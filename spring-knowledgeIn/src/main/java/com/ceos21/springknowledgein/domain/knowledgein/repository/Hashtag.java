@@ -3,18 +3,15 @@ package com.ceos21.springknowledgein.domain.knowledgein.repository;
 import jakarta.persistence.*;
 
 @Entity
-public class Image {
-
+public class Hashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String imageUrl;
+    private String tagName;
 
+    public Hashtag() {}
 
-    public Image() {}
-
-    public Image(String imageUrl, Post post) {
-        this.imageUrl = imageUrl;
+    public Hashtag(String tagName) {
+        this.tagName = tagName;
     }
-
 }
