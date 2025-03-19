@@ -173,7 +173,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 #### (3)  Fetch Join과 Distinct
 - **Fetch Join** 이란?
+  
  : JPQL에서 성능 최적화를 위해 제공하는 기능
+ 
  : 연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능
  
  - **Fetch Join** 사용
