@@ -9,11 +9,13 @@
 
 #### 네이버 지식인 구조
 1. 질문 (Post)
-![Image](https://github.com/user-attachments/assets/7c03d81a-2dc6-4525-a813-80c91426f3e0)
+<img src="https://github.com/user-attachments/assets/7c03d81a-2dc6-4525-a813-80c91426f3e0" width="50%">
+
 2. 답변 (Answer)
-![Image](https://github.com/user-attachments/assets/a648fd62-186e-49f9-a412-3beb63e4be2b)
-3. 좋아요/싫어요 (Like_dislike) + 댓글 (Comment)
-![Image](https://github.com/user-attachments/assets/251a48a4-0e74-4030-bde4-0b8d74e4e200)
+<img src="https://github.com/user-attachments/assets/a648fd62-186e-49f9-a412-3beb63e4be2b" width="50%">
+
+4. 좋아요/싫어요 (Like_dislike) + 댓글 (Comment)
+<img src="https://github.com/user-attachments/assets/251a48a4-0e74-4030-bde4-0b8d74e4e200" width="50%">
 
 ## Mission 1️⃣ 데이터 모델링 
 **ERD**![Image](https://github.com/user-attachments/assets/e1c66816-b435-4335-80f9-a36cbd603e03)**1. User**
