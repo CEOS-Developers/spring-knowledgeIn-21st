@@ -141,6 +141,58 @@
 // when
         List<Post> posts = postRepository.findByWriter(user);
 
+## Mission 3️⃣ JPA 관련 문제
+#### (1) 어떻게 data jpa는 interface만으로도 함수가 구현이 되는가?
+```
+public interface PostRepository extends JpaRepository<Post, Long> {
+    List<Post> findByWriter(User writer);
+}
+
+```
+- Spring이 애플리케이션을 실행하면서 PostRepository의 프록시 객체를 생성
+
+- 인터페이스만 정의하면 Spring이 동적으로 구현체를 만들어 주입
+이 때, SimpleJpaRepository 클래스가 작동하며 메서드 이름을 분석해 쿼리 자동 생성
+
+> findByWriter(User writer)
+→ "SELECT p FROM Post p WHERE p.writer = ?"
+
+- Spring이 내부적으로 EntityManager를 사용하여 쿼리를 실행하고 결과 반환
+
+#### (2)  왜 계속 생성되는 entity manager를 생성자 주입을 이용하는가?
+- ** EntityManager은 싱글톤 객체가 아니다 !!**
+- 트랜잭션이 시작될 때 새로운 EntityManager 객체가 동적으로 생성되며, 트랜잭션이 끝날 때 EntityManager는 폐기됨.
+
+> ❔ ** 그럼 왜 생성자 주입?**
+- EntityManager는 **프록시 객체**로 주입되며, 실제 트랜잭션 범위에서만 EntityManager가 생성되고 관리된다.
+- 프록시 객체는 애플리케이션에서 하나의 인스턴스로 관리되며(싱글톤), 필요한 시점에 실제 EntityManager를 동적으로 생성한다.
+
+#### (3)  Fetch Join과 Distinct
+- ** Fetch Join** 이란?
+ : JPQL에서 성능 최적화를 위해 제공하는 기능
+ : 연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능
+ 
+ - **Fetch Join** 사용
+ ```
+"select t From Team t join fetch t.members where t.name = "팀A";
+
+
+ : Name이 "팀A"인 Team을 조회하면서 해당 팀에 속한 members도  함께 즉시 로딩하여 가져오는 쿼리 (즉시 로딩)
+  - 만약 "팀 A"에 **Member가 2명** 있다면?
+    : **팀 A가 2번 중복** 됨
+    
+    
+
+    
+ - 이 때 !! **Distinct**를 사용하면
+   ```
+"select distinct t From Team t join fetch t.members where t.name = "팀A";
+ ```
+ : 중복되었던 "Team A"가 **한 번** 만 나오게 된다.
+ 
+
+ (참고 https://9hyuk9.tistory.com/77)
+
 // then
         assertThat(posts).hasSize(3);
         assertThat(posts).extracting(Post::getTitle).containsExactly("Post 1", "Post 2","Post 3");
