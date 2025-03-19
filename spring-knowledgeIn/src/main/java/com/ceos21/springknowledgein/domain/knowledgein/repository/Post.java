@@ -1,6 +1,7 @@
 package com.ceos21.springknowledgein.domain.knowledgein.repository;
 
 import com.ceos21.springknowledgein.domain.user.repository.Member;
+
 import jakarta.persistence.*;
 
 import lombok.Getter;
@@ -28,6 +29,14 @@ public class Post {
     @JoinColumn(name = "post_id")//image 테이블에서 post_id 외래키 추가
     private List<Image> images = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "post_id")
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "post_id")
+    private List<Like> likes = new ArrayList<>();
+
 
     public Post() {}
 
@@ -43,5 +52,13 @@ public class Post {
 
     public void removeImage(Image image) {
         images.remove(image);
+    }
+
+    public void addComment(Comment comment) {
+        comments.add(comment);
+    }
+
+    public void removeComment(Comment comment) {
+        comments.remove(comment);
     }
 }
