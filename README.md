@@ -64,7 +64,7 @@
         userRepository.save(user);
     }
 ```
-![Image](https://github.com/user-attachments/assets/8b2227f0-43b7-4b36-ae46-accc9386423d)
+<img src="https://github.com/user-attachments/assets/8b2227f0-43b7-4b36-ae46-accc9386423d" width="60%">
 
 **2. 작성자를 기준으로 FindPost**
 - 첫번째 Post 생성 
@@ -82,7 +82,7 @@
         postRepository.save(post1);
 
 ```
-![Image](https://github.com/user-attachments/assets/dffeab57-e437-48eb-ace8-fc28a72cc7af)
+<img src="https://github.com/user-attachments/assets/dffeab57-e437-48eb-ace8-fc28a72cc7af" width="60%">
 
 - 두번째 Post 생성 
 ```
@@ -101,7 +101,7 @@
         image.setPost(post2);
         postRepository.save(post2);
 ```
-![Image](https://github.com/user-attachments/assets/a45d367d-4a33-4cc7-9504-4db1a22590cb)
+<img src="https://github.com/user-attachments/assets/a45d367d-4a33-4cc7-9504-4db1a22590cb" width="60%">
 
 - 세번째 Post 생성
 ```
@@ -128,11 +128,11 @@
         imageRepository.save(image2);
 
 ```
-![Image](https://github.com/user-attachments/assets/5e5e52df-bfa7-459e-a5b9-5ecf8d3dd19b)
+<img src="https://github.com/user-attachments/assets/5e5e52df-bfa7-459e-a5b9-5ecf8d3dd19b" width="60%">
 
 - Post DB
-![Image](https://github.com/user-attachments/assets/fe378097-02c1-4153-979f-ea16c396b5f2)
-- Image DB![Image](https://github.com/user-attachments/assets/e5232e8e-39c2-48da-80d2-0445e0744e42)
+<img src="https://github.com/user-attachments/assets/fe378097-02c1-4153-979f-ea16c396b5f2" width="60%">
+- Image DB <img src="https://github.com/user-attachments/assets/e5232e8e-39c2-48da-80d2-0445e0744e42" width="60%">
 
 - 나머지 when/then
 ```
