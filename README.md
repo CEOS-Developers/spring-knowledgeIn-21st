@@ -140,6 +140,10 @@
 ```
 // when
         List<Post> posts = postRepository.findByWriter(user);
+// then
+        assertThat(posts).hasSize(3);
+        assertThat(posts).extracting(Post::getTitle).containsExactly("Post 1", "Post 2","Post 3");
+```
 
 ## Mission 3️⃣ JPA 관련 문제
 #### (1) 어떻게 data jpa는 interface만으로도 함수가 구현이 되는가?
@@ -175,17 +179,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
  - **Fetch Join** 사용
  ```
 "select t From Team t join fetch t.members where t.name = "팀A";
-
+```
 
  : Name이 "팀A"인 Team을 조회하면서 해당 팀에 속한 members도  함께 즉시 로딩하여 가져오는 쿼리 (즉시 로딩)
   - 만약 "팀 A"에 **Member가 2명** 있다면?
     : **팀 A가 2번 중복** 됨
-    
-    
-
+   
     
  - 이 때 !! **Distinct**를 사용하면
-   ```
+```
 "select distinct t From Team t join fetch t.members where t.name = "팀A";
  ```
  : 중복되었던 "Team A"가 **한 번** 만 나오게 된다.
@@ -193,8 +195,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
  (참고 https://9hyuk9.tistory.com/77)
 
-// then
-        assertThat(posts).hasSize(3);
-        assertThat(posts).extracting(Post::getTitle).containsExactly("Post 1", "Post 2","Post 3");
-```
 
