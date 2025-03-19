@@ -132,7 +132,9 @@
 
 - Post DB
 <img src="https://github.com/user-attachments/assets/fe378097-02c1-4153-979f-ea16c396b5f2" width="60%">
-- Image DB <img src="https://github.com/user-attachments/assets/e5232e8e-39c2-48da-80d2-0445e0744e42" width="60%">
+
+- Image DB
+ <img src="https://github.com/user-attachments/assets/e5232e8e-39c2-48da-80d2-0445e0744e42" width="60%">
 
 - 나머지 when/then
 ```
