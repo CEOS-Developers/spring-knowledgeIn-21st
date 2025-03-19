@@ -7,6 +7,8 @@
 4. 게시글 댓글에 좋아요, 싫어요 기능
 5. 게시글, 댓글, 좋아요 삭제 기능
 
+
+
 #### 네이버 지식인 구조
 1. 질문 (Post)
 <img src="https://github.com/user-attachments/assets/7c03d81a-2dc6-4525-a813-80c91426f3e0" width="50%">
@@ -16,6 +18,8 @@
 
 4. 좋아요/싫어요 (Like_dislike) + 댓글 (Comment)
 <img src="https://github.com/user-attachments/assets/251a48a4-0e74-4030-bde4-0b8d74e4e200" width="50%">
+
+
 
 ## Mission 1️⃣ 데이터 모델링 
 **ERD**![Image](https://github.com/user-attachments/assets/e1c66816-b435-4335-80f9-a36cbd603e03)**1. User**
@@ -48,6 +52,8 @@
 ```
 - Comment 또한 Post와 Answer에 각각 작성 가능하므로 TargetStatus를 이용하여 하나의 테이블에서 관리
 
+
+
 ## Mission 2️⃣ Repository 단위 테스트 (Post Entity 사용)
 
 **1. User 생성**
@@ -65,6 +71,7 @@
     }
 ```
 <img src="https://github.com/user-attachments/assets/8b2227f0-43b7-4b36-ae46-accc9386423d" width="60%">
+
 
 **2. 작성자를 기준으로 FindPost**
 - 첫번째 Post 생성 
@@ -84,6 +91,7 @@
 ```
 <img src="https://github.com/user-attachments/assets/dffeab57-e437-48eb-ace8-fc28a72cc7af" width="60%">
 
+
 - 두번째 Post 생성 
 ```
  Image image = Image.builder()
@@ -102,6 +110,7 @@
         postRepository.save(post2);
 ```
 <img src="https://github.com/user-attachments/assets/a45d367d-4a33-4cc7-9504-4db1a22590cb" width="60%">
+
 
 - 세번째 Post 생성
 ```
@@ -145,6 +154,8 @@
         assertThat(posts).extracting(Post::getTitle).containsExactly("Post 1", "Post 2","Post 3");
 ```
 
+
+
 ## Mission 3️⃣ JPA 관련 문제
 #### (1) 어떻게 data jpa는 interface만으로도 함수가 구현이 되는가?
 ```
@@ -163,6 +174,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 - Spring이 내부적으로 EntityManager를 사용하여 쿼리를 실행하고 결과 반환
 
+
+
 #### (2)  왜 계속 생성되는 entity manager를 생성자 주입을 이용하는가?
 - **EntityManager은 싱글톤 객체가 아니다 !!**
 - 트랜잭션이 시작될 때 새로운 EntityManager 객체가 동적으로 생성되며, 트랜잭션이 끝날 때 EntityManager는 폐기됨.
@@ -170,6 +183,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 > ❔ **그럼 왜 생성자 주입?**
 - EntityManager는 **프록시 객체**로 주입되며, 실제 트랜잭션 범위에서만 EntityManager가 생성되고 관리된다.
 - 프록시 객체는 애플리케이션에서 하나의 인스턴스로 관리되며(싱글톤), 필요한 시점에 실제 EntityManager를 동적으로 생성한다.
+
+
 
 #### (3)  Fetch Join과 Distinct
 - **Fetch Join** 이란?
