@@ -22,7 +22,7 @@
 
 
 ## Mission 1️⃣ 데이터 모델링 
-**ERD**![Image](https://github.com/user-attachments/assets/e1c66816-b435-4335-80f9-a36cbd603e03)**1. User**
+(1) **ERD**![Image](https://github.com/user-attachments/assets/e1c66816-b435-4335-80f9-a36cbd603e03)**1. User**
 - 한 명의 user은 여러개의 **Post, Aswer, like_dislike, comment**를 작성 가능 (User와 1:N 관계)
 
 **2. Post**
@@ -32,7 +32,7 @@
 **3. Answer**
 - 하나의 Answer에는 여러개의 **comment, Image, like_dislike** 작성 가능 (Answer과 1:N 관계)
 
-### Entity 설계 
+### (2) Entity 설계 
 
 **1. LikeDislike**
 ```
@@ -157,7 +157,7 @@
 
 
 ## Mission 3️⃣ JPA 관련 문제
-#### (1) 어떻게 data jpa는 interface만으로도 함수가 구현이 되는가?
+### (1) 어떻게 data jpa는 interface만으로도 함수가 구현이 되는가?
 ```
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByWriter(User writer);
@@ -176,7 +176,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
 
-#### (2)  왜 계속 생성되는 entity manager를 생성자 주입을 이용하는가?
+### (2)  왜 계속 생성되는 entity manager를 생성자 주입을 이용하는가?
 - **EntityManager은 싱글톤 객체가 아니다 !!**
 - 트랜잭션이 시작될 때 새로운 EntityManager 객체가 동적으로 생성되며, 트랜잭션이 끝날 때 EntityManager는 폐기됨.
 
@@ -186,7 +186,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
 
-#### (3)  Fetch Join과 Distinct
+### (3)  Fetch Join과 Distinct
 - **Fetch Join** 이란?
   
  : JPQL에서 성능 최적화를 위해 제공하는 기능
