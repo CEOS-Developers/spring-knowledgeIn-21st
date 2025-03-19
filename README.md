@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/e2032450-ca24-4f69-8146-b33c66f581e4)### 네이버 지식인
+### 네이버 지식인
 
 **구현 기능**
 1. 게시글 조회
