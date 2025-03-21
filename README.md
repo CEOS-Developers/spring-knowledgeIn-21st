@@ -52,6 +52,8 @@
 ```
 - Comment 또한 Post와 Answer에 각각 작성 가능하므로 TargetStatus를 이용하여 하나의 테이블에서 관리
 
+🌟 Comment는 갯수가 많지 않을 것 같고 코드 중복을 피하려고 이 방식을 사용했는데 Post_Comment와 Answer_Comment로 나누는게 나을까요? 의견 부탁드립니다 🌟
+
 
 
 ## Mission 2️⃣ Repository 단위 테스트 (Post Entity 사용)
