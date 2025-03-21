@@ -34,4 +34,15 @@ public class Comment extends BaseEntity {
 
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
     private List<Comment> childrenCommentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+    private List<Reaction> reactionList = new ArrayList<>();
+
+    public void addChildrenComment(Comment comment) {
+        childrenCommentList.add(comment);
+    }
+
+    public void addReaction(Reaction reaction) {
+        reactionList.add(reaction);
+    }
 }

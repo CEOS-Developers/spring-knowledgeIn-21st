@@ -27,7 +27,7 @@ public class User extends BaseEntity {
     private String nickname;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<CommentReaction> commentReactionList = new ArrayList<>();
+    private List<Reaction> reactionList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
@@ -35,8 +35,8 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> postList = new ArrayList<>();
 
-    public void addCommentReaction(CommentReaction commentReaction) {
-        commentReactionList.add(commentReaction);
+    public void addReaction(Reaction commentReaction) {
+        reactionList.add(commentReaction);
     }
 
     public void addComment(Comment comment) {
