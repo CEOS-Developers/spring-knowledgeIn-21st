@@ -1,0 +1,27 @@
+spring:
+  profiles:
+    include: local, jwt, oauth
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+
+#logging.level:
+#  org.hibernate.SQL: debug
+
+etc:
+  base-url: ${BASE_URL}
+  front-url: ${FRONT_URL}
+  front-auth-success: ${FRONT_URL}/auth/success
+
