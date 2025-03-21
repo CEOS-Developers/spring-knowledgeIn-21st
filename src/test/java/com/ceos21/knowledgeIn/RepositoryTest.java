@@ -34,8 +34,8 @@ public class RepositoryTest {
 
 
         //given
-        Member member = Member.builder().name("박채연").email("grace7759@naver.com").password("1234").nickname("사랑먼지").build();
-        Member member2 = Member.builder().name("동영배").email("grace7759@naver.com").password("2222").nickname("태양").build();
+        Member member = Member.builder().name("박채연").email("pcy@naver.com").password("1234").nickname("사랑먼지").build();
+        Member member2 = Member.builder().name("동영배").email("pcy@naver.com").password("2222").nickname("태양").build();
 
         //when
         Member savedMember = memberRepository.save(member);
@@ -53,7 +53,7 @@ public class RepositoryTest {
     void createPost(){
 
         //given
-        Member member = Member.builder().name("박채연").email("grace7759@naver.com").password("1234").nickname("사랑먼지").build();
+        Member member = Member.builder().name("박채연").email("pcy@naver.com").password("1234").nickname("사랑먼지").build();
         Member savedMember = memberRepository.save(member);
         Post post1 = Post.builder().title("테스트1").member(savedMember).content("테스트 해봅니다").isAnonymous(false).build();
         Post post2 = Post.builder().title("테스트2").member(savedMember).content("테스트 해봅니다").isAnonymous(false).build();
