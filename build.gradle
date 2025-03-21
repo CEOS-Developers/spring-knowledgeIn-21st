@@ -25,19 +25,27 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // test lombok
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    // test DB
+    testRuntimeOnly 'com.h2database:h2'
+
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    testCompileOnly 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
 
-    // DB
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // DB - mysql, jpa, p6spy
     runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
+
+
 }
 
 tasks.named('test') {
