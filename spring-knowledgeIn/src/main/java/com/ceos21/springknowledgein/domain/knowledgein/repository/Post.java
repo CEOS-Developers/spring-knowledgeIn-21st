@@ -37,6 +37,15 @@ public class Post {
     @JoinColumn(name = "post_id")
     private List<Like> likes = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "post_id")
+    private List<Hate> hates = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostHashtag> postHashTags = new ArrayList<>();
+
+
+
 
     public Post() {}
 
@@ -61,4 +70,21 @@ public class Post {
     public void removeComment(Comment comment) {
         comments.remove(comment);
     }
+
+    public void addLike(Like like) {
+        likes.add(like);
+    }
+
+    public void removeLike(Like like) {
+        likes.remove(like);
+    }
+
+    public void addHate(Hate hate) {
+        hates.add(hate);
+    }
+
+    public void removeHate(Hate hate) {
+        hates.remove(hate);
+    }
+
 }

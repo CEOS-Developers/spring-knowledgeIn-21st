@@ -24,6 +24,10 @@ public class Comment {
     @JoinColumn(name= "comment_id")
     private List<CoComment> coComments = new ArrayList<>();
 
+    @OneToMany
+    @JoinColumn(name = "comment_id")
+    private List<Like> likes = new ArrayList<>();
+
     public Comment() {}
 
     public Comment(String content) {
@@ -36,6 +40,14 @@ public class Comment {
 
     public void removeCoComment(CoComment coComment) {
         coComments.remove(coComment);
+    }
+
+    public void addLike(Like like) {
+        likes.add(like);
+    }
+
+    public void removeLike(Like like) {
+        likes.remove(like);
     }
 
 

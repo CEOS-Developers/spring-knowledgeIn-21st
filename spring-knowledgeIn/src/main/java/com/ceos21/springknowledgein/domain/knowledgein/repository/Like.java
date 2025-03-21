@@ -13,7 +13,13 @@ public class Like {
     private Long id;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "member_id")
     private Member member;
+
+    public Like() {}
+
+    public Like(Member member) {
+        this.member = member;
+    }
 
 }
