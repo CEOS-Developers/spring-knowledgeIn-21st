@@ -17,7 +17,7 @@ public class Comment {
     private String content;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -27,6 +27,10 @@ public class Comment {
     @OneToMany
     @JoinColumn(name = "comment_id")
     private List<Like> likes = new ArrayList<>();
+
+    @OneToMany
+    @JoinColumn(name = "comment_id")
+    private List<Hate> hates = new ArrayList<>();
 
     public Comment() {}
 
@@ -49,6 +53,10 @@ public class Comment {
     public void removeLike(Like like) {
         likes.remove(like);
     }
+
+    public void addHate(Hate hate) { hates.add(hate); }
+
+    public void removeHate(Hate hate) { hates.remove(hate); }
 
 
 

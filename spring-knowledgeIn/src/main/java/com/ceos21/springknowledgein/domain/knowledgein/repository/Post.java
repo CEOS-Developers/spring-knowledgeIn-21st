@@ -22,7 +22,7 @@ public class Post {
     private String content;
 
     @ManyToOne //Post => Member
-    @JoinColumn
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

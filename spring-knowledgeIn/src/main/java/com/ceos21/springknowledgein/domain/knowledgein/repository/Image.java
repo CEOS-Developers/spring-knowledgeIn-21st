@@ -13,7 +13,7 @@ public class Image {
 
     public Image() {}
 
-    public Image(String imageUrl, Post post) {
+    public Image(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 

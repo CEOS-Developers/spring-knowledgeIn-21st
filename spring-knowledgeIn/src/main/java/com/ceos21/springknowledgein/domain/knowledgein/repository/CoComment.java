@@ -14,7 +14,7 @@ public class CoComment {
     private String content;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "member_id")
     private Member member;
 
     public CoComment() {}

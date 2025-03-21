@@ -12,7 +12,7 @@ public class Hashtag {
     private Long id;
     private String tagName;
 
-    @OneToMany
+    @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostHashtag> postHashtags = new ArrayList<>();
 
     public Hashtag() {}
