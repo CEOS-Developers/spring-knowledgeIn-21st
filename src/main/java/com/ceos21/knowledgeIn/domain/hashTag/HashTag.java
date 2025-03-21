@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,6 +21,7 @@ public class HashTag extends BaseEntity {
 
     private String name;
 
+    @Builder.Default
     @OneToMany(mappedBy = "hashtag")
-    private List<PostHashTag> postHashTags;
+    private List<PostHashTag> postHashTags = new ArrayList<>();
 }

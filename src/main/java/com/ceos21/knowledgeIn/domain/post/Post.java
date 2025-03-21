@@ -2,7 +2,7 @@ package com.ceos21.knowledgeIn.domain.post;
 
 import com.ceos21.knowledgeIn.domain.comment.Comment;
 import com.ceos21.knowledgeIn.domain.image.Image;
-import com.ceos21.knowledgeIn.domain.user.User;
+import com.ceos21.knowledgeIn.domain.member.Member;
 import com.ceos21.knowledgeIn.global.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ import java.util.List;
 public class Post extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private Member member;
 
     private String title;
 
@@ -29,9 +29,11 @@ public class Post extends BaseEntity {
 
     private Boolean isAnonymous;
 
+    @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "post")
     private List<Image> images = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
 
