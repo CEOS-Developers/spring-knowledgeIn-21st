@@ -3,6 +3,8 @@ package com.ceos21.spring_boot.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Builder
 @Getter
@@ -21,4 +23,13 @@ public class User extends BaseEntity {
 
     @Column(length=20)
     private String nickname;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Post> posts;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Answer> answers;
 }

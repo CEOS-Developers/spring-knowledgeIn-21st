@@ -22,8 +22,19 @@ public class Post extends BaseEntity {
     private String content;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    @Builder.Default // 이슈
-    List<Image> images = new ArrayList<>();
+    private List<Image> images;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Answer> answers;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostHash> postHashtags;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Image> image;
 
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="writer_id")

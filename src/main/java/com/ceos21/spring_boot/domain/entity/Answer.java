@@ -20,8 +20,10 @@ public class Answer {
     private String content;
 
     @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL)
-    @Builder.Default // 이슈
-    List<Image> images = new ArrayList<>();
+    private List<Image> images;
+
+    @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL)
+    private List<Comment> comments;
 
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="writer_id")
@@ -30,4 +32,5 @@ public class Answer {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="post_id")
     private Post post;
+
 }

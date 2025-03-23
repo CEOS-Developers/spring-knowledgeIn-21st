@@ -4,6 +4,9 @@ import com.ceos21.spring_boot.domain.enums.TargetStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -28,6 +31,7 @@ public class Comment extends BaseEntity {
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="answer_id")
     private Answer answer;
+
 
     @Enumerated(EnumType.STRING)
     private TargetStatus targetStatus;
