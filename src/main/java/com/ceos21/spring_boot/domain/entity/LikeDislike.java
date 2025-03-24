@@ -15,8 +15,8 @@ public class LikeDislike {
             @Column(name="like_dislike_id")
             private Long id;
 
-            @Enumerated(EnumType.STRING)
-            private LikeStatus likestatus;
+        @Enumerated(EnumType.STRING)
+        private LikeStatus likestatus;
 
             @Enumerated(EnumType.STRING)
             private TargetStatus targetstatus;
