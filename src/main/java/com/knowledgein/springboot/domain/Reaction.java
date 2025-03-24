@@ -1,7 +1,6 @@
 package com.knowledgein.springboot.domain;
 
 import com.knowledgein.springboot.domain.common.BaseEntity;
-import com.knowledgein.springboot.domain.enums.ContentType;
 import com.knowledgein.springboot.domain.enums.ReactionType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,11 +19,7 @@ public class Reaction extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(columnDefinition = "VARCHAR(10) DEFAULT 'NONE'")
-    private ContentType contentType;
-
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(10) DEFAULT 'NONE'")
     private ReactionType reactionType;
 
@@ -35,8 +30,4 @@ public class Reaction extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
 }

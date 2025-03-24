@@ -28,21 +28,4 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_comment_id")
-    private Comment parentComment; // Default로 nullable
-
-    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
-    private List<Comment> childrenCommentList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
-    private List<Reaction> reactionList = new ArrayList<>();
-
-    public void addChildrenComment(Comment comment) {
-        childrenCommentList.add(comment);
-    }
-
-    public void addReaction(Reaction reaction) {
-        reactionList.add(reaction);
-    }
 }

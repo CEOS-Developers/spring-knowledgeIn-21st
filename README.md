@@ -178,3 +178,100 @@ public class PostRepositoryTest {
     - JPA 관련 컴포넌트(@Entity, Repository)만 로드하여 주로 DB 접근 레이어(Repository)만 테스트함
     - `application.yml` 파일의 DB 설정을 무시하고 h2 DB로 실행 → mySQL 지원 x ㅠㅠ
     - 자동으로 rollback 됨 (내부에 rollback 로직 포함) → rollback 안하려면 `@rollback(false)` 설정
+  
+---
+## ReactionType에 None이 있는 이유
+
+```jsx
+public enum ReactionType {
+    LIKE, UNLIKE, NONE
+}
+```
+
+- `NONE` 옵션을 추가하여 soft delete 가능하도록 처리
+- 좋아요/싫어요 클릭 특성상 여러번 연타하는 경우가 생길 수 있는데 그럴때마다 delete 쿼리를 날리는 것은 비효율적임
+- Q. 하지만 db에 `NONE` 값을 가진 데이터가 쌓이는건 어떻게 해결할건지? 스케줄러 요청을 통해 `NONE`값을 오래동안 가지고 있는 데이터를 주기적으로 clean up
+
+## 맵핑 엔티티에 기본키 vs 복합키
+
+- 복합키를 사용하면 save를 여러번 해도 키의 중복을 막을 수 있으나 좀 더 복잡하고 만일 맵핑 엔티티에 속성이 추가된다면 불편해진다는 단점이 있음
+
+### 기본키 방식: `@Table`의 `@UniqueConstraints` 조건
+
+- 기존 엔티티 형식을 유지하면서 복합키의 장점인 중복키를 철저하게 배제하는 방법은?
+- `@Table`의 `@UniqueConstraints` 조건 사용해서 복합적인 유니크 키를 정의한다!
+
+    ```jsx
+    @Table(
+        name = "post_hashtag",
+        uniqueConstraints = {
+            @UniqueConstraint(columnNames = {"post_id", "hashtag_id"})
+        }
+    )
+    public class PostHashtag {
+    	...
+    }
+    ```
+
+- Reference Doc: [복합키 맵핑](https://velog.io/@dev_hammy/Defining-Unique-Constraints-in-JPA)
+
+### 복합키 방식: `@EmbeddedId`를 활용한 복합키 맵핑
+
+- **@EmbeddedId** 를 적용한 식별자 클래스(ex.`PostHashtagId` 클래스) 조건
+    - Serializable 인터페이스 구현
+    - 기본 생성자 꼭 필요; `@NoArgsContructor(access = AccessLevel.PROTECTED)`
+    - Public class여야함
+
+        ```jsx
+        @Getter
+        @Embeddable
+        @NoArgsContructor(access = AccessLevel.PROTECTED)
+        @AllArgsContructor
+        public class PostHashtagId implements serializable {
+        		@Column(name = "post_id")
+            private Long postId;
+        
+            @Column(name = "hashtag_id")
+            private Long hashtagId;
+        }
+        ```
+
+        ```jsx
+        @Entity
+        @Getter
+        @NoArgsConstructor(access = AccessLevel.PROTECTED)
+        @AllArgsConstructor
+        public class PostHashtag {
+        
+            @EmbeddedId
+            private PostHashtagId id;
+            
+            ...
+        }
+        ```
+
+
+## 네이버 지식인 구조 확인
+
+### Question & Answer 구조
+
+- 지식인 구조를 확인해보니 Q&A 형식으로 Question, Answer 모두 Post 형식임을 확인
+- Question에는 Comment가 아닌 Answer이 달리고 Answer에 Comment가 달리는 형식
+- Question에는 Reaction 달릴 수 없음
+
+### 수정 사항
+
+- Post에 postType 필드 추가
+
+    ```jsx
+    public enum PostType {
+        QUESTION, ANSWER;
+    }
+    ```
+
+- Post 1 : N Post 관계 추가 → PostType이 Question인 경우만 Answer을 받을 수 있도록 구현해야함
+- Commet 1 : N Comment 관계 삭제 → Comment는 Post 타입에 달리는 댓글
+- Comment의 ContentType Enum 필드 삭제
+- Comment 1 : N Reaction 관계 삭제 → 좋아요/싫어요는 Post의 Answer 타입에 달리는 반응
+
+![new ERD](./readme-src/new_erd.png)

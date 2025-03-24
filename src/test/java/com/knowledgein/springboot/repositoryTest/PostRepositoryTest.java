@@ -3,6 +3,7 @@ package com.knowledgein.springboot.repositoryTest;
 import com.knowledgein.springboot.SpringbootApplication;
 import com.knowledgein.springboot.domain.Post;
 import com.knowledgein.springboot.domain.User;
+import com.knowledgein.springboot.domain.enums.PostType;
 import com.knowledgein.springboot.repository.PostRepository;
 import com.knowledgein.springboot.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -44,18 +45,21 @@ public class PostRepositoryTest {
                 .user(user)
                 .title("1st post")
                 .content("1st post content")
+                .postType(PostType.QUESTION)
                 .build();
 
         Post post2 = Post.builder()
                 .user(user)
                 .title("2nd post")
                 .content("2nd post content")
+                .postType(PostType.QUESTION)
                 .build();
 
         Post post3 = Post.builder()
                 .user(user)
                 .title("3rd post")
                 .content("3rd post content")
+                .postType(PostType.QUESTION)
                 .build();
 
         postRepository.save(post1);
