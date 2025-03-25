@@ -1,0 +1,13 @@
+#DB
+MYSQL_USERNAME: leo
+MYSQL_PASSWORD: 1234
+MYSQL_HOST: localhost
+MYSQL_PORT: 3306
+MYSQL_DATABASE: knowledge
+
+# 연결정보 - 로컬
+BASE_URL: http://localhost:8080
+FRONT_URL: http://localhost:3000
+
+REDIS_HOST: localhost
+REDIS_PORT: 6379
