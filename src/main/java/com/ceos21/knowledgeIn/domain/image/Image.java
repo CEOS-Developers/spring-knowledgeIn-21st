@@ -2,16 +2,13 @@ package com.ceos21.knowledgeIn.domain.image;
 
 import com.ceos21.knowledgeIn.domain.post.Post;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Builder
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Image {
 
     @Id

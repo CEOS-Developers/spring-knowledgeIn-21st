@@ -4,10 +4,7 @@ import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTag;
 import com.ceos21.knowledgeIn.global.common.domain.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 public class HashTag extends BaseEntity {
 
