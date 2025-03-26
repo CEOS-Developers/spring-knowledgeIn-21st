@@ -1,5 +1,7 @@
-package com.ceos21.knowledgein.domain;
+package com.ceos21.knowledgein.post.domain;
 
+import com.ceos21.knowledgein.global.domain.BaseTimeEntity;
+import com.ceos21.knowledgein.user.domain.UserEntity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -8,7 +10,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "reply")
-public class Reply extends BaseTimeEntity{
+public class Reply extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;

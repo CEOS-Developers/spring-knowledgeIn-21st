@@ -1,9 +1,12 @@
 package com.ceos21.knowledgein.repository;
 
-import com.ceos21.knowledgein.domain.HashTag;
-import com.ceos21.knowledgein.domain.Post;
-import com.ceos21.knowledgein.domain.PostImage;
-import com.ceos21.knowledgein.domain.UserEntity;
+import com.ceos21.knowledgein.post.domain.HashTag;
+import com.ceos21.knowledgein.post.domain.Post;
+import com.ceos21.knowledgein.post.domain.PostImage;
+import com.ceos21.knowledgein.post.repository.PostImageRepository;
+import com.ceos21.knowledgein.post.repository.PostRepository;
+import com.ceos21.knowledgein.user.domain.UserEntity;
+import com.ceos21.knowledgein.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.ceos21.knowledgein.domain.Role.USER;
+import static com.ceos21.knowledgein.user.domain.Role.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest

@@ -1,4 +1,4 @@
-package com.ceos21.knowledgein.domain;
+package com.ceos21.knowledgein.user.domain;
 
 import lombok.RequiredArgsConstructor;
 

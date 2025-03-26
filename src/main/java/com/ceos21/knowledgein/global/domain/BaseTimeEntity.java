@@ -1,4 +1,4 @@
-package com.ceos21.knowledgein.domain;
+package com.ceos21.knowledgein.global.domain;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

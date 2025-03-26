@@ -1,16 +1,14 @@
 package com.ceos21.knowledgein.repository;
 
-import com.ceos21.knowledgein.domain.Role;
-import com.ceos21.knowledgein.domain.UserEntity;
+import com.ceos21.knowledgein.user.domain.UserEntity;
+import com.ceos21.knowledgein.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 
-import static com.ceos21.knowledgein.domain.Role.*;
+import static com.ceos21.knowledgein.user.domain.Role.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class UserRepositoryTest {

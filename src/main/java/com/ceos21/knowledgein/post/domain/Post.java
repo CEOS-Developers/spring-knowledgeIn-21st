@@ -1,5 +1,7 @@
-package com.ceos21.knowledgein.domain;
+package com.ceos21.knowledgein.post.domain;
 
+import com.ceos21.knowledgein.global.domain.BaseTimeEntity;
+import com.ceos21.knowledgein.user.domain.UserEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

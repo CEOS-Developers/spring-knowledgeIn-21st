@@ -1,6 +1,6 @@
-package com.ceos21.knowledgein.repository;
+package com.ceos21.knowledgein.post.repository;
 
-import com.ceos21.knowledgein.domain.Post;
+import com.ceos21.knowledgein.post.domain.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
