@@ -7,10 +7,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
+import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -34,30 +36,34 @@ public class Post extends BaseTimeEntity {
     private UserEntity user;
 
     @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<PostImage> postImages;
+    private List<PostImage> postImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.PERSIST)
-    private List<HashTag> hashTags;
+    private List<HashTag> hashTags = new ArrayList<>();
 
     @OneToMany(mappedBy = "post")
-    private List<Reply> replies;
+    private List<Reply> replies = new ArrayList<>();
 
-    @Builder
-    public Post(String title, String content, boolean nicknamePublic, List<HashTag> hashTags, List<PostImage> postImages, UserEntity user) {
-        this.title = title;
-        this.content = content;
-        this.nicknamePublic = nicknamePublic;
-        this.postImages = postImages;
-        this.hashTags = hashTags;
-        this.user = user;
+    public static Post of(String title,
+                          String content,
+                          boolean nicknamePublic,
+                          List<HashTag> hashTags,
+                          List<PostImage> postImages,
+                          UserEntity user) {
+        return Post.builder()
+                .title(title)
+                .content(content)
+                .nicknamePublic(nicknamePublic)
+                .hashTags(hashTags)
+                .postImages(postImages)
+                .user(user)
+                .build();
+    }
 
-
-        this.viewCount = 0L;
-        if (postImages != null) {
-            postImages.forEach(postImage -> postImage.setPost(this));
-        }
-        if (hashTags != null) {
-            hashTags.forEach(hashTag -> hashTag.setPost(this));
+    public void addReply(Reply reply) {
+        replies.add(reply);
+        if (reply.getPost() != this) {
+            reply.setPost(this);
         }
     }
 
@@ -74,4 +80,23 @@ public class Post extends BaseTimeEntity {
             hashTag.setPost(this);
         }
     }
+
+    @Builder(access = PRIVATE)
+    private Post(String title, String content, boolean nicknamePublic, List<HashTag> hashTags, List<PostImage> postImages, UserEntity user) {
+        this.title = title;
+        this.content = content;
+        this.nicknamePublic = nicknamePublic;
+        this.postImages = postImages;
+        this.hashTags = hashTags;
+        this.user = user;
+
+        this.viewCount = 0L;
+        if (postImages != null) {
+            postImages.forEach(postImage -> postImage.setPost(this));
+        }
+        if (hashTags != null) {
+            hashTags.forEach(hashTag -> hashTag.setPost(this));
+        }
+    }
+
 }

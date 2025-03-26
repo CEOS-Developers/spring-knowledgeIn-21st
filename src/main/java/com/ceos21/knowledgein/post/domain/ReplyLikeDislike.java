@@ -4,6 +4,7 @@ import com.ceos21.knowledgein.global.domain.BaseTimeEntity;
 import com.ceos21.knowledgein.user.domain.UserEntity;
 import jakarta.persistence.*;
 
+import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -14,7 +15,7 @@ public class ReplyLikeDislike extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(STRING)
     private LikeDislike likeDislike;
 
     @JoinColumn(name = "reply_id", referencedColumnName = "id")

@@ -6,8 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static com.ceos21.knowledgein.user.domain.Role.*;
 import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -31,11 +33,20 @@ public class UserEntity extends BaseTimeEntity {
     @Enumerated(STRING)
     private Role role;
 
-    @Builder
-    public UserEntity(String name, String nickName, String passWord, Role role) {
+    public static UserEntity of(String name, String nickName, String passWord) {
+        return UserEntity.builder()
+                .name(name)
+                .nickName(nickName)
+                .passWord(passWord)
+                .role(USER)
+                .build();
+    }
+
+    @Builder(access = PRIVATE)
+    private UserEntity(String name, String nickName, String passWord, Role role) {
+        this.role = role;
         this.name = name;
         this.nickName = nickName;
         this.passWord = passWord;
-        this.role = role;
     }
 }

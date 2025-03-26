@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
+import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -25,11 +26,11 @@ public class PostImage {
     @ManyToOne(fetch = LAZY)
     private Post post;
 
-    @Builder
-    public PostImage(String storageUrl, String uploadFileName, Post post) {
-        this.storageUrl = storageUrl;
-        this.uploadFileName = uploadFileName;
-        this.post = post;
+    public static PostImage createWithNoPost(String storageUrl, String uploadFileName) {
+        return PostImage.builder()
+                .storageUrl(storageUrl)
+                .uploadFileName(uploadFileName)
+                .build();
     }
 
     public void setPost(Post post) {
@@ -38,4 +39,12 @@ public class PostImage {
             post.getPostImages().add(this);
         }
     }
+
+    @Builder(access = PRIVATE)
+    private PostImage(String storageUrl, String uploadFileName, Post post) {
+        this.storageUrl = storageUrl;
+        this.uploadFileName = uploadFileName;
+        this.post = post;
+    }
+
 }
