@@ -220,13 +220,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 - 좋아요/싫어요는 답변 글에만 달 수 있도록 수정
 
 ### 구현 기능
-<img src="https://github.com/user-attachments/assets/7954e2c9-b181-4b04-bf30-e042610746bd" width="80%">
+<img src="https://github.com/user-attachments/assets/7954e2c9-b181-4b04-bf30-e042610746bd" width="60%">
 
 - User은 로그인 기능이 아직 없어 임의로 추가했습니다.
-  ![Image](https://github.com/user-attachments/assets/703d8bc7-4e31-4a0f-a273-7eafaace8ffc)
+  <img src="https://github.com/user-attachments/assets/703d8bc7-4e31-4a0f-a273-7eafaace8ffc" width="70%">
+
 #### 1. 질문 작성
 ![Image](https://github.com/user-attachments/assets/328be23e-9793-4d8d-b9b9-dae4d0bc77b7)
 ✨ **여기서 이미지는!! AWS S3 버킷 사용**
+
 <img src="https://github.com/user-attachments/assets/bad6c7b5-cb11-437d-90ef-48e405ef1a10" width="70%">
 
  - 버킷에 잘 들어갔지요~
@@ -235,7 +237,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 ![Image](https://github.com/user-attachments/assets/9499ae8b-c7ab-40de-b747-7069b8adcc36)
 
 #### 3. 내가 쓴 질문글 삭제
-<img src="https://github.com/user-attachments/assets/c51a031a-ad44-409f-a7a6-1a74393c080a" width="80%">
+<img src="https://github.com/user-attachments/assets/c51a031a-ad44-409f-a7a6-1a74393c080a" width="70%">
 
 - 삭제 성공~
 
@@ -244,7 +246,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 - 에러 발생!!
 
 #### 4. 답변 작성
-<img src="https://github.com/user-attachments/assets/51d8f2ab-e820-480a-8766-42f2787c317c" width="80%">
+<img src="https://github.com/user-attachments/assets/51d8f2ab-e820-480a-8766-42f2787c317c" width=60%">
 
 ![Image](https://github.com/user-attachments/assets/9b9f714d-7601-438d-8ee8-a8a1d12785de)
 
@@ -265,15 +267,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 모두 에러 처리 나도록 했습니다.
 
 (1) 의 경우
-![Image](https://github.com/user-attachments/assets/ec241205-d2d6-4be4-b1d5-0a5f7c42d535)
+
+<img src="https://github.com/user-attachments/assets/ec241205-d2d6-4be4-b1d5-0a5f7c42d535" width="70%">
 
 (2),(4)의 경우
-![Image](https://github.com/user-attachments/assets/19aee750-7f83-4041-9fc5-8a6c8673d7c2)
+
+<img src="https://github.com/user-attachments/assets/19aee750-7f83-4041-9fc5-8a6c8673d7c2" width="70%">
 
 **결국, LIKE/DISLIKE가 있는 경우, 삭제한 후에만 새로 달 수 있습니다.**
 
 #### 7. 좋아요/싫어요 삭제
-<img src="https://github.com/user-attachments/assets/9c3f6c42-b3a9-4dcc-8591-57c919f30b3e" width="80%">
+<img src="https://github.com/user-attachments/assets/9c3f6c42-b3a9-4dcc-8591-57c919f30b3e" width="70%">
 
  ***
 
