@@ -216,45 +216,48 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 ---
 ### WEEK 3. ERD 수정
-![img.png](img.png)
+![Image](https://github.com/user-attachments/assets/93f0e2b0-2b97-4426-90e2-4ce2fee3f4cb)
 - 좋아요/싫어요는 답변 글에만 달 수 있도록 수정
 
 ### 구현 기능
-![img_1.png](img_1.png)
+<img src="https://github.com/user-attachments/assets/7954e2c9-b181-4b04-bf30-e042610746bd" width="80%">
 
 - User은 로그인 기능이 아직 없어 임의로 추가했습니다.
-![img_2.png](img_2.png)
+  ![Image](https://github.com/user-attachments/assets/703d8bc7-4e31-4a0f-a273-7eafaace8ffc)
 #### 1. 질문 작성
-![img_5.png](img_5.png)
+![Image](https://github.com/user-attachments/assets/328be23e-9793-4d8d-b9b9-dae4d0bc77b7)
 ✨ **여기서 이미지는!! AWS S3 버킷 사용**
-![img_6.png](img_6.png)
+<img src="https://github.com/user-attachments/assets/bad6c7b5-cb11-437d-90ef-48e405ef1a10" width="70%">
+
  - 버킷에 잘 들어갔지요~
 
 #### 2. 내가 쓴 모든 질문글 조회
-![img_4.png](img_4.png)
+![Image](https://github.com/user-attachments/assets/9499ae8b-c7ab-40de-b747-7069b8adcc36)
 
 #### 3. 내가 쓴 질문글 삭제
-![img_7.png](img_7.png)
+<img src="https://github.com/user-attachments/assets/c51a031a-ad44-409f-a7a6-1a74393c080a" width="80%">
+
 - 삭제 성공~
 
 ✨ 삭제하려는 userId와 질문 작성자가 다르면?
-![img_8.png](img_8.png)
+![Image](https://github.com/user-attachments/assets/94a62a0a-175b-4577-9cd8-15dbfe3a01b5)
 - 에러 발생!!
 
 #### 4. 답변 작성
-![img_10.png](img_10.png)
-![img_9.png](img_9.png)
+<img src="https://github.com/user-attachments/assets/51d8f2ab-e820-480a-8766-42f2787c317c" width="80%">
+
+![Image](https://github.com/user-attachments/assets/9b9f714d-7601-438d-8ee8-a8a1d12785de)
 
 ✨ 질문 작성자가 답변을 달려 하면?
-![img_11.png](img_11.png)
+![Image](https://github.com/user-attachments/assets/7d7b8eac-d01e-4872-8952-f58698339081)
 - 에러 발생 !!
 
 #### 5. 질문과 답변 조회
-![img_12.png](img_12.png)
+![Image](https://github.com/user-attachments/assets/47a6e657-d499-4a7e-a35f-b204a2ebc45d)
 - postId를 PathParameter로 입력하면 그 질문과 답변글들을 조회 가능
 
 #### 6. 좋아요/싫어요 달기
-![img_13.png](img_13.png)
+![Image](https://github.com/user-attachments/assets/40f6552c-c7f5-44b2-bb19-26960f1a28a9)
 ✨ 좋아요/싫어요 연타 방지를 어떻게 할까... 생각하다가 
 
 (1) 좋아요-> 좋아요/ (2) 좋아요-> 싫어요/ (3) 싫어요-> 싫어요/(4) 싫어요->좋아요
@@ -262,15 +265,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 모두 에러 처리 나도록 했습니다.
 
 (1) 의 경우
-![img_14.png](img_14.png)
+![Image](https://github.com/user-attachments/assets/ec241205-d2d6-4be4-b1d5-0a5f7c42d535)
 
-(2),(4)의 경우 
-![img_15.png](img_15.png)
+(2),(4)의 경우
+![Image](https://github.com/user-attachments/assets/19aee750-7f83-4041-9fc5-8a6c8673d7c2)
 
 **결국, LIKE/DISLIKE가 있는 경우, 삭제한 후에만 새로 달 수 있습니다.**
 
 #### 7. 좋아요/싫어요 삭제
-![img_16.png](img_16.png)
+<img src="https://github.com/user-attachments/assets/9c3f6c42-b3a9-4dcc-8591-57c919f30b3e" width="80%">
 
  ***
 
