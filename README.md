@@ -246,7 +246,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 - 에러 발생!!
 
 #### 4. 답변 작성
-<img src="https://github.com/user-attachments/assets/51d8f2ab-e820-480a-8766-42f2787c317c" width=60%">
+<img src="https://github.com/user-attachments/assets/51d8f2ab-e820-480a-8766-42f2787c317c" width="60%">
 
 ![Image](https://github.com/user-attachments/assets/9b9f714d-7601-438d-8ee8-a8a1d12785de)
 
@@ -277,7 +277,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 **결국, LIKE/DISLIKE가 있는 경우, 삭제한 후에만 새로 달 수 있습니다.**
 
 #### 7. 좋아요/싫어요 삭제
-<img src="https://github.com/user-attachments/assets/9c3f6c42-b3a9-4dcc-8591-57c919f30b3e" width="70%">
+<img src="https://github.com/user-attachments/assets/9c3f6c42-b3a9-4dcc-8591-57c919f30b3e" width="50%">
 
  ***
 
