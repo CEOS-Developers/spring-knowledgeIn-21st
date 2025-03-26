@@ -7,13 +7,10 @@ import com.ceos21.spring_boot.converter.PostConverter;
 import com.ceos21.spring_boot.domain.entity.*;
 import com.ceos21.spring_boot.dto.Answer.AnswerResponseDTO;
 import com.ceos21.spring_boot.dto.post.PostRequestDTO;
-import com.ceos21.spring_boot.repository.AnswerRepository;
-import com.ceos21.spring_boot.repository.HashtagRepository;
+import com.ceos21.spring_boot.repository.*;
 import com.ceos21.spring_boot.service.ImageService;
 import com.ceos21.spring_boot.service.S3UploadService;
 import com.ceos21.spring_boot.dto.post.PostResponseDTO;
-import com.ceos21.spring_boot.repository.PostRepository;
-import com.ceos21.spring_boot.repository.UserRepository;
 import com.ceos21.spring_boot.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +32,7 @@ public class PostServiceImpl implements PostService {
     private final ImageService imageService;
     private final HashtagRepository hashtagRepository;
     private final AnswerRepository answerRepository;
+    private final LikeDislikeRepository likeDislikeRepository;
 
     // 질문글에 대한 답변 작성
     @Transactional
@@ -88,6 +86,13 @@ public class PostServiceImpl implements PostService {
         // 2. Post 작성자 = 요창자 ?
         if (!post.getPostWriter().getId().equals(userId)) {
             throw new CustomException(ErrorStatus.CANNOT_DELETE);
+        }
+
+        // 3. Post에 속한 Answer 찾기
+        List<Answer> answers = answerRepository.findByPostId(postId);
+            //각 Answer에 속한 LikeDislike 삭제
+        for (Answer answer : answers) {
+            likeDislikeRepository.deleteByAnswerId(answer.getId());
         }
 
         // 3. Post 삭제

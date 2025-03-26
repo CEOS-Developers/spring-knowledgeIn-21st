@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
-    List<Answer> findByPost(Post post);
+    List<Answer> findByPostId(Long postId);
     List<Answer> findAllByPostId(Long postId);
+
 }

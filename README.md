@@ -214,4 +214,86 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
  (참고 https://9hyuk9.tistory.com/77)
 
+---
+### WEEK 3. ERD 수정
+![img.png](img.png)
+- 좋아요/싫어요는 답변 글에만 달 수 있도록 수정
 
+### 구현 기능
+![img_1.png](img_1.png)
+
+- User은 로그인 기능이 아직 없어 임의로 추가했습니다.
+![img_2.png](img_2.png)
+#### 1. 질문 작성
+![img_5.png](img_5.png)
+✨ **여기서 이미지는!! AWS S3 버킷 사용**
+![img_6.png](img_6.png)
+ - 버킷에 잘 들어갔지요~
+
+#### 2. 내가 쓴 모든 질문글 조회
+![img_4.png](img_4.png)
+
+#### 3. 내가 쓴 질문글 삭제
+![img_7.png](img_7.png)
+- 삭제 성공~
+
+✨ 삭제하려는 userId와 질문 작성자가 다르면?
+![img_8.png](img_8.png)
+- 에러 발생!!
+
+#### 4. 답변 작성
+![img_10.png](img_10.png)
+![img_9.png](img_9.png)
+
+✨ 질문 작성자가 답변을 달려 하면?
+![img_11.png](img_11.png)
+- 에러 발생 !!
+
+#### 5. 질문과 답변 조회
+![img_12.png](img_12.png)
+- postId를 PathParameter로 입력하면 그 질문과 답변글들을 조회 가능
+
+#### 6. 좋아요/싫어요 달기
+![img_13.png](img_13.png)
+✨ 좋아요/싫어요 연타 방지를 어떻게 할까... 생각하다가 
+
+(1) 좋아요-> 좋아요/ (2) 좋아요-> 싫어요/ (3) 싫어요-> 싫어요/(4) 싫어요->좋아요
+
+모두 에러 처리 나도록 했습니다.
+
+(1) 의 경우
+![img_14.png](img_14.png)
+
+(2),(4)의 경우 
+![img_15.png](img_15.png)
+
+**결국, LIKE/DISLIKE가 있는 경우, 삭제한 후에만 새로 달 수 있습니다.**
+
+#### 7. 좋아요/싫어요 삭제
+![img_16.png](img_16.png)
+
+ ***
+
+❔Hashtag를 이용한 질문글 찾기를 위해 HashtagController을 따로 둘지, PostController에 포함시킬지 고민중입니다. 어떻게 하셨나요❔
+
+***
+### 부가 구현 설명
+
+**1. ErrorStatus + 성공 응답 처리**
+ - exception과 ErrorStatus, SuccessStatus 등을 추가하였습니다. 
+ - ErrorStatus에서는 에러 처리를 Custom하여 추가합니다.
+
+**2. Swagger**
+- SwaggerConfig를 이용한 Swagger 테스트 설정
+
+**3. Converter**
+- DTO <-> Entity 간 변환을 Converter에서 처리
+- 서비스 로직의 간결성을 위해
+
+**4. Service + ServiceImpl 사용**
+- Service는 인터페이스 구현 + ServiceImpl은 비즈니스 로직 처리
+- 확장성을 위해
+
+**5. AWS S3 BUCKET 사용**
+- 이미지 업로드를 위해 사용
+- MultiPartFile 형식으로 이미지를 S3 버킷에 업로드 후, 이미지 URL을 반환하여 DB에 저장

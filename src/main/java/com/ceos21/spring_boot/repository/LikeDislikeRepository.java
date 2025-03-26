@@ -11,4 +11,5 @@ public interface LikeDislikeRepository extends JpaRepository<LikeDislike, Long> 
 
     Optional<LikeDislike> findByAnswerAndUser(Answer answer, User user);
 
+    void deleteByAnswerId(Long answerId);
 }

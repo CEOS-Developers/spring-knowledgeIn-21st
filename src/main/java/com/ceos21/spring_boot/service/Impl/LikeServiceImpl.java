@@ -41,28 +41,30 @@ public class LikeServiceImpl implements LikeService {
 
         // 기존 likeDislike 존재 확인
         LikeDislike existingLikeDislike = likeDislikeRepository.findByAnswerAndUser(answer, user)
-                .orElseThrow(() -> new CustomException(ErrorStatus.LIKE_DISLIKE_NOT_FOUND));
+                .orElse(null);
 
         if (existingLikeDislike != null) {
-            // 3.1. 기존 상태가 좋아요(LIKE)일 경우 -> 좋아요를 취소
+            // 3.1. 기존 상태가 좋아요(LIKE)일 경우
             if (existingLikeDislike.getLikeStatus() == LikeStatus.LIKE) {
 
                 if (likeRequest.getLikeStatus() == LikeStatus.DISLIKE) {
                     // 좋아요 상태에서 싫어요 누름
                     throw new CustomException(ErrorStatus.CANNOT_CHECK_BOTH);
                 }
+                    // 좋아요 상태에서 좋아요 또 누름
                 else if (likeRequest.getLikeStatus() == LikeStatus.LIKE) {
                     throw new CustomException(ErrorStatus.DUPLICATE_LIKE);
                 }
                 return AnswerConverter.toLikeResponseDTO(null);
             }
-            // 3.2. 기존 상태가 싫어요(DISLIKE)일 경우 -> 싫어요를 취소
+            // 3.2. 기존 상태가 싫어요(DISLIKE)일 경우
             else if (existingLikeDislike.getLikeStatus() == LikeStatus.DISLIKE) {
 
                 if (likeRequest.getLikeStatus() == LikeStatus.LIKE) {
                     // 싫어요 상태에서 좋아요 누름
                     throw new CustomException(ErrorStatus.CANNOT_CHECK_BOTH);
                 }
+                    // 싫어요 상태에서 싫어요 또 누름
                 else if (likeRequest.getLikeStatus() == LikeStatus.DISLIKE) {
                     throw new CustomException(ErrorStatus.DUPLICATE_DISLIKE);
                 }
