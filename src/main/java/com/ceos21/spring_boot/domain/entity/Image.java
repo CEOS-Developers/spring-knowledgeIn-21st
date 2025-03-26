@@ -28,4 +28,9 @@ public class Image extends BaseEntity {
     public void setPost(Post post) {
         this.post = post;
     }
+
+    //연관관계 편의 메서드
+    public void setAnswer(Answer answer) {
+        this.answer = answer;
+    }
 }

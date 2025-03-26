@@ -22,15 +22,24 @@ public class Answer {
     @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL)
     private List<Image> images;
 
-    @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "answer", cascade = CascadeType.PERSIST)
     private List<Comment> comments;
 
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="writer_id")
-    private User writer;
+    private User answerWriter;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="post_id")
     private Post post;
+
+    // 연관관계 편의 메서드
+    public void addImage(Image image) {
+        if (this.images == null) {
+            this.images = new ArrayList<>();
+        }
+        this.images.add(image);
+        image.setAnswer(this);
+    }
 
 }

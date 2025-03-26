@@ -99,7 +99,7 @@ import static org.assertj.core.api.Assertions.assertThat;
             imageRepository.save(image2);
 
             // when
-            List<Post> posts = postRepository.findByWriter(user);
+            List<Post> posts = postRepository.findByPostWriter(user);
 
             // then
             assertThat(posts).hasSize(3);

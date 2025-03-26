@@ -4,6 +4,8 @@ package com.ceos21.spring_boot.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -16,5 +18,13 @@ public class Hashtag extends BaseEntity {
 
     @Column(length=30)
     private String content;
+
+    @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL)
+    private List<PostHash> postHashtags;
+
+    // String만 받는 생성자 추가
+    public Hashtag(String content) {
+        this.content = content;
+    }
 
 }
