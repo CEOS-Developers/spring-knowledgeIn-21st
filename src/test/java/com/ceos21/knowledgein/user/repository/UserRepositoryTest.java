@@ -1,4 +1,4 @@
-package com.ceos21.knowledgein.repository;
+package com.ceos21.knowledgein.user.repository;
 
 import com.ceos21.knowledgein.user.domain.UserEntity;
 import com.ceos21.knowledgein.user.repository.UserRepository;
@@ -20,12 +20,7 @@ class UserRepositoryTest {
     @DisplayName("유저 save 테스트")
     void saveUserTest() {
         // given
-        UserEntity testUser = UserEntity.builder()
-                .name("test-user")
-                .nickName("test-nick")
-                .passWord("1234")
-                .role(USER)
-                .build();
+        UserEntity testUser = UserEntity.of("test-user", "test-nick", "1234");
         // when
         UserEntity savedUser = userRepository.save(testUser);
         // then

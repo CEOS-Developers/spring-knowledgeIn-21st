@@ -1,10 +1,8 @@
-package com.ceos21.knowledgein.repository;
+package com.ceos21.knowledgein.post.repository;
 
 import com.ceos21.knowledgein.post.domain.HashTag;
 import com.ceos21.knowledgein.post.domain.Post;
 import com.ceos21.knowledgein.post.domain.PostImage;
-import com.ceos21.knowledgein.post.repository.PostImageRepository;
-import com.ceos21.knowledgein.post.repository.PostRepository;
 import com.ceos21.knowledgein.user.domain.UserEntity;
 import com.ceos21.knowledgein.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.ceos21.knowledgein.user.domain.Role.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -131,70 +128,36 @@ class PostRepositoryTest {
         assertThat(allByUserId.get(0)).isEqualTo(userPost);
         assertThat(allByUserId.get(0).getPostImages().size()).isEqualTo(2);
         assertThat(allByUserId.get(0).getHashTags().size()).isEqualTo(2);
-
     }
 
 
     private Post makeTestPostWithImagesAndHashTags(List<PostImage> postImageList, List<HashTag> hashTagList) {
-        return Post.builder()
-                .title("test")
-                .content("test")
-                .nicknamePublic(false)
-                .user(user)
-                .postImages(postImageList)
-                .hashTags(hashTagList)
-                .build();
+        return Post.of("test", "test", false, hashTagList, postImageList, user);
     }
 
     private List<HashTag> make2HashTags() {
         return List.of(
-                HashTag.builder()
-                        .tag("test1")
-                        .build(),
-                HashTag.builder()
-                        .tag("test2")
-                        .build()
+                HashTag.createWithNoPost("test1"),
+                HashTag.createWithNoPost("test2")
         );
     }
 
     private UserEntity makeTestUser(String name) {
-        return UserEntity.builder()
-                .name(name)
-                .nickName("test-nick")
-                .passWord("1234")
-                .role(USER)
-                .build();
+        return UserEntity.of(name, "test-nick", "1234");
     }
 
     private Post makeTestPost(String title, String content) {
-        return Post.builder()
-                .title(title)
-                .content(content)
-                .nicknamePublic(true)
-                .user(user)
-                .build();
+        return Post.of(title, content, false, null, null, user);
     }
 
     private List<PostImage> make2PostImages() {
         return List.of(
-                PostImage.builder()
-                        .storageUrl("test1")
-                        .uploadFileName("test1")
-                        .build(),
-                PostImage.builder()
-                        .storageUrl("test2")
-                        .uploadFileName("test2")
-                        .build()
+                PostImage.createWithNoPost("test1", "test1"),
+                PostImage.createWithNoPost("test2", "test2")
         );
     }
 
     private Post makeTestPostWithImages(List<PostImage> postImageList) {
-        return Post.builder()
-                .title("test")
-                .content("test")
-                .nicknamePublic(false)
-                .user(user)
-                .postImages(postImageList)
-                .build();
+        return Post.of("test", "test", false, null, postImageList, user);
     }
 }
