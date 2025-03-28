@@ -11,3 +11,5 @@ FRONT_URL: http://localhost:3000
 
 REDIS_HOST: localhost
 REDIS_PORT: 6379
+
+DIR: /Users/leo/knowledgein_images/

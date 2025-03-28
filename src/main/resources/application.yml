@@ -11,11 +11,16 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 100
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 800MB
 
 #logging.level:
 #  org.hibernate.SQL: debug
@@ -25,3 +30,5 @@ etc:
   front-url: ${FRONT_URL}
   front-auth-success: ${FRONT_URL}/auth/success
 
+file:
+  dir: ${DIR}
