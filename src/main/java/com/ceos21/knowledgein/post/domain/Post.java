@@ -1,17 +1,21 @@
 package com.ceos21.knowledgein.post.domain;
 
-import com.ceos21.knowledgein.global.domain.BaseTimeEntity;
+import com.ceos21.knowledgein.global.domain.BaseTimeEntityWithDeletion;
 import com.ceos21.knowledgein.user.domain.UserEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static jakarta.persistence.FetchType.*;
-import static jakarta.persistence.GenerationType.*;
+import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.CascadeType.REMOVE;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -19,7 +23,9 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "post")
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-public class Post extends BaseTimeEntity {
+@SQLDelete(sql = "UPDATE post SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
+public class Post extends BaseTimeEntityWithDeletion {
 
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;
@@ -35,10 +41,10 @@ public class Post extends BaseTimeEntity {
     @ManyToOne(fetch = LAZY)
     private UserEntity user;
 
-    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<PostImage> postImages = new ArrayList<>();
+    @OneToMany(mappedBy = "post", cascade = {PERSIST, REMOVE})
+    private List<Image> images = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "post", cascade = PERSIST)
     private List<HashTag> hashTags = new ArrayList<>();
 
     @OneToMany(mappedBy = "post")
@@ -48,14 +54,14 @@ public class Post extends BaseTimeEntity {
                           String content,
                           boolean nicknamePublic,
                           List<HashTag> hashTags,
-                          List<PostImage> postImages,
+                          List<Image> images,
                           UserEntity user) {
         return Post.builder()
                 .title(title)
                 .content(content)
                 .nicknamePublic(nicknamePublic)
                 .hashTags(hashTags)
-                .postImages(postImages)
+                .images(images)
                 .user(user)
                 .build();
     }
@@ -67,10 +73,10 @@ public class Post extends BaseTimeEntity {
         }
     }
 
-    public void addPostImage(PostImage postImage) {
-        postImages.add(postImage);
-        if (postImage.getPost() != this) {
-            postImage.setPost(this);
+    public void addPostImage(Image image) {
+        images.add(image);
+        if (image.getPost() != this) {
+            image.setPost(this);
         }
     }
 
@@ -82,21 +88,29 @@ public class Post extends BaseTimeEntity {
     }
 
     @Builder(access = PRIVATE)
-    private Post(String title, String content, boolean nicknamePublic, List<HashTag> hashTags, List<PostImage> postImages, UserEntity user) {
+    private Post(String title, String content, boolean nicknamePublic, List<HashTag> hashTags, List<Image> images, UserEntity user) {
         this.title = title;
         this.content = content;
         this.nicknamePublic = nicknamePublic;
-        this.postImages = postImages;
+        this.images = images;
         this.hashTags = hashTags;
         this.user = user;
 
         this.viewCount = 0L;
-        if (postImages != null) {
-            postImages.forEach(postImage -> postImage.setPost(this));
+        if (images != null) {
+            images.forEach(postImage -> postImage.setPost(this));
         }
         if (hashTags != null) {
             hashTags.forEach(hashTag -> hashTag.setPost(this));
         }
     }
 
+    public Post update(String title, String content, List<HashTag> hashTags, List<Image> images) {
+        this.title = title;
+        this.content = content;
+        this.images = images;
+        this.hashTags = hashTags;
+
+        return this;
+    }
 }

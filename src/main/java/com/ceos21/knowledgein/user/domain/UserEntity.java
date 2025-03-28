@@ -1,13 +1,15 @@
 package com.ceos21.knowledgein.user.domain;
 
-import com.ceos21.knowledgein.global.domain.BaseTimeEntity;
+import com.ceos21.knowledgein.global.domain.BaseTimeEntityWithDeletion;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
-import static com.ceos21.knowledgein.user.domain.Role.*;
-import static jakarta.persistence.EnumType.*;
+import static com.ceos21.knowledgein.user.domain.Role.USER;
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -16,7 +18,9 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "`user`")
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-public class UserEntity extends BaseTimeEntity {
+@SQLDelete(sql = "UPDATE `user` SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
+public class UserEntity extends BaseTimeEntityWithDeletion {
 
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;

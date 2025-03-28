@@ -5,7 +5,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static jakarta.persistence.GenerationType.*;
+import java.util.List;
+
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static java.util.stream.Collectors.toList;
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -26,6 +29,18 @@ public class HashTag {
     private Post post;
 
     public static HashTag createWithNoPost(String tag) {
+        return HashTag.builder()
+                .tag(tag)
+                .build();
+    }
+
+    public static List<HashTag> of(List<String> tags) {
+        return tags.stream()
+                .map(HashTag::of)
+                .collect(toList());
+    }
+
+    public static HashTag of(String tag) {
         return HashTag.builder()
                 .tag(tag)
                 .build();

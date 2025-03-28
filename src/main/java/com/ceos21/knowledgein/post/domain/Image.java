@@ -1,5 +1,6 @@
 package com.ceos21.knowledgein.post.domain;
 
+import com.ceos21.knowledgein.global.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,10 +12,10 @@ import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
-@Table(name = "post_image")
+@Table(name = "image")
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-public class PostImage {
+public class Image extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;
@@ -26,8 +27,12 @@ public class PostImage {
     @ManyToOne(fetch = LAZY)
     private Post post;
 
-    public static PostImage createWithNoPost(String storageUrl, String uploadFileName) {
-        return PostImage.builder()
+    @JoinColumn(name = "reply_id", referencedColumnName = "id", nullable = true)
+    @ManyToOne(fetch = LAZY)
+    private Reply reply;
+
+    public static Image createWithNoPost(String storageUrl, String uploadFileName) {
+        return Image.builder()
                 .storageUrl(storageUrl)
                 .uploadFileName(uploadFileName)
                 .build();
@@ -35,13 +40,20 @@ public class PostImage {
 
     public void setPost(Post post) {
         this.post = post;
-        if (!post.getPostImages().contains(this)) {
-            post.getPostImages().add(this);
+        if (!post.getImages().contains(this)) {
+            post.getImages().add(this);
+        }
+    }
+
+    public void setReply(Reply reply) {
+        this.reply = reply;
+        if (!reply.getImages().contains(this)) {
+            reply.getImages().add(this);
         }
     }
 
     @Builder(access = PRIVATE)
-    private PostImage(String storageUrl, String uploadFileName, Post post) {
+    private Image(String storageUrl, String uploadFileName, Post post) {
         this.storageUrl = storageUrl;
         this.uploadFileName = uploadFileName;
         this.post = post;
