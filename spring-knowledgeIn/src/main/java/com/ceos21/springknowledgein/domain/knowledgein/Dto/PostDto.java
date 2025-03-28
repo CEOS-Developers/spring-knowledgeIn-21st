@@ -7,11 +7,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDto {
     private String title;
     private String content;
     private Member member;
+
+    public static PostDto of(String title, String content, Member member) {
+        return new PostDto(title, content, member);
+    }
+
 }
