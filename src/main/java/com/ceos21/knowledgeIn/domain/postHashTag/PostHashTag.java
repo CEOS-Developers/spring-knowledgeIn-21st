@@ -2,7 +2,7 @@ package com.ceos21.knowledgeIn.domain.postHashTag;
 
 import com.ceos21.knowledgeIn.domain.hashTag.HashTag;
 import com.ceos21.knowledgeIn.domain.post.Post;
-import com.ceos21.knowledgeIn.global.common.domain.BaseEntity;
+import com.ceos21.knowledgeIn.global.domain.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;

@@ -1,4 +1,4 @@
-package com.ceos21.knowledgeIn.global.common.domain;
+package com.ceos21.knowledgeIn.global.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

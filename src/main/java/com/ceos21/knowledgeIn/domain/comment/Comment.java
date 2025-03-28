@@ -2,7 +2,7 @@ package com.ceos21.knowledgeIn.domain.comment;
 
 import com.ceos21.knowledgeIn.domain.post.Post;
 import com.ceos21.knowledgeIn.domain.member.Member;
-import com.ceos21.knowledgeIn.global.common.domain.BaseEntity;
+import com.ceos21.knowledgeIn.global.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

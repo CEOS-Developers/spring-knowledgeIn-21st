@@ -3,7 +3,7 @@ package com.ceos21.knowledgeIn.domain.reaction;
 import com.ceos21.knowledgeIn.domain.common.ReactionType;
 import com.ceos21.knowledgeIn.domain.member.Member;
 import com.ceos21.knowledgeIn.domain.post.Post;
-import com.ceos21.knowledgeIn.global.common.domain.BaseEntity;
+import com.ceos21.knowledgeIn.global.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

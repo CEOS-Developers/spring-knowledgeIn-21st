@@ -4,7 +4,7 @@ import com.ceos21.knowledgeIn.domain.comment.Comment;
 import com.ceos21.knowledgeIn.domain.common.PostType;
 import com.ceos21.knowledgeIn.domain.image.Image;
 import com.ceos21.knowledgeIn.domain.member.Member;
-import com.ceos21.knowledgeIn.global.common.domain.BaseEntity;
+import com.ceos21.knowledgeIn.global.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
