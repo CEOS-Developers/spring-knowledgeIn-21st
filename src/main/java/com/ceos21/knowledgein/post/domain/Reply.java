@@ -59,6 +59,17 @@ public class Reply extends BaseTimeEntity {
                 .build();
     }
 
+    public static Reply createWithParent(String content, UserEntity user, Post post, Reply parent) {
+        return Reply.builder()
+                .accepted(false)
+                .content(content)
+                .user(user)
+                .post(post)
+                .parent(parent)
+                .images(new ArrayList<>())
+                .build();
+    }
+
     @Builder(access = PRIVATE)
     private Reply(boolean accepted, String content, Reply parent, UserEntity user, Post post, List<Image> images) {
         this.accepted = accepted;
@@ -70,6 +81,14 @@ public class Reply extends BaseTimeEntity {
 
         if (images != null) {
             images.forEach(image -> image.setReply(this));
+        }
+
+        if (images != null) {
+            images.forEach(image -> image.setPost(post));
+        }
+
+        if (parent != null) {
+            parent.addReplyChild(this);
         }
     }
 
@@ -84,6 +103,20 @@ public class Reply extends BaseTimeEntity {
         images.add(image);
         if (image.getReply() != this) {
             image.setReply(this);
+        }
+    }
+
+    public void addReplyChild(Reply reply) {
+        replyChildren.add(reply);
+        if (reply.getParent() != this) {
+            reply.setParent(this);
+        }
+    }
+
+    public void setParent(Reply parent) {
+        this.parent = parent;
+        if (!parent.getReplyChildren().contains(this)) {
+            parent.getReplyChildren().add(this);
         }
     }
 

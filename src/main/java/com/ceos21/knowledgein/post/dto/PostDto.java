@@ -26,7 +26,11 @@ public record PostDto(
             post.getContent(),
             post.getViewCount(),
             post.isNicknamePublic(),
-            ImageDto.from(post.getImages()),
+            ImageDto.from(post.getImages()
+                                  .stream()
+                                  .filter(image -> image.getReply() == null)
+                                  .toList()
+            ),
             HashTagDto.from(post.getHashTags()),
             ReplyDto.from(post.getReplies())
         );
