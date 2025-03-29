@@ -1,17 +1,14 @@
 package com.ceos21.spring_boot.Domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "hashtag")
 @Getter
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Hashtag extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +20,9 @@ public class Hashtag extends BaseEntity {
 
     @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL)
     private List<PostHashtag> postHashtags;
+
+    @Builder
+    public Hashtag(String tag){
+        this.name = tag;
+    }
 }

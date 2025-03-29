@@ -9,7 +9,9 @@ import java.util.List;
 @Entity
 @Table(name = "member")
 @Getter
-@NoArgsConstructor @AllArgsConstructor
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class User extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +28,7 @@ public class User extends BaseEntity{
     private String email;
 
     @Column(name = "name", length = 50, nullable = false)
-    private String name;
+    private String username;
 
     @Column(name = "birthdate", nullable = false)
     private LocalDate birthdate;
@@ -52,5 +54,15 @@ public class User extends BaseEntity{
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Reaction> reactions;
+
+    public User(String userId, String password, String username, String email, LocalDate birthdate, String phoneNumber) {
+        this.Id = userId;
+        this.password = password;
+        this.username = username;
+        this.email = email;
+        this.birthdate = birthdate;
+        this.phoneNumber = phoneNumber;
+    }
+
 }
 

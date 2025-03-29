@@ -1,14 +1,12 @@
 package com.ceos21.spring_boot.Domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "post_hashtag")
 @Getter
+@Builder
 @NoArgsConstructor @AllArgsConstructor
 public class PostHashtag extends BaseEntity {
     @Id

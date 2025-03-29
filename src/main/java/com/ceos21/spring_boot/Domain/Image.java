@@ -1,15 +1,12 @@
 package com.ceos21.spring_boot.Domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "image")
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Image extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +23,10 @@ public class Image extends BaseEntity {
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="answer_id")
     private Answer answer;
+
+    @Builder
+    public Image(String url, Post post) {
+        this.postImageUrl = url;
+        this.post = post;
+    }
 }
