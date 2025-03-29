@@ -24,6 +24,7 @@ API 명세서: https://heather-pink-26a.notion.site/API-1c1a28ca99b1808891f7f9a4
 - 댓글 관련 기능
 - 반응 관련 기능
 - 아무도 사용하지 않는 해시태그 삭제
+- S3 사용할줄 모름 이슈로 이미지 처리 로직은 구현 전
 
 ...등이 있다
 
@@ -41,7 +42,7 @@ RequestBody쪽의 타입을 application/json으로 설정해주면 되지만 스
 ### 예외처리
 지금까지 누가 써둔거 사용만 하고 귀찮아서 원리를 뜯어볼 생각을 절대 안했는데 이번 기회에 해봤다.
 
-일단 예외처리는 스프링의 AOP 기술의 대표격인것 같다.
+일단 전역 예외 처리는 스프링의 AOP 기술 예시의 대표격인것 같다.
 `@Controller`나 `@RestController` 어노테이션을 사용한 곳에서 에러가 나면(point cut)
 `@ControllerAdvice`나 `@RestControllerAdvice` 어노테이션이 적힌 곳으로 이동하여 에러를 처리하는 것.
 
@@ -68,6 +69,11 @@ RequestBody쪽의 타입을 application/json으로 설정해주면 되지만 스
   - **ApiResponse.onFailure(code,message,result)** : 실패했을 때 쓰는 메서드니까 Advice 쪽에서 씀. 성공했을 때는 다 SUCCESS인 Status만 사용해서
     프론트에 제공해줄 데이터만 파라미터로 받았는데, 실패하면 실패 분류 코드도, 실패 메시지도 다 다르니까 이걸 다 파라미터로 받아야한다.
     예외가 발생해 전달해줄 데이터가 없을 가능성이 많지만 혹시의 상황을 대비해 result도 줄려면 줄 순 있다.
+
+
+- **BaseCode와 ReasonDTO** : 솔직히 ReasonDTO가 왜 있는건지 모르겠다. ReasonDTO가 제공하는 필드는 그냥 ErrorStarus에서 다 가져올 수 있는데..
+  장점이 뭔지.. 객체로 한번에 제공? 아무튼 BaseCode역시 이 ReasonDTO를 반환하는 메서드를 구현하기를 강제하는 목적으로 만들어진 인터페이스였기에
+  나는 그냥 저 두 클래스와 관련된 것들은 과감히 버렸다. 근데 내가 잘못한걸지도.. 누군가 알면 알려주면 좋겠름
 
 이렇게 분석은 끝냈는데 정작 Advice를 쓰려고 하니까 막막했다.
 
@@ -97,4 +103,42 @@ RequestBody쪽의 타입을 application/json으로 설정해주면 되지만 스
 내가 명시하지 않은, 그리고 너무 많아서 다 명시하기도 너무 힘든 나머지 에러들을 묶어서 하나의 응답 형식으로 반환할 수 있다.
 
 자세한 설명은 여기서 : https://dev.gmarket.com/83
+
+### Service vs ServiceImpl
+서비스 계층 인터페이스 설정 역시 이 전 동아리의 워크북에서 권장하던 부분이다.
+
+근데 사실상 나는 서비스 확장할 계획이 없는데 1:1상황에서 계속 인터페이스까지 만들자니 꽤 귀찮았다.
+그리고 나중에 서비스 메서드에서 파라미터 수정이 생길때 진짜.....힘들다.
+그래서 그냥 안만들면 안되나? 하던 중 좋은 핑계거리(?)를 찾음.
+
+https://zhfvkq.tistory.com/76
+
+그래 중복코드 발생 불필요한 추상화 이런 단점도 있을 수 있다고......
+그래서 그냥 안쓰기로 했다^^
+
+근데 또 내가 잘못한걸수도
+### OrElse vs OrElseGet
+아직 자바 잘 모름이.. 새로운 걸 알아서 적어봄
+
+OrElse는 결과값이 null일때 실행되는 건줄 알았는데, null이든 아니든 실행된다고 한다.
+일단 무조건 실행은 하고, null이면 인자값을 넘긴다.
+
+해시태그가 존재하면 해당 해시태그를 넘기고, 없으면 orElse 안에서 repository.save를 사용해 새로 생성한 태그를 넘기는 로직을 짰는데,
+해시태그가 있어도 orElse가 무조건 실행돼서 해시태그 이름에 걸어둔 Unique 제약에 위배된다며 오류를 일으켰다.
+
+그래서 찾은 orElseGet.. 이건 null 일때만 실행되고, 인자로 값이 아니라 메서드를 받는다.
+
+근데 굳이 따지자면 둘 다 null 아닐때도 실행되긴 하는데, orElseGet은 null일 때 인자로 받은 함수가 실행되기 때문에 꼭 실행 안되는것처럼 보이는것이다.
+아래 구현 코드를 보면 이해가 잘 될 것 같다.
+
+>public T orElse(T other) {
+return value != null ? value : other;
+}
+> 
+>public T orElseGet(Supplier<? extends T> other) {
+return value != null ? value : other.get();
+}
+
+
+
 
