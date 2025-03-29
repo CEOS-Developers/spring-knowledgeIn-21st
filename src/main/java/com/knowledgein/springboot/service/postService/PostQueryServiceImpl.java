@@ -24,7 +24,7 @@ public class PostQueryServiceImpl implements PostQueryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Post getPostById(Long postId) {
+    public Post getPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(()-> new GeneralException(ErrorStatus.POST_NOT_FOUND));
         return post;

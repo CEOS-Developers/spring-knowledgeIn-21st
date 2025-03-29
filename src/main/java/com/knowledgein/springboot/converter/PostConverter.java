@@ -2,6 +2,7 @@ package com.knowledgein.springboot.converter;
 
 import com.knowledgein.springboot.domain.Post;
 import com.knowledgein.springboot.domain.User;
+import com.knowledgein.springboot.domain.enums.PostType;
 import com.knowledgein.springboot.web.dto.postDTO.PostRequestDTO;
 import com.knowledgein.springboot.web.dto.postDTO.PostResponseDTO;
 import org.springframework.data.domain.Page;
@@ -28,10 +29,14 @@ public class PostConverter {
     }
 
     public static PostResponseDTO.PreviewDto toPreviewDto(Post post) {
+        Long questionId = (post.getQuestionPost() != null)
+                ? post.getQuestionPost().getId()
+                : null;
+
         return PostResponseDTO.PreviewDto.builder()
                 .postId(post.getId())
                 .userId(post.getUser().getId())
-                .questionId(post.getQuestionPost().getId())
+                .questionId(questionId)
                 .postType(post.getPostType())
                 .title(post.getTitle())
                 .createdAt(post.getCreatedAt())

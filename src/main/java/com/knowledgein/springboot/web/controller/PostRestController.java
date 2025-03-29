@@ -45,7 +45,7 @@ public class PostRestController {
     @Operation(summary = "특정 게시물 조회 API",
             description = "지정된 게시물을 조회하는 API")
     public ApiResponse<PostResponseDTO.PreviewDto> get(@PathVariable(name = "postId") Long postId) {
-        Post post = postQueryService.getPostById(postId);
+        Post post = postQueryService.getPost(postId);
         return ApiResponse.onSuccess(PostConverter.toPreviewDto(post));
     }
 

@@ -48,7 +48,7 @@ public class PostCommandServiceImpl implements PostCommandService {
             if (request.getQuestionId() == null) throw new GeneralException(ErrorStatus.QUESTION_SHOULD_EXIST);
             question = postRepository.findById(request.getQuestionId())
                     .orElseThrow(() -> new GeneralException(ErrorStatus.PARENT_QUESTION_NOT_FOUND));
-
+            if (question.getPostType() != PostType.QUESTION) throw new GeneralException(ErrorStatus.PARENT_IS_A_QUESTION);
         }
 
         Post newPost = PostConverter.toPost(request, user, question);
@@ -65,7 +65,7 @@ public class PostCommandServiceImpl implements PostCommandService {
 
         if (request.getImageList() != null) {
             for (String imageUrl : request.getImageList()) {
-                Image image = ImageConverter.toImage(imageUrl);
+                Image image = ImageConverter.toImage(newPost, imageUrl);
                 newPost.addImage(image);
             }
         }

@@ -23,7 +23,8 @@ public enum ErrorStatus implements BaseCode {
     PARENT_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "PARENT QUESTION NOT FOUND", "부모 질문글을 찾을 수 없습니다."),
     QUESTION_SHOULD_NOT_EXIST(HttpStatus.BAD_REQUEST, "QUESTION SHOULD NOT EXIST", "질문글은 부모 질문글을 가질 수 없습니다."),
     QUESTION_SHOULD_EXIST(HttpStatus.BAD_REQUEST, "QUESTION SHOULD EXIST", "대답글은 부모 질문글을 가져야 합니다."),
-    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST NOT FOUND", "게시물을 찾을 수 없습니다.");
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST NOT FOUND", "게시물을 찾을 수 없습니다."),
+    PARENT_IS_A_QUESTION(HttpStatus.BAD_REQUEST, "PARENT IS A QUESTION", "부모글은 질문글이어야 합니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
