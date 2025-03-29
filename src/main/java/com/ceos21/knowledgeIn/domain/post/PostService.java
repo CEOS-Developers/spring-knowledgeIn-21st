@@ -8,6 +8,7 @@ import com.ceos21.knowledgeIn.domain.image.Image;
 import com.ceos21.knowledgeIn.domain.image.ImageService;
 import com.ceos21.knowledgeIn.domain.member.Member;
 import com.ceos21.knowledgeIn.domain.post.dto.PostRequestDTO;
+import com.ceos21.knowledgeIn.domain.post.dto.PostResponseDTO;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTag;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTagRepository;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTagService;
@@ -117,7 +118,14 @@ public class PostService {
     }
 
     @Transactional
-    public Post updatePost(Post post, PostRequestDTO.PostUpdateRequestDTO requestDTO, List<MultipartFile> newImageFiles) {
+    public Post updatePost(Long postId, PostRequestDTO.PostUpdateRequestDTO requestDTO, List<MultipartFile> newImageFiles) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+
+        //답변이 존재하는 질문은 수정 불가
+        if(post.getPostType()==PostType.QUESTION&&post.getAnswerCnt()>0){
+            throw new GeneralException(Status.QUESTION_UPDATE_FORBIDDEN);
+        }
+
         List<PostHashTag> newHashTags = new ArrayList<>();
         List<PostHashTag> oldHashTags = new ArrayList<>();
         List<Image> newImages = new ArrayList<>();
@@ -156,11 +164,31 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePost(Post post) {
+    public void deletePost(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+
+        //답변이 존재하는 질문은 삭제 불가
+        if(post.getAnswerCnt()>0){
+            throw new GeneralException(Status.QUESTION_DELETE_FORBIDDEN);
+        }
 
         if(post.getPostType()==PostType.ANSWER){
             post.getParent().setAnswerCnt(false);
         }
         postRepository.delete(post);
+    }
+
+    public Post getQuestion(Long postId) {
+        return postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+    }
+
+    public Page<Post> getQuestionAnswerList(Long postId, Integer page, Integer size, String sort) {
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+        if(post.getPostType()!= PostType.QUESTION){//질문 글이 아닐 시에 오류 응답
+            throw new GeneralException(Status.BAD_REQUEST);
+        }
+
+        return postRepository.findByParent(post, PageRequest.of(page,size));
     }
 }

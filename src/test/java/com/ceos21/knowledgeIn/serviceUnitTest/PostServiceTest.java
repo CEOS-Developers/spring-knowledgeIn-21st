@@ -47,7 +47,7 @@ public class PostServiceTest {
                 .remainingHashTagIds(oldHashTagIds)
                 .build();
 
-        postService.updatePost(post,updateRequestDTO,null);
+        postService.updatePost(post.getId(),updateRequestDTO,null);
 
     }
 
