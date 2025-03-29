@@ -98,8 +98,8 @@ boolean으로 그렸는데<br>
         Optional<Post> findPost = postRepository.findById(userPost.getId());
         // then
         assertThat(findPost).isEmpty();
-        userPost.getPostImages().forEach(postImage -> {
-            Optional<PostImage> findPostImage = postImageRepository.findById(postImage.getId());
+        userPost.getPostImages().forEach(image -> {
+            Optional<PostImage> findPostImage = postImageRepository.findById(image.getId());
             assertThat(findPostImage).isEmpty();
         });
     }
@@ -117,8 +117,8 @@ boolean으로 그렸는데<br>
     @Transactional
     void savePostTestWithRelation() {
         // given
-        List<PostImage> postImageList = make2PostImages();
-        Post newPost = makeTestPostWithImages(postImageList);
+        List<PostImage> imageList = make2PostImages();
+        Post newPost = makeTestPostWithImages(imageList);
         // when
         Post savedPost = postRepository.save(newPost);
         // then
@@ -223,6 +223,36 @@ Record type
 - getter
 - hashcode, toString
 
+## N+1 문제를 실전적으로 해결해 보자!
+
+결론부터
+
+나의 경우 default batch size를 걸고 일단 넘어간다.<br>
+스트레스 받으면서 모든걸 튜닝하고 싶지 않기도 하고.. 그정도로 필요하다고 생각하지 않는다.<br>
+병목이 발생해 문제가 생기면 그 부분만 튜닝하면 그만!<br>
+
+default batch size는 한번에 가져오는 레코드 수를 뜻하고<br>
+fetch join만큼 강력하게 한방 쿼리는 아니지만<br>
+N+1을 1+1로 해결하는 느낌이다.
+
+다시말해 연관관계가 x가 있으면 x+1<br>
+나의 경우 post에 연관관계가 image, hashtag, reply<br>
+3+1 -> 4번의 쿼리가 나갈것이다.<br>
+
+실제로 확인해 보자
+
+<img width="1559" alt="Image" src="https://github.com/user-attachments/assets/9b8352e0-2ef0-4104-a008-c74edf201545" />
+
+
+14개의 post, 3개의 이미지, 7개의 해시태그를 모두 불러오는데 쿼리 딱 4번이면 괜찮은 것 같다.<br>
+(내가 설정한 100개를 넘지 않으면 계속 4번으로 유지)
+
+```
+select p1_0.id,p1_0.content,p1_0.created_at,p1_0.deleted_at,p1_0.nickname_public,p1_0.title,p1_0.updated_at,p1_0.user_id,p1_0.view_count from post p1_0 where (p1_0.deleted_at IS NULL);
+select i1_0.post_id,i1_0.id,i1_0.created_at,i1_0.reply_id,i1_0.storage_url,i1_0.updated_at,i1_0.upload_file_name from image i1_0 where i1_0.post_id in (2,3,4,5,6,7,8,9,10,11,12,13,14,15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+select ht1_0.post_id,ht1_0.id,ht1_0.tag from hashtag ht1_0 where ht1_0.post_id in (2,3,4,5,6,7,8,9,10,11,12,13,14,15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+select r1_0.post_id,r1_0.id,r1_0.accepted,r1_0.content,r1_0.created_at,r1_0.parent_id,r1_0.updated_at,r1_0.user_id from reply r1_0 where r1_0.post_id in (2,3,4,5,6,7,8,9,10,11,12,13,14,15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+```
 
 ## 다시 돌아온 AOP - 공통 응답 포맷 + 예외처리
 
@@ -416,10 +446,31 @@ public class ResponseInterceptor implements ResponseBodyAdvice {
 <img width="855" alt="Image" src="https://github.com/user-attachments/assets/654518bc-6bbd-4ce7-8c45-bc9d5007bdaa" />
 
 곧 있을 아이디에이션 프로젝트를 개발할때<br>
-프론트엔드에게 이렇게 응답을 깔끔하게 주면 엄청난 사랑 받을 것 같지 않은가?!?<br>
+프론트엔드에게 이렇게 응답을 깔끔하게 주면 엄청나게 사랑 받을 것 같지 않은가?!?<br>
 거기다 실수를 방지할 수 있는 시스템으로 백엔드 팀원의 사랑은 덤<br>
 
 우리 모두 다른 팀원에게 사랑받는 개발자가 되자! 
 
+## 결과
 
+Create
 
+<img width="790" alt="Image" src="https://github.com/user-attachments/assets/cebb9f60-c896-4113-89fc-fa2da28bd402" />
+<img width="489" alt="Image" src="https://github.com/user-attachments/assets/86d0ba0e-28b8-4a1b-836d-833aa5d4df49" />
+
+현재 업로드한 이미지는 로컬에 저장, 베포할때 경로를 버킷으로 변경하면 됨 
+
+<img width="750" alt="Image" src="https://github.com/user-attachments/assets/b8314e21-c809-4781-8b98-88cb7f8f04a0" />
+
+Read
+
+<img width="688" alt="Image" src="https://github.com/user-attachments/assets/cc497900-75d7-45e9-9d63-ce0928d20283" />
+<img width="804" alt="Image" src="https://github.com/user-attachments/assets/4c18902a-daa2-4b67-8dfb-ebaad1f7f5ad" />
+
+Soft Delete
+
+<img width="431" alt="Image" src="https://github.com/user-attachments/assets/0145d1ef-d744-4fc5-80e7-fa4175214388" />
+<img width="597" alt="Image" src="https://github.com/user-attachments/assets/41634786-f4df-4075-a15b-85b02ac58f1d" />
+
+시간 부족이라는 핑계로 인해 로깅+테스트 코드 작성은 못했다<br>
+다음에 꼭 작성하겠습니다ㅜㅜ
