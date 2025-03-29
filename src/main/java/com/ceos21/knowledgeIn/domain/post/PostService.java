@@ -5,21 +5,15 @@ import com.ceos21.knowledgeIn.domain.hashTag.HashTag;
 import com.ceos21.knowledgeIn.domain.hashTag.HashTagRepository;
 import com.ceos21.knowledgeIn.domain.hashTag.HashTagService;
 import com.ceos21.knowledgeIn.domain.image.Image;
-import com.ceos21.knowledgeIn.domain.image.ImageRepository;
 import com.ceos21.knowledgeIn.domain.image.ImageService;
 import com.ceos21.knowledgeIn.domain.member.Member;
-import com.ceos21.knowledgeIn.domain.member.MemberRepository;
 import com.ceos21.knowledgeIn.domain.post.dto.PostRequestDTO;
-import com.ceos21.knowledgeIn.domain.post.dto.PostResponseDTO;
-import com.ceos21.knowledgeIn.domain.post.dto.QuestionResponseDTO;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTag;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTagRepository;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTagService;
-import com.ceos21.knowledgeIn.global.exceptionHandler.ApiResponse;
-import com.ceos21.knowledgeIn.global.exceptionHandler.ErrorStatus;
+import com.ceos21.knowledgeIn.global.exceptionHandler.Status;
 import com.ceos21.knowledgeIn.global.exceptionHandler.GeneralException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -101,7 +95,7 @@ public class PostService {
         //해시태그 엔티티 리스트화
         List<HashTag> hashTags = requestDTO.getHashTags().stream().map(hashTagService::findOrSave).toList();
 
-        Post parentPost = postRepository.findById(postId).orElseThrow(()->new GeneralException(ErrorStatus.NOT_FOUND));
+        Post parentPost = postRepository.findById(postId).orElseThrow(()->new GeneralException(Status.NOT_FOUND));
 
         //DTO->Entity->save
         Post post = postRepository.save(Post.builder()
@@ -140,8 +134,8 @@ public class PostService {
         //유지할 해시태그 DTO List->Entity List
         if(requestDTO.getRemainingHashTagIds()!=null&&!requestDTO.getRemainingHashTagIds().isEmpty()){
             oldHashTags = requestDTO.getRemainingHashTagIds().stream().map(id->{
-                        HashTag hashTag = hashTagRepository.findById(id).orElseThrow(()->new GeneralException(ErrorStatus.NOT_FOUND));
-                        return postHashTagRepository.findByPostAndHashTag(post,hashTag).orElseThrow(()->new GeneralException(ErrorStatus.NOT_FOUND));
+                        HashTag hashTag = hashTagRepository.findById(id).orElseThrow(()->new GeneralException(Status.NOT_FOUND));
+                        return postHashTagRepository.findByPostAndHashTag(post,hashTag).orElseThrow(()->new GeneralException(Status.NOT_FOUND));
                     }).toList();
         }
 

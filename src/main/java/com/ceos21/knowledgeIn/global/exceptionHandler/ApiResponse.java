@@ -21,11 +21,11 @@ public class ApiResponse<T>{
 
     //성공 시 응답 생성
     public static <T> ApiResponse<T> onSuccess(T result){
-        return new ApiResponse<>(true, ErrorStatus.SUCCESS.getCode(), ErrorStatus.SUCCESS.getMessage(), result);
+        return new ApiResponse<>(true, Status.SUCCESS.getCode(), Status.SUCCESS.getMessage(), result);
     }
 
     //특정 코드가 필요한 경우? 응답 생성
-    public static <T> ApiResponse<T> of(ErrorStatus code, T result){
+    public static <T> ApiResponse<T> of(Status code, T result){
         return new ApiResponse<>(true, code.getCode(), code.getMessage(),result);
     }
 

@@ -5,14 +5,9 @@ import com.ceos21.knowledgeIn.domain.common.PostType;
 import com.ceos21.knowledgeIn.domain.hashTag.HashTagDTO;
 import com.ceos21.knowledgeIn.domain.image.Image;
 import com.ceos21.knowledgeIn.domain.post.Post;
-import com.ceos21.knowledgeIn.global.exceptionHandler.ErrorStatus;
+import com.ceos21.knowledgeIn.global.exceptionHandler.Status;
 import com.ceos21.knowledgeIn.global.exceptionHandler.GeneralException;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -53,7 +48,7 @@ public class PostResponseDTO {
                     .commentCount(post.getCommentCnt())
                     .build();
         }else{
-            throw new GeneralException(ErrorStatus.INTERNAL_SERVER_ERROR);
+            throw new GeneralException(Status.INTERNAL_SERVER_ERROR);
         }
     }
 }

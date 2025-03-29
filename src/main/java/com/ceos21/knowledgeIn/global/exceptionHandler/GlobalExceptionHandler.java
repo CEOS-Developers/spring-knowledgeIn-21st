@@ -26,19 +26,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = ConstraintViolationException.class)
     public ResponseEntity<Object> validation (ConstraintViolationException e, WebRequest request) {
 
-        ErrorStatus errorStatus = ErrorStatus.BAD_REQUEST;
+        Status status = Status.BAD_REQUEST;
 
-        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(),
-                errorStatus.getMessage()+"\n제약조건에 위배되는 값이 포함되어 있습니다.",null);
+        ApiResponse<Object> body = ApiResponse.onFailure(status.getCode(),
+                status.getMessage()+"\n제약조건에 위배되는 값이 포함되어 있습니다.",null);
 
-        return handleExceptionInternal(e, body, HttpHeaders.EMPTY, errorStatus.getStatus(), request);
+        return handleExceptionInternal(e, body, HttpHeaders.EMPTY, status.getStatus(), request);
     }
 
     //@Valid 어노테이션을 이용한 검증에 실패 시, 또는 @RequestBody 로 들어오는 객체 검증 실패 시
     @Override
     public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-        ErrorStatus errorStatus = ErrorStatus.BAD_REQUEST;
+        Status errorStatus = Status.BAD_REQUEST;
 
         Map<String, String> errors = new LinkedHashMap<>(); //HashMap 과 달리 입력 순서대로 key 가 보장됨
 
@@ -69,17 +69,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleGeneralException(Exception e, WebRequest request) {
         e.printStackTrace(); //에러 출력
 
-        ErrorStatus errorStatus = ErrorStatus.INTERNAL_SERVER_ERROR;
+        Status status = Status.INTERNAL_SERVER_ERROR;
 
-        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(),
-                errorStatus.getMessage(), e.getMessage());
+        ApiResponse<Object> body = ApiResponse.onFailure(status.getCode(),
+                status.getMessage(), e.getMessage());
 
         //ResponseEntity 를 만들어주는 부모 클래스 메서드
         return super.handleExceptionInternal(
                 e,
                 body,
                 HttpHeaders.EMPTY,
-                errorStatus.getStatus(),
+                status.getStatus(),
                 request
         );
     }

@@ -1,7 +1,7 @@
 package com.ceos21.knowledgeIn.domain.member;
 
 import com.ceos21.knowledgeIn.domain.member.dto.MemberRequestDTO;
-import com.ceos21.knowledgeIn.global.exceptionHandler.ErrorStatus;
+import com.ceos21.knowledgeIn.global.exceptionHandler.Status;
 import com.ceos21.knowledgeIn.global.exceptionHandler.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ public class MemberService {
     public String memberJoin(MemberRequestDTO.MemberJoinDTO requestDTO) {
 
         if(memberRepository.existsByEmail(requestDTO.getEmail())){
-            throw new GeneralException(ErrorStatus.ALREADY_EXISTS);
+            throw new GeneralException(Status.ALREADY_EXISTS);
         }
 
         Member member = Member.builder()

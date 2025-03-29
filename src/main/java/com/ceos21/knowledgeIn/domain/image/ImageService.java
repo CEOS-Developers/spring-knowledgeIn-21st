@@ -1,6 +1,6 @@
 package com.ceos21.knowledgeIn.domain.image;
 
-import com.ceos21.knowledgeIn.global.exceptionHandler.ErrorStatus;
+import com.ceos21.knowledgeIn.global.exceptionHandler.Status;
 import com.ceos21.knowledgeIn.global.exceptionHandler.GeneralException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +18,6 @@ public class ImageService {
     }
 
     public Image getImageByUrl(String imageUrl) {
-        return imageRepository.findByImageUrl(imageUrl).orElseThrow(()->new GeneralException(ErrorStatus.NOT_FOUND));
+        return imageRepository.findByImageUrl(imageUrl).orElseThrow(()->new GeneralException(Status.NOT_FOUND));
     }
 }

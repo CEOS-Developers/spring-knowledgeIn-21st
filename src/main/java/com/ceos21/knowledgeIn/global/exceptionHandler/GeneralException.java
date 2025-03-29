@@ -7,17 +7,17 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public class GeneralException extends RuntimeException {
-    private ErrorStatus errorStatus;
+    private Status status;
 
     public HttpStatus getHttpStatus() {
-        return this.errorStatus.getStatus();
+        return this.status.getStatus();
     }
 
     public String getCode(){
-        return this.errorStatus.getCode();
+        return this.status.getCode();
     }
 
     public String getMessage(){
-        return this.errorStatus.getMessage();
+        return this.status.getMessage();
     }
 }

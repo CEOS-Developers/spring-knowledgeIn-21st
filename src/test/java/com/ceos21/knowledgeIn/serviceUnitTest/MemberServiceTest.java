@@ -2,10 +2,6 @@ package com.ceos21.knowledgeIn.serviceUnitTest;
 
 import com.ceos21.knowledgeIn.domain.member.Member;
 import com.ceos21.knowledgeIn.domain.member.MemberRepository;
-import com.ceos21.knowledgeIn.domain.member.MemberService;
-import com.ceos21.knowledgeIn.domain.member.dto.MemberRequestDTO;
-import com.ceos21.knowledgeIn.global.exceptionHandler.ErrorStatus;
-import com.ceos21.knowledgeIn.global.exceptionHandler.GeneralException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

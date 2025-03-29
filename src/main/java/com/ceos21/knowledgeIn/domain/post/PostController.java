@@ -7,7 +7,7 @@ import com.ceos21.knowledgeIn.domain.post.dto.PostRequestDTO;
 import com.ceos21.knowledgeIn.domain.post.dto.PostResponseDTO;
 import com.ceos21.knowledgeIn.global.exceptionHandler.ApiResponse;
 import com.ceos21.knowledgeIn.global.exceptionHandler.GeneralException;
-import com.ceos21.knowledgeIn.global.exceptionHandler.ErrorStatus;
+import com.ceos21.knowledgeIn.global.exceptionHandler.Status;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class PostController {
     @Operation(summary = "질문 생성 API", description = "질문 생성 API")
     public ApiResponse<PostResponseDTO> createQuestion(@RequestPart PostRequestDTO.QuestionCreateRequestDTO requestDTO,
                                                            @RequestPart(required = false) List<MultipartFile> images){
-       Member member = memberRepository.findById(1L).orElseThrow(()->new GeneralException(ErrorStatus.NOT_FOUND));
+       Member member = memberRepository.findById(1L).orElseThrow(()->new GeneralException(Status.NOT_FOUND));
 
        PostResponseDTO body = PostResponseDTO.from(postService.createQuestion(member, requestDTO, images));
 
@@ -59,7 +59,7 @@ public class PostController {
     @GetMapping("/{postId}")
     @Operation(summary = "질문 단건 조회 API", description = "질문 단건 조회 API")
     public ApiResponse<PostResponseDTO> getPost(@PathVariable Long postId){
-        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(ErrorStatus.NOT_FOUND));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
         PostResponseDTO questionResponseDTO = PostResponseDTO.from(post);//QuestionDTO 랑 PostDTO 통일 어떻게 할건지 정의 필요
 
         return ApiResponse.onSuccess(questionResponseDTO);
@@ -70,9 +70,9 @@ public class PostController {
     @Operation(summary = "답변 조회 API", description = "특정 질문에 대한 답변 목록을 조회하는 API")
     public ApiResponse<Page<PostResponseDTO>> getAnswers(@PathVariable Long postId, @RequestParam Integer page,
                                                    @RequestParam Integer size, @RequestParam String sort){
-        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(ErrorStatus.NOT_FOUND));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
         if(post.getPostType()!= PostType.QUESTION){//질문 글이 아닐 시에 오류 응답
-            throw new GeneralException(ErrorStatus.BAD_REQUEST);
+            throw new GeneralException(Status.BAD_REQUEST);
         }
 
         Page<PostResponseDTO> body = postRepository.findByParent(post, PageRequest.of(page,size)).map(PostResponseDTO::from);
@@ -86,7 +86,7 @@ public class PostController {
     public ApiResponse<PostResponseDTO> createAnswer(@PathVariable Long postId, @RequestPart PostRequestDTO.AnswerCreateRequestDTO requestDTO,
                                                      @RequestPart(required = false) List<MultipartFile> images){
 
-        Member member = memberRepository.findById(1L).orElseThrow(()->new GeneralException(ErrorStatus.NOT_FOUND));
+        Member member = memberRepository.findById(1L).orElseThrow(()->new GeneralException(Status.NOT_FOUND));
 
         PostResponseDTO body = PostResponseDTO.from(postService.createAnswer(postId,member,requestDTO,images));
 
@@ -101,11 +101,11 @@ public class PostController {
     public ApiResponse<PostResponseDTO> updatePost(@PathVariable Long postId, @RequestPart PostRequestDTO.PostUpdateRequestDTO requestDTO,
                                                    @RequestPart(required = false) List<MultipartFile> newImages){
 
-        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(ErrorStatus.NOT_FOUND));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
 
         //답변이 존재하는 질문은 수정 불가
         if(post.getPostType()==PostType.QUESTION&&post.getAnswerCnt()>0){
-            throw new GeneralException(ErrorStatus.QUESTION_UPDATE_FORBIDDEN);
+            throw new GeneralException(Status.QUESTION_UPDATE_FORBIDDEN);
         }
 
         PostResponseDTO body = PostResponseDTO.from(postService.updatePost(post,requestDTO,newImages));
@@ -118,15 +118,15 @@ public class PostController {
     @DeleteMapping("/{postId}")
     @Operation(summary = "게시글 삭제 API", description = "질문이나 답변을 삭제하는 API")
     public ApiResponse<Object> deletePost(@PathVariable Long postId){
-        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(ErrorStatus.NOT_FOUND));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
 
         //답변이 존재하는 질문은 삭제 불가
         if(post.getAnswerCnt()>0){
-            throw new GeneralException(ErrorStatus.QUESTION_DELETE_FORBIDDEN);
+            throw new GeneralException(Status.QUESTION_DELETE_FORBIDDEN);
         }
         //삭제 로직
         postService.deletePost(post);
 
-        return new ApiResponse<>(true, ErrorStatus.SUCCESS.getCode(),"삭제에 성공했습니다.", null);
+        return new ApiResponse<>(true, Status.SUCCESS.getCode(),"삭제에 성공했습니다.", null);
     }
 }
