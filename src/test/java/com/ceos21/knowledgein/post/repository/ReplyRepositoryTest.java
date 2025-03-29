@@ -1,8 +1,8 @@
 package com.ceos21.knowledgein.post.repository;
 
 import com.ceos21.knowledgein.post.domain.HashTag;
+import com.ceos21.knowledgein.post.domain.Image;
 import com.ceos21.knowledgein.post.domain.Post;
-import com.ceos21.knowledgein.post.domain.PostImage;
 import com.ceos21.knowledgein.post.domain.Reply;
 import com.ceos21.knowledgein.user.domain.UserEntity;
 import com.ceos21.knowledgein.user.repository.UserRepository;
@@ -43,7 +43,7 @@ class ReplyRepositoryTest {
     @DisplayName("Post 조회 : 답변 추가")
     void addReplyToPost() {
         // given
-        Reply testReply = Reply.createWithNoParent("test", user, userPost);
+        Reply testReply = Reply.createWithNoParent("test", user, userPost, null);
         Reply savedReply = replyRepository.save(testReply);
         log.info("post reply size : {}", savedReply.getPost().getReplies().size());
         // when
@@ -58,8 +58,8 @@ class ReplyRepositoryTest {
 
 
 
-    private Post makeTestPostWithImagesAndHashTags(List<PostImage> postImageList, List<HashTag> hashTagList) {
-        return Post.of("test", "test", false, hashTagList, postImageList, user);
+    private Post makeTestPostWithImagesAndHashTags(List<Image> imageList, List<HashTag> hashTagList) {
+        return Post.of("test", "test", false, hashTagList, imageList, user);
     }
 
     private List<HashTag> make2HashTags() {
@@ -73,10 +73,10 @@ class ReplyRepositoryTest {
         return UserEntity.of(name, "test-nick", "1234");
     }
 
-    private List<PostImage> make2PostImages() {
+    private List<Image> make2PostImages() {
         return List.of(
-                PostImage.createWithNoPost("test1", "test1"),
-                PostImage.createWithNoPost("test2", "test2")
+                Image.createWithNoPost("test1", "test1"),
+                Image.createWithNoPost("test2", "test2")
         );
     }
 

@@ -1,8 +1,8 @@
 package com.ceos21.knowledgein.post.repository;
 
 import com.ceos21.knowledgein.post.domain.HashTag;
+import com.ceos21.knowledgein.post.domain.Image;
 import com.ceos21.knowledgein.post.domain.Post;
-import com.ceos21.knowledgein.post.domain.PostImage;
 import com.ceos21.knowledgein.user.domain.UserEntity;
 import com.ceos21.knowledgein.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -58,13 +58,13 @@ class PostRepositoryTest {
     @Transactional
     void savePostTestWithRelation() {
         // given
-        List<PostImage> postImageList = make2PostImages();
-        Post newPost = makeTestPostWithImages(postImageList);
+        List<Image> imageList = make2PostImages();
+        Post newPost = makeTestPostWithImages(imageList);
         // when
         Post savedPost = postRepository.save(newPost);
         // then
         assertThat(newPost).isEqualTo(savedPost);
-        assertThat(savedPost.getPostImages().size()).isEqualTo(2);
+        assertThat(savedPost.getImages().size()).isEqualTo(2);
     }
 
     @Test
@@ -72,14 +72,14 @@ class PostRepositoryTest {
     @Transactional
     void savePostTestWithRelationHashTagAndImages() {
         // given
-        List<PostImage> postImageList = make2PostImages();
+        List<Image> imageList = make2PostImages();
         List<HashTag> hashTagList = make2HashTags();
-        Post newPost = makeTestPostWithImagesAndHashTags(postImageList, hashTagList);
+        Post newPost = makeTestPostWithImagesAndHashTags(imageList, hashTagList);
         // when
         Post savedPost = postRepository.save(newPost);
         // then
         assertThat(newPost).isEqualTo(savedPost);
-        assertThat(savedPost.getPostImages().size()).isEqualTo(2);
+        assertThat(savedPost.getImages().size()).isEqualTo(2);
         assertThat(savedPost.getHashTags().size()).isEqualTo(2);
     }
 
@@ -94,8 +94,8 @@ class PostRepositoryTest {
         Optional<Post> findPost = postRepository.findById(userPost.getId());
         // then
         assertThat(findPost).isEmpty();
-        userPost.getPostImages().forEach(postImage -> {
-            Optional<PostImage> findPostImage = postImageRepository.findById(postImage.getId());
+        userPost.getImages().forEach(postImage -> {
+            Optional<Image> findPostImage = postImageRepository.findById(postImage.getId());
             assertThat(findPostImage).isEmpty();
         });
     }
@@ -119,20 +119,20 @@ class PostRepositoryTest {
         List<Post> allByUserId = postRepository.findAllByUserId(user.getId());
 
         log.info("allByUserId : {}", allByUserId);
-        log.info("allByUserId.get(0).getPostImages() : {}", allByUserId.get(0).getPostImages());
+        log.info("allByUserId.get(0).getPostImages() : {}", allByUserId.get(0).getImages());
         log.info("allByUserId.get(0).getHashTags() : {}", allByUserId.get(0).getHashTags());
 
 
         // then
         assertThat(allByUserId.size()).isEqualTo(1);
         assertThat(allByUserId.get(0)).isEqualTo(userPost);
-        assertThat(allByUserId.get(0).getPostImages().size()).isEqualTo(2);
+        assertThat(allByUserId.get(0).getImages().size()).isEqualTo(2);
         assertThat(allByUserId.get(0).getHashTags().size()).isEqualTo(2);
     }
 
 
-    private Post makeTestPostWithImagesAndHashTags(List<PostImage> postImageList, List<HashTag> hashTagList) {
-        return Post.of("test", "test", false, hashTagList, postImageList, user);
+    private Post makeTestPostWithImagesAndHashTags(List<Image> imageList, List<HashTag> hashTagList) {
+        return Post.of("test", "test", false, hashTagList, imageList, user);
     }
 
     private List<HashTag> make2HashTags() {
@@ -150,14 +150,14 @@ class PostRepositoryTest {
         return Post.of(title, content, false, null, null, user);
     }
 
-    private List<PostImage> make2PostImages() {
+    private List<Image> make2PostImages() {
         return List.of(
-                PostImage.createWithNoPost("test1", "test1"),
-                PostImage.createWithNoPost("test2", "test2")
+                Image.createWithNoPost("test1", "test1"),
+                Image.createWithNoPost("test2", "test2")
         );
     }
 
-    private Post makeTestPostWithImages(List<PostImage> postImageList) {
-        return Post.of("test", "test", false, null, postImageList, user);
+    private Post makeTestPostWithImages(List<Image> imageList) {
+        return Post.of("test", "test", false, null, imageList, user);
     }
 }
