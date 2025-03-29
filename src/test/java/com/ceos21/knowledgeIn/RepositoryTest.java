@@ -29,7 +29,6 @@ public class RepositoryTest {
 
     @DisplayName("멤버 추가")
     @Test
-    @Transactional
     void createMember(){
 
 

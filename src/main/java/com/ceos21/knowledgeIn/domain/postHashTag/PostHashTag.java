@@ -17,8 +17,8 @@ import lombok.*;
 public class PostHashTag extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hashtag_id")
-    private HashTag hashtag;
+    @JoinColumn(name = "hashTag_id")
+    private HashTag hashTag;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
