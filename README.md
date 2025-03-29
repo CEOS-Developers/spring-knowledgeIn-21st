@@ -460,7 +460,6 @@ Create
 
 현재 업로드한 이미지는 로컬에 저장, 베포할때 경로를 버킷으로 변경하면 됨 
 
-<img width="750" alt="Image" src="https://github.com/user-attachments/assets/b8314e21-c809-4781-8b98-88cb7f8f04a0" />
 
 Read
 
