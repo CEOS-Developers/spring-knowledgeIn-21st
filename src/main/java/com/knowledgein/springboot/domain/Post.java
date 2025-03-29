@@ -39,12 +39,15 @@ public class Post extends BaseEntity {
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Image> imageList = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Comment> commentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<PostHashtag> postHashtagList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,6 +55,8 @@ public class Post extends BaseEntity {
     private Post questionPost; // Default로 nullable
 
     @OneToMany(mappedBy = "questionPost", cascade = CascadeType.ALL)
+//    @OneToMany(mappedBy = "questionPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Post> answerPostList = new ArrayList<>();
 
     public void addAnswerPost(Post post) {

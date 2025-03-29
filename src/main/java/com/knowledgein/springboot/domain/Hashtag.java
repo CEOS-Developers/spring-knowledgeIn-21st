@@ -17,10 +17,11 @@ public class Hashtag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 10, unique = true)
     private String tag;
 
     @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<PostHashtag> postHashtagList = new ArrayList<>();
 
     public void addPostHashtag(PostHashtag postHashtag) {

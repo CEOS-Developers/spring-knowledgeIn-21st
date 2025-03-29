@@ -27,12 +27,15 @@ public class User extends BaseEntity {
     private String nickname;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Reaction> reactionList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Comment> commentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Post> postList = new ArrayList<>();
 
     public void addReaction(Reaction commentReaction) {
