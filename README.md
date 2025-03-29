@@ -42,7 +42,7 @@ RequestBody쪽의 타입을 application/json으로 설정해주면 되지만 스
 ### 예외처리
 지금까지 누가 써둔거 사용만 하고 귀찮아서 원리를 뜯어볼 생각을 절대 안했는데 이번 기회에 해봤다.
 
-일단 전역 예외 처리는 스프링의 AOP 기술 예시의 대표격인것 같다.
+일단 전역 예외 처리는 ~~스프링의~~(스프링 AOP 기술이 아닌 그냥 공통 관심사 분리 개념에서의 AOP라고 함) AOP 예시의 대표격인것 같다.
 `@Controller`나 `@RestController` 어노테이션을 사용한 곳에서 에러가 나면(point cut)
 `@ControllerAdvice`나 `@RestControllerAdvice` 어노테이션이 적힌 곳으로 이동하여 에러를 처리하는 것.
 
