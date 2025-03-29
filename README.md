@@ -362,10 +362,9 @@ if (request.getPostType() == PostType.ANSWER) {
 
 - 결과
     - Post: `QUESTION` 타입은 `questionId` 필드가 비어있고, 하나의 질문에 여러개의 답글이 달릴 수 있음을 확인
-
       ![post-result](./readme-src/post-post.png)
   
-    - Hashtag: `tag` 필드에 `@Column(nuique = true)`를 해주니 겹치는 해시태그는 한번만 나옴PostHashTag 테이블 보면 맵핑은 잘 되어있는거 확인 가능)
+    - Hashtag: `tag` 필드에 `@Column(nuique = true)`를 해주니 겹치는 해시태그는 한번만 나옴 (PostHashTag 테이블 보면 맵핑은 잘 되어있는거 확인 가능)
       ![hashtag-result](./readme-src/post-hashtag.png)
      
     - Image: `image_url` 필드에 사진 url이 잘 올라가는 것을 확인할 수 있음 (사진 업로드는 aws s3 버킷 사용)
@@ -525,3 +524,11 @@ if (request.getPostType() == PostType.ANSWER) {
         }
         
         ```
+---
+## Service 계층의 단위 테스트
+
+- `@BeforeEach` 사용
+    - Test가 두개 있는데 각 test 실행 전에 user, post 객체 생성 위해 사용
+    - Reference Doc: [@BeforeEach 사용](https://mimah.tistory.com/entry/Spring-Boot-AfterEach-BeforeEach-%EC%98%88%EC%A0%9C)
+- 특정 게시글 조회 성공 & 특정 게시글 조회 실패 테스트 → 성공
+    - 실패 테스트는 에러 코드 비교 (`ErrorStatus.POST_NOT_FOUND`가 나오도록)
