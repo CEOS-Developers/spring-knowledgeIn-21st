@@ -7,7 +7,7 @@ import com.knowledgein.springboot.service.postService.PostCommandService;
 import com.knowledgein.springboot.service.postService.PostQueryService;
 import com.knowledgein.springboot.web.dto.postDTO.PostRequestDTO;
 import com.knowledgein.springboot.web.dto.postDTO.PostResponseDTO;
-import com.knowledgein.validation.annotation.CheckPage;
+import com.knowledgein.springboot.validation.annotation.CheckPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
-package com.knowledgein.validation.validator;
+package com.knowledgein.springboot.validation.validator;
 
-import com.knowledgein.validation.annotation.CheckPage;
+import com.knowledgein.springboot.validation.annotation.CheckPage;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
