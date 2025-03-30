@@ -98,9 +98,8 @@ RequestBody쪽의 타입을 application/json으로 설정해주면 되지만 스
 나는 이 전 프로젝트에서 3번과 5번은 모두 4번 내에서 처리했으므로
 1,2,4,6 이렇게 만들었다.
 
-그리고 기타 모든 예외를 처리하기 위해 `GlobalExceptionHandler`는 `ResponseEntityExceptionHandler` 라는 것을
-상속받는게 좋다고 한다. 저건 스프링의 기본 예외 핸들러 중 하나인데, 이것을 상속 받고 응답을 커스텀함으로써
-내가 명시하지 않은, 그리고 너무 많아서 다 명시하기도 너무 힘든 나머지 에러들을 묶어서 하나의 응답 형식으로 반환할 수 있다.
+그리고 `ResponseEntityExceptionHandler` 라는 스프링의 기본 예외 핸들러 중 하나를
+상속받은 후 오버라이딩을 통해 응답을 커스텀하는 방법도 있다고 한다.
 
 자세한 설명은 여기서 : https://dev.gmarket.com/83
 
