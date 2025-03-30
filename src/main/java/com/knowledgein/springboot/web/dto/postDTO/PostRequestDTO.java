@@ -41,4 +41,22 @@ public class PostRequestDTO {
         @Schema(description = "이미지 URL", example = "['https://image1.png', ...]")
         private List<String> imageList;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UpdateDto {
+        @Schema(description = "게시물 제목", example = "날씨가 궁금해요")
+        private String title;
+
+        @Schema(description = "게시물 내용", example = "오늘 날씨는 뭘지 궁금해요 알려주세요")
+        private String content;
+
+        @Schema(description = "해시태그", example = "['#날씨', '#궁금', '#긴급']")
+        private List<String> hashtagList;
+
+        @Schema(description = "이미지 URL", example = "['https://image1.png', ...]")
+        private List<String> imageList;
+    }
 }

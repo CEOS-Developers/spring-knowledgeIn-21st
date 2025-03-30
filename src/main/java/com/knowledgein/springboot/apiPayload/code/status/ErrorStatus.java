@@ -18,6 +18,7 @@ public enum ErrorStatus implements BaseCode {
 
     // 유저 관련 에러 응답
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER NOT FOUND", "유저를 찾을 수 없습니다."),
+    USER_NOT_AUTHORIZED(HttpStatus.BAD_REQUEST, "USER NOT AUTHORIZED", "유저에게 권한이 없습니다."),
 
     // 게시물 관련 에러 응답
     PARENT_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "PARENT QUESTION NOT FOUND", "부모 질문글을 찾을 수 없습니다."),

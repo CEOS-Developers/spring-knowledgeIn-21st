@@ -2,7 +2,6 @@ package com.knowledgein.springboot.converter;
 
 import com.knowledgein.springboot.domain.Post;
 import com.knowledgein.springboot.domain.User;
-import com.knowledgein.springboot.domain.enums.PostType;
 import com.knowledgein.springboot.web.dto.postDTO.PostRequestDTO;
 import com.knowledgein.springboot.web.dto.postDTO.PostResponseDTO;
 import org.springframework.data.domain.Page;
@@ -11,8 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PostConverter {
-    public static PostResponseDTO.resultDto toResultDto(Post post) {
-        return PostResponseDTO.resultDto.builder()
+    public static PostResponseDTO.ResultDto toResultDto(Post post) {
+        return PostResponseDTO.ResultDto.builder()
                 .postId(post.getId())
                 .createdAt(post.getCreatedAt())
                 .build();
@@ -56,6 +55,24 @@ public class PostConverter {
                 .totalElements(postPage.getTotalElements())
                 .isFirst(postPage.isFirst())
                 .isLast(postPage.isLast())
+                .build();
+    }
+
+    public static PostResponseDTO.UpdatedDto toUpdatedDto(Post post) {
+        List<String> hashtagList = post.getPostHashtagList().stream()
+                .map(postHashtag -> postHashtag.getHashtag().getTag())
+                .collect(Collectors.toList());
+
+        List<String> imageList = post.getImageList().stream()
+                .map(image -> image.getImageUrl())
+                .collect(Collectors.toList());
+
+        return PostResponseDTO.UpdatedDto.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .hashtagList(hashtagList)
+                .imageList(imageList)
                 .build();
     }
 

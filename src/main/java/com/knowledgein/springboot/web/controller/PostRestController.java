@@ -26,7 +26,7 @@ public class PostRestController {
     @PostMapping("/posts")
     @Operation(summary = "게시물 생성 API",
             description = "게시물에 필요한 내용을 작성해서 생성하는 API")
-    public ApiResponse<PostResponseDTO.resultDto> create(@RequestBody PostRequestDTO.CreateDto request) {
+    public ApiResponse<PostResponseDTO.ResultDto> create(@RequestBody PostRequestDTO.CreateDto request) {
         Post post = postCommandService.createPost(request);
         return ApiResponse.onSuccess(PostConverter.toResultDto(post));
     }
@@ -52,7 +52,15 @@ public class PostRestController {
     @DeleteMapping("/posts/{postId}")
     @Operation(summary = "특정 게시물 삭제 API",
             description = "지정된 게시물을 삭제하는 API")
-    public ApiResponse<List<PostResponseDTO.resultDto>> delete(@PathVariable(name = "postId") Long postId) {
-        return ApiResponse.onSuccess(postCommandService.deletePost(postId));
+    public ApiResponse<List<PostResponseDTO.ResultDto>> delete(@PathVariable(name = "postId") Long postId, @RequestParam(name = "userId") Long userId) {
+        return ApiResponse.onSuccess(postCommandService.deletePost(postId, userId));
+    }
+
+    @PatchMapping("/posts/{postId}")
+    @Operation(summary = "특정 게시물 일부 수정 API",
+            description = "지정된 게시물의 일부 필드를 수정하는 API")
+    public ApiResponse<PostResponseDTO.UpdatedDto> update(@PathVariable(name = "postId") Long postId, @RequestParam(name = "userId") Long userId, @RequestBody PostRequestDTO.UpdateDto request) {
+        Post updatedPost = postCommandService.updatePost(postId, userId, request);
+        return ApiResponse.onSuccess(PostConverter.toUpdatedDto(updatedPost));
     }
 }

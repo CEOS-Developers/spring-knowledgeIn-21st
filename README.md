@@ -365,7 +365,8 @@ if (request.getPostType() == PostType.ANSWER) {
       ![post-result](./readme-src/post-post.png)
   
     - Hashtag: `tag` 필드에 `@Column(nuique = true)`를 해주니 겹치는 해시태그는 한번만 나옴 (PostHashTag 테이블 보면 맵핑은 잘 되어있는거 확인 가능)
-      ![hashtag-result](./readme-src/post-hashtag.png)
+    
+    - ![hashtag-result](./readme-src/post-hashtag.png)
      
     - Image: `image_url` 필드에 사진 url이 잘 올라가는 것을 확인할 수 있음 (사진 업로드는 aws s3 버킷 사용)
       ![image-result](./readme-src/post-image.png)
@@ -524,6 +525,100 @@ if (request.getPostType() == PostType.ANSWER) {
         }
         
         ```
+
+### 특정 post 업데이트
+
+- `PATCH` vs `PUT`
+    - Reference Doc: [Patch vs Put](https://afuew.tistory.com/17)
+    - `PUT`메서드
+        - 자원이 존재하지 않는 경우: 새로운 자원을 저장
+        - 자원이 존재하는 경우: 기존에 존재하는 자원을 새로운 자원으로 대체
+        - → 리액션 기능에서 기존에 리액션을 했다면 리액션 상태만 변경인 것이고, 기존에 리액션을 하지 않았다면 리액션이 새로 생성
+    - `PATCH` 메서드
+        - `PUT`과 다르게 미리 자원이 존재해야함
+        - → 미리 자원이 `POST`로 생성된 게시물, 유저 등의 내용을 일부 수정할때 사용
+        - → 특정 post 업데이트는 이 경우에 해당!
+- Hashtag의 orphan removal
+    - Post와 1:N 관계인 엔티티는(ex. Image) `@OneToMany(orphanRemoval = true)` 설정을 해주면 Post 삭제 및 업데이트로 인해 Image가 사용이 되지 않으면 따라서 remove 되도록 해주지만 Hashtag는 N:M 관계이므로 따로 처리 필요
+
+    ```java
+    // For orphan removal
+    List<Hashtag> originalHashtags = post.getPostHashtagList().stream()
+            .map(PostHashtag::getHashtag)
+            .collect(Collectors.toList());
+            
+    if (request.getHashtagList() != null) {
+        post.clearPostHashtagList();
+        for (String tag: request.getHashtagList()) {
+            Hashtag hashtag = hashtagRepository.findByTag(tag)
+                    .orElseGet(() -> hashtagRepository.save(HashtagConverter.toHashtag(tag)));
+    
+            PostHashtag postHashtag = PostHashtagConverter.toPostHashtag(post, hashtag);
+            post.addPostHashtag(postHashtag);
+        }
+    
+        // Orphan removal
+        Set<String> updatedTagSet = new HashSet<>(Optional.ofNullable(request.getHashtagList()).orElse(List.of()));
+    
+        for (Hashtag oldTag : originalHashtags) {
+            if (!updatedTagSet.contains(oldTag.getTag())) {
+                if (oldTag.getPostHashtagList().size() <= 1) {
+                    hashtagRepository.delete(oldTag);
+                }
+            }
+        }
+    }
+    ```
+
+- Request & Response
+
+    ```jsx
+    {
+      "questionId": 1,
+      "userId": 2,
+      "postType": "ANSWER",
+      "title": "잠깨는 방법 (2)",
+      "content": "사실은 사과가 더 효과적이래요",
+      "hashtagList": ["#잠", "#만능", "#사과"],
+      "imageList": []
+    }
+    
+    // postId: 3, userId: 2
+    {
+      "title": "다시다시 말해드릴게요",
+      "content": "잠을 효과적으로 깨기 위해서는 그냥 찬물을 마시면 된답니다",
+      "hashtagList": ["#잠", "#만능", "#찬물"],
+      "imageList": []
+    }
+    
+    // Response
+    {
+      "isSuccess": true,
+      "code": "COMMON200",
+      "message": "성공입니다.",
+      "result": {
+        "postId": 3,
+        "title": "다시다시 말해드릴게요",
+        "content": "잠을 효과적으로 깨기 위해서는 그냥 찬물을 마시면 된답니다",
+        "hashtagList": [
+          "#잠",
+          "#만능",
+          "#찬물"
+        ],
+        "imageList": []
+      }
+    }
+    ```
+
+- 결과
+    - Post table: `PostId=3` 수정됨
+
+  ![Update-Post](./readme-src/update-post.png)
+
+    - Hashtag table: `#사과` 사라짐
+  
+      ![Update-Hashtag](./readme-src/update-hashtag.png)  
+      
 ---
 ## Service 계층의 단위 테스트
 

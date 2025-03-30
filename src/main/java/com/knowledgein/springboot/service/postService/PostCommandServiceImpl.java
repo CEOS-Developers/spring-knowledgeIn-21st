@@ -21,8 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,11 +79,13 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     @Override
     @Transactional
-    public List<PostResponseDTO.resultDto> deletePost(Long postId) {
+    public List<PostResponseDTO.ResultDto> deletePost(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
 
-        List<PostResponseDTO.resultDto> deletedList = new ArrayList<>();
+        if (!Objects.equals(userId, post.getUser().getId())) throw new GeneralException(ErrorStatus.USER_NOT_AUTHORIZED);
+
+        List<PostResponseDTO.ResultDto> deletedList = new ArrayList<>();
 
         if (post.getPostType() == PostType.QUESTION) {
             for (Post answer: post.getAnswerPostList()) {
@@ -97,4 +99,53 @@ public class PostCommandServiceImpl implements PostCommandService {
 
         return deletedList;
     }
+
+    @Override
+    @Transactional
+    public Post updatePost(Long postId, Long userId, PostRequestDTO.UpdateDto request) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
+
+        if (!Objects.equals(userId, post.getUser().getId())) throw new GeneralException(ErrorStatus.USER_NOT_AUTHORIZED);
+
+        // For orphan removal
+        List<Hashtag> originalHashtags = post.getPostHashtagList().stream()
+                .map(PostHashtag::getHashtag)
+                .collect(Collectors.toList());
+
+        // Possibly updated fields: title, content, hashtags, images
+        if (request.getTitle() != null) { post.updateTitle(request.getTitle()); }
+        if (request.getContent() != null) { post.updateContent(request.getContent()); }
+        if (request.getHashtagList() != null) {
+            post.clearPostHashtagList();
+            for (String tag: request.getHashtagList()) {
+                Hashtag hashtag = hashtagRepository.findByTag(tag)
+                        .orElseGet(() -> hashtagRepository.save(HashtagConverter.toHashtag(tag)));
+
+                PostHashtag postHashtag = PostHashtagConverter.toPostHashtag(post, hashtag);
+                post.addPostHashtag(postHashtag);
+            }
+
+            // Orphan removal
+            Set<String> updatedTagSet = new HashSet<>(Optional.ofNullable(request.getHashtagList()).orElse(List.of()));
+
+            for (Hashtag oldTag : originalHashtags) {
+                if (!updatedTagSet.contains(oldTag.getTag())) {
+                    if (oldTag.getPostHashtagList().size() <= 1) {
+                        hashtagRepository.delete(oldTag);
+                    }
+                }
+            }
+        }
+        if (request.getImageList() != null) {
+            post.clearImageList();
+            for (String imageUrl: request.getImageList()) {
+                Image image = ImageConverter.toImage(post, imageUrl);
+                post.addImage(image);
+            }
+        }
+
+        return post;
+    }
+
 }

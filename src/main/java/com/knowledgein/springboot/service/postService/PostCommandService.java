@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface PostCommandService {
     Post createPost(PostRequestDTO.CreateDto request);
-    List<PostResponseDTO.resultDto> deletePost(Long postId);
+    List<PostResponseDTO.ResultDto> deletePost(Long postId, Long userId);
+    Post updatePost(Long postId, Long userId, PostRequestDTO.UpdateDto request);
 }
