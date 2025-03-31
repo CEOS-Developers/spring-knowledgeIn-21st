@@ -5,6 +5,7 @@ import com.ceos21.springknowledgein.domain.user.repository.Member;
 import jakarta.persistence.*;
 
 import lombok.Getter;
+import lombok.Setter;
 
 
 import java.util.ArrayList;
@@ -42,10 +43,7 @@ public class Post {
     private List<Hate> hates = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostHashtag> postHashTags = new ArrayList<>();
-
-
-
+    private List<PostHashtag> postHashtags = new ArrayList<>();
 
     public Post() {}
 
@@ -86,5 +84,16 @@ public class Post {
     public void removeHate(Hate hate) {
         hates.remove(hate);
     }
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public void addPostHashtag(PostHashtag postHashtag) {
+        postHashtags.add(postHashtag);
+        postHashtag.setPost(this);
+    }
+
 
 }

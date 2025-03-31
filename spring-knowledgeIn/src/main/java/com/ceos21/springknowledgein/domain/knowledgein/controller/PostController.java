@@ -1,6 +1,6 @@
 package com.ceos21.springknowledgein.domain.knowledgein.controller;
 
-import com.ceos21.springknowledgein.domain.knowledgein.Dto.PostDto;
+import com.ceos21.springknowledgein.domain.knowledgein.Dto.PostCreateDto;
 import com.ceos21.springknowledgein.domain.knowledgein.repository.Post;
 import com.ceos21.springknowledgein.domain.knowledgein.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,8 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody PostDto postDto) {
-        Post post = postService.createPost(postDto);
+    public ResponseEntity<Post> createPost(@RequestBody PostCreateDto postCreateDto) {
+        Post post = postService.createPost(postCreateDto);
         return ResponseEntity.ok(post);
     }
 
