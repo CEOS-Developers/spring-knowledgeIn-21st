@@ -1,6 +1,8 @@
 # spring-knowledgeIn-21st
 ceos back-end 21st naver knowledge-in clone coding project
 
+# Week2 
+
 ## 네이버 지식인 DB 모델링
 
 ### 요구 구현 기능
@@ -275,3 +277,353 @@ public enum ReactionType {
 - Comment 1 : N Reaction 관계 삭제 → 좋아요/싫어요는 Post의 Answer 타입에 달리는 반응
 
 ![new ERD](./readme-src/new_erd.png)
+
+---
+# Week3
+
+## 지식인의 4가지 HTTP Method API 구현
+![api-spec](./readme-src/api-spec.png)
+
+### 새로운 Post 생성
+
+- PostType에 따른 생성 과정 차이
+    - `postType == PostType.QUESTION`
+        - `questionId` 필드가 `null`이어야 함
+        - Request & Response
+
+            ```jsx
+            {
+              "questionId": null,
+              "userId": 1,
+              "postType": "QUESTION",
+              "title": "잠깨고 싶어요",
+              "content": "잠을 어떻게 깨나요.. 졸려요",
+              "hashtagList": ["#잠", "#궁금", "#긴급"],
+              "imageList": ["https://ceos-knowlege-in.s3.ap-northeast-2.amazonaws.com/question-image.png"]
+            }
+            
+            {
+              "isSuccess": true,
+              "code": "COMMON200",
+              "message": "성공입니다.",
+              "result": {
+                "postId": 1,
+                "createdAt": "2025-03-30T00:27:54.818197"
+              }
+            }
+            ```
+
+    - `postType == PostType.ANSWER`
+        - `questionId` 필드가 `null`이 아니어야 하고 해당 id의 부모 post가 존재해야 함
+        - 부모글은 question type이어야 함
+        - 해당 question post의 `AnswerPostList`에 추가되어야 함
+        - Request & Response
+
+            ```jsx
+            {
+              "questionId": 1,
+              "userId": 2,
+              "postType": "ANSWER",
+              "title": "잠깨는 방법",
+              "content": "잠을 효과적으로 깨기 위해서는 아아를 마셔야해요",
+              "hashtagList": ["#잠", "#만능", "#아아"],
+              "imageList": []
+            }
+            
+            {
+              "isSuccess": true,
+              "code": "COMMON200",
+              "message": "성공입니다.",
+              "result": {
+                "postId": 2,
+                "createdAt": "2025-03-30T00:30:37.468488"
+              }
+            }
+            ```
+
+
+```java
+if (request.getPostType() == PostType.QUESTION) {
+    if (request.getQuestionId() != null) throw new GeneralException(ErrorStatus.QUESTION_SHOULD_NOT_EXIST);
+} else {
+    // request.getPostType() == PostType.ANSWER
+    if (request.getQuestionId() == null) throw new GeneralException(ErrorStatus.QUESTION_SHOULD_EXIST);
+    question = postRepository.findById(request.getQuestionId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus.PARENT_QUESTION_NOT_FOUND));
+    if (question.getPostType() != PostType.QUESTION) throw new GeneralException(ErrorStatus.PARENT_IS_A_QUESTION);
+}
+
+// newPost 객체 생성 후
+
+if (request.getPostType() == PostType.ANSWER) {
+    question.addAnswerPost(newPost);
+}
+```
+
+- 결과
+    - Post: `QUESTION` 타입은 `questionId` 필드가 비어있고, 하나의 질문에 여러개의 답글이 달릴 수 있음을 확인
+      ![post-result](./readme-src/post-post.png)
+  
+    - Hashtag: `tag` 필드에 `@Column(nuique = true)`를 해주니 겹치는 해시태그는 한번만 나옴 (PostHashTag 테이블 보면 맵핑은 잘 되어있는거 확인 가능)
+    
+    - ![hashtag-result](./readme-src/post-hashtag.png)
+     
+    - Image: `image_url` 필드에 사진 url이 잘 올라가는 것을 확인할 수 있음 (사진 업로드는 aws s3 버킷 사용)
+      ![image-result](./readme-src/post-image.png)
+  
+        - Reference Doc1: [aws s3 bucket](https://velog.io/@jinseoit/AWS-S3-bucket)
+        - Refrence Doc2: [aws s3 bucket troubleshooting](https://velog.io/@ino5/S3-%EB%B2%84%ED%82%B7-%EC%A0%95%EC%B1%85-%EC%84%A4%EC%A0%95-%EC%8B%9C-Action-does-not-apply-to-any-resources-in-statement-%EC%97%90%EB%9F%AC)
+        - Uploaded Pic: [uploaded pic](https://ceos-knowlege-in.s3.ap-northeast-2.amazonaws.com/question-image.png)
+
+### Post List 조회
+
+- 임의로 게시물 5개씩 페이지 구성하도록 구현(+질문만 모아서 볼 수 있도록 하는 기능을 추가해도 좋을 것 같다)
+- Custom Annotation 생성: `@CheckPage`
+    - 사용자 기준으로는 1이 첫 페이지지만 `Pageable` 객체는 0부터 시작하므로 이를 체크하고 조정해주는 validation을 주로 사용
+
+    ```java
+    @Documented
+    @Constraint(validatedBy = PageCheckValidator.class)
+    @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface CheckPage {
+        String message() default "페이지 번호는 1 이상이어야 합니다.";
+        Class<?>[] groups() default {};
+        Class<? extends Payload>[] payload() default {};
+    }
+    
+    public class PageCheckValidator implements ConstraintValidator<CheckPage, Integer> {
+        @Override
+        public boolean isValid(Integer page, ConstraintValidatorContext context) {
+            if (page == null || page <= 0) {
+                return false;
+            }
+    
+            // 검증을 통과한 경우, 값 조정 (1 -> 0)
+            if (page == 1) {
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate("페이지 번호를 0으로 변경했습니다.")
+                        .addConstraintViolation();
+            }
+    
+            return true;
+        }
+    }
+    
+    // 사용 at PostRestController
+    public ApiResponse<PostResponseDTO.PreviewListDto> getPage(@CheckPage @RequestParam(name = "page") Integer page)
+    ```
+
+- 결과
+
+    ```jsx
+    {
+      "isSuccess": true,
+      "code": "COMMON200",
+      "message": "성공입니다.",
+      "result": {
+        "previewList": [
+          {
+            "postId": 1,
+            "userId": 1,
+            "questionId": null,
+            "postType": "QUESTION",
+            "title": "잠깨고 싶어요",
+            "createdAt": "2025-03-30T00:27:55"
+          },
+    			// 생략 ... 
+          {
+            "postId": 5,
+            "userId": 2,
+            "questionId": 4,
+            "postType": "ANSWER",
+            "title": "참나",
+            "createdAt": "2025-03-30T00:54:57"
+          }
+        ],
+        "listSize": 5,
+        "totalPage": 2,
+        "totalElements": 6,
+        "isFirst": true,
+        "isLast": false
+      }
+    }
+    ```
+
+
+### 특정 Post 조회
+
+- Id 값으로 특정 post를 조회
+- 리스트 조회와 마찬가지로 게시물의 preview를 조회
+- 결과
+
+    ```jsx
+    {
+      "isSuccess": true,
+      "code": "COMMON200",
+      "message": "성공입니다.",
+      "result": {
+        "postId": 4,
+        "userId": 1,
+        "questionId": null,
+        "postType": "QUESTION",
+        "title": "노래가 너무 좋아요",
+        "createdAt": "2025-03-30T00:42:46"
+      }
+    }
+    ```
+
+
+### 특정 Post 삭제
+
+- Soft Delete? Nope
+    - Soft Delete를 고민했지만 기존 셜계대로 쿼리를 날려 Delete하는 방식을 택함
+    - Soft Delete는 리액션 기능에 필요한 사항이고 게시물에 관해서는 굳이 필요하다고 느껴지지는 않았음
+- AnswerPostList의 객체들 삭제 방법
+    1. `orphanRemoval = true` 옵션 사용
+        - 이 옵션을 사용하면 Question Post 객체를 삭제할때 answerPostList의 객체들도 같이 삭제 가능
+
+        ```java
+        @OneToMany(mappedBy = "questionPost", cascade = CascadeType.ALL, orphanRemoval = true)
+        @Builder.Default
+        private List<Post> answerPostList = new ArrayList<>();
+        ```
+
+    2. 순회하며 확실히 삭제 → 택
+        - 하나하나 삭제하는 방법으로 1번보다는 덜 효율적이지만 delete되는 객체들에 대한 로깅을 하고 싶을때 (확실히 하고 싶을떄) 사용하기 좋을 듯
+
+        ```java
+        if (post.getPostType() == PostType.QUESTION) {
+            for (Post answer: post.getAnswerPostList()) {
+                postRepository.delete(answer);
+            }
+        }
+        ```
+
+    - 결과
+        - 질문글인 4번을 삭제했더니 4번에 대한 대답글이었던 5번과 6번도 함께 삭제되는 것 확인
+
+        ```jsx
+        {
+          "isSuccess": true,
+          "code": "COMMON200",
+          "message": "성공입니다.",
+          "result": [
+            {
+              "postId": 5,
+              "createdAt": "2025-03-30T00:54:57"
+            },
+            {
+              "postId": 6,
+              "createdAt": "2025-03-30T00:55:25"
+            },
+            {
+              "postId": 4,
+              "createdAt": "2025-03-30T00:42:46"
+            }
+          ]
+        }
+        
+        ```
+
+### 특정 post 업데이트
+
+- `PATCH` vs `PUT`
+    - Reference Doc: [Patch vs Put](https://afuew.tistory.com/17)
+    - `PUT`메서드
+        - 자원이 존재하지 않는 경우: 새로운 자원을 저장
+        - 자원이 존재하는 경우: 기존에 존재하는 자원을 새로운 자원으로 대체
+        - → 리액션 기능에서 기존에 리액션을 했다면 리액션 상태만 변경인 것이고, 기존에 리액션을 하지 않았다면 리액션이 새로 생성
+    - `PATCH` 메서드
+        - `PUT`과 다르게 미리 자원이 존재해야함
+        - → 미리 자원이 `POST`로 생성된 게시물, 유저 등의 내용을 일부 수정할때 사용
+        - → 특정 post 업데이트는 이 경우에 해당!
+- Hashtag의 orphan removal
+    - Post와 1:N 관계인 엔티티는(ex. Image) `@OneToMany(orphanRemoval = true)` 설정을 해주면 Post 삭제 및 업데이트로 인해 Image가 사용이 되지 않으면 따라서 remove 되도록 해주지만 Hashtag는 N:M 관계이므로 따로 처리 필요
+
+    ```java
+    // For orphan removal
+    List<Hashtag> originalHashtags = post.getPostHashtagList().stream()
+            .map(PostHashtag::getHashtag)
+            .collect(Collectors.toList());
+            
+    if (request.getHashtagList() != null) {
+        post.clearPostHashtagList();
+        for (String tag: request.getHashtagList()) {
+            Hashtag hashtag = hashtagRepository.findByTag(tag)
+                    .orElseGet(() -> hashtagRepository.save(HashtagConverter.toHashtag(tag)));
+    
+            PostHashtag postHashtag = PostHashtagConverter.toPostHashtag(post, hashtag);
+            post.addPostHashtag(postHashtag);
+        }
+    
+        // Orphan removal
+        Set<String> updatedTagSet = new HashSet<>(Optional.ofNullable(request.getHashtagList()).orElse(List.of()));
+    
+        for (Hashtag oldTag : originalHashtags) {
+            if (!updatedTagSet.contains(oldTag.getTag())) {
+                if (oldTag.getPostHashtagList().size() <= 1) {
+                    hashtagRepository.delete(oldTag);
+                }
+            }
+        }
+    }
+    ```
+
+- Request & Response
+
+    ```jsx
+    {
+      "questionId": 1,
+      "userId": 2,
+      "postType": "ANSWER",
+      "title": "잠깨는 방법 (2)",
+      "content": "사실은 사과가 더 효과적이래요",
+      "hashtagList": ["#잠", "#만능", "#사과"],
+      "imageList": []
+    }
+    
+    // postId: 3, userId: 2
+    {
+      "title": "다시다시 말해드릴게요",
+      "content": "잠을 효과적으로 깨기 위해서는 그냥 찬물을 마시면 된답니다",
+      "hashtagList": ["#잠", "#만능", "#찬물"],
+      "imageList": []
+    }
+    
+    // Response
+    {
+      "isSuccess": true,
+      "code": "COMMON200",
+      "message": "성공입니다.",
+      "result": {
+        "postId": 3,
+        "title": "다시다시 말해드릴게요",
+        "content": "잠을 효과적으로 깨기 위해서는 그냥 찬물을 마시면 된답니다",
+        "hashtagList": [
+          "#잠",
+          "#만능",
+          "#찬물"
+        ],
+        "imageList": []
+      }
+    }
+    ```
+
+- 결과
+    - Post table: `PostId=3` 수정됨
+
+  ![Update-Post](./readme-src/update-post.png)
+
+    - Hashtag table: `#사과` 사라짐
+  
+      ![Update-Hashtag](./readme-src/update-hashtag.png)  
+      
+---
+## Service 계층의 단위 테스트
+
+- `@BeforeEach` 사용
+    - Test가 두개 있는데 각 test 실행 전에 user, post 객체 생성 위해 사용
+    - Reference Doc: [@BeforeEach 사용](https://mimah.tistory.com/entry/Spring-Boot-AfterEach-BeforeEach-%EC%98%88%EC%A0%9C)
+- 특정 게시글 조회 성공 & 특정 게시글 조회 실패 테스트 → 성공
+    - 실패 테스트는 에러 코드 비교 (`ErrorStatus.POST_NOT_FOUND`가 나오도록)

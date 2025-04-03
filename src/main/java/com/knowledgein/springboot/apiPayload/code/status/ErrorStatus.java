@@ -14,7 +14,18 @@ public enum ErrorStatus implements BaseCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 에러."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST,"COMMON400","잘못된 요청입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","인증이 필요합니다."),
-    FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다.");
+    FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
+
+    // 유저 관련 에러 응답
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER NOT FOUND", "유저를 찾을 수 없습니다."),
+    USER_NOT_AUTHORIZED(HttpStatus.BAD_REQUEST, "USER NOT AUTHORIZED", "유저에게 권한이 없습니다."),
+
+    // 게시물 관련 에러 응답
+    PARENT_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "PARENT QUESTION NOT FOUND", "부모 질문글을 찾을 수 없습니다."),
+    QUESTION_SHOULD_NOT_EXIST(HttpStatus.BAD_REQUEST, "QUESTION SHOULD NOT EXIST", "질문글은 부모 질문글을 가질 수 없습니다."),
+    QUESTION_SHOULD_EXIST(HttpStatus.BAD_REQUEST, "QUESTION SHOULD EXIST", "대답글은 부모 질문글을 가져야 합니다."),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST NOT FOUND", "게시물을 찾을 수 없습니다."),
+    PARENT_IS_A_QUESTION(HttpStatus.BAD_REQUEST, "PARENT IS A QUESTION", "부모글은 질문글이어야 합니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

@@ -38,20 +38,28 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<Image> imageList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<Comment> commentList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostHashtag> postHashtagList = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
     private Post questionPost; // Default로 nullable
 
-    @OneToMany(mappedBy = "questionPost", cascade = CascadeType.ALL)
+//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Image> imageList = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Comment> commentList = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PostHashtag> postHashtagList = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "questionPost", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "questionPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Post> answerPostList = new ArrayList<>();
 
     public void addAnswerPost(Post post) {
@@ -68,5 +76,21 @@ public class Post extends BaseEntity {
 
     public void addPostHashtag(PostHashtag postHashtag) {
         this.postHashtagList.add(postHashtag);
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void clearPostHashtagList() {
+        this.postHashtagList.clear();
+    }
+
+    public void clearImageList() {
+        this.imageList.clear();
     }
 }

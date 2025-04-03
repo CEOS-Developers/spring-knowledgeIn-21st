@@ -1,6 +1,5 @@
 package com.knowledgein.springboot.repositoryTest;
 
-import com.knowledgein.springboot.SpringbootApplication;
 import com.knowledgein.springboot.domain.Post;
 import com.knowledgein.springboot.domain.User;
 import com.knowledgein.springboot.domain.enums.PostType;
@@ -9,10 +8,7 @@ import com.knowledgein.springboot.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -26,16 +22,16 @@ public class PostRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-//    @Transactional
+    @Transactional
 //    @Rollback(false)
     void storePostTest() {
         // Post 저장 테스트
 
         // given - 유저 생성
         User user = User.builder()
-                .name("tris")
-                .email("tris@gmail.com")
-                .nickname("trisss")
+                .name("layla")
+                .email("layla@gmail.com")
+                .nickname("layllaaa")
                 .build();
 
         userRepository.save(user);
@@ -43,22 +39,22 @@ public class PostRepositoryTest {
         // when - 포스트 생성
         Post post1 = Post.builder()
                 .user(user)
-                .title("1st post")
-                .content("1st post content")
+                .title("1st test post")
+                .content("1st test post content")
                 .postType(PostType.QUESTION)
                 .build();
 
         Post post2 = Post.builder()
                 .user(user)
-                .title("2nd post")
-                .content("2nd post content")
+                .title("2nd test post")
+                .content("2nd test post content")
                 .postType(PostType.QUESTION)
                 .build();
 
         Post post3 = Post.builder()
                 .user(user)
-                .title("3rd post")
-                .content("3rd post content")
+                .title("3rd test post")
+                .content("3rd test post content")
                 .postType(PostType.QUESTION)
                 .build();
 
@@ -71,11 +67,6 @@ public class PostRepositoryTest {
         postList = postRepository.findAll();
 
         Assertions.assertEquals(3, postList.size());
-
-//        postList.forEach(post -> {
-//            System.out.println("Post: " + post.getTitle());
-//            System.out.println("Writer: " + post.getUser().getNickname());
-//        });
-
     }
 }
+
