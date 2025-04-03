@@ -1,35 +1,26 @@
 package com.ceos21.spring_boot.Domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "post")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
-public class Post {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id", nullable = false, unique = true)
-    private Long postId;
+    @Column(name = "post_id")
+    private Long id;
 
     @Column(name = "title", length = 50, nullable = false)
     private String title;
 
     @Column(name = "post_content", columnDefinition = "TEXT", nullable = false)
-    private String postContent;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "post_image_url", length = 255)
-    private String postImageUrl;
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -38,8 +29,29 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<PostHashtag> postHashtags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Image> images = new ArrayList<>();
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostHashtag> postHashtags;
+    private List<Answer> answers;
+
+    @Builder
+    public Post(String title, String content, User user) {
+        this.title = title;
+        this.content = content;
+        this.user = user;
+    }
+
+    public void addHashtag(Hashtag hashtag) {
+        PostHashtag postHashtag = PostHashtag.builder()
+                .post(this)
+                .hashtag(hashtag)
+                .build();
+        this.postHashtags.add(postHashtag);
+    }
 }
 
 
