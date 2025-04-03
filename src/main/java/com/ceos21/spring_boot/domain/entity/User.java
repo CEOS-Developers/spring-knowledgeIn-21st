@@ -24,12 +24,12 @@ public class User extends BaseEntity {
     @Column(length=20)
     private String nickname;
 
-    @OneToMany(mappedBy = "writer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "commentWriter", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "writer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "postWriter", cascade = CascadeType.ALL)
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "writer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "answerWriter", cascade = CascadeType.ALL)
     private List<Answer> answers;
 }

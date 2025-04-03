@@ -214,4 +214,93 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
  (참고 https://9hyuk9.tistory.com/77)
 
+---
+### WEEK 3. ERD 수정
+![Image](https://github.com/user-attachments/assets/93f0e2b0-2b97-4426-90e2-4ce2fee3f4cb)
+- 좋아요/싫어요는 답변 글에만 달 수 있도록 수정
 
+### 구현 기능
+<img src="https://github.com/user-attachments/assets/7954e2c9-b181-4b04-bf30-e042610746bd" width="60%">
+
+- User은 로그인 기능이 아직 없어 임의로 추가했습니다.
+  <img src="https://github.com/user-attachments/assets/703d8bc7-4e31-4a0f-a273-7eafaace8ffc" width="70%">
+
+#### 1. 질문 작성
+![Image](https://github.com/user-attachments/assets/328be23e-9793-4d8d-b9b9-dae4d0bc77b7)
+✨ **여기서 이미지는!! AWS S3 버킷 사용**
+
+<img src="https://github.com/user-attachments/assets/bad6c7b5-cb11-437d-90ef-48e405ef1a10" width="70%">
+
+ - 버킷에 잘 들어갔지요~
+
+#### 2. 내가 쓴 모든 질문글 조회
+![Image](https://github.com/user-attachments/assets/9499ae8b-c7ab-40de-b747-7069b8adcc36)
+
+#### 3. 내가 쓴 질문글 삭제
+<img src="https://github.com/user-attachments/assets/c51a031a-ad44-409f-a7a6-1a74393c080a" width="70%">
+
+- 삭제 성공~
+
+✨ 삭제하려는 userId와 질문 작성자가 다르면?
+![Image](https://github.com/user-attachments/assets/94a62a0a-175b-4577-9cd8-15dbfe3a01b5)
+- 에러 발생!!
+
+#### 4. 답변 작성
+<img src="https://github.com/user-attachments/assets/51d8f2ab-e820-480a-8766-42f2787c317c" width="60%">
+
+![Image](https://github.com/user-attachments/assets/9b9f714d-7601-438d-8ee8-a8a1d12785de)
+
+✨ 질문 작성자가 답변을 달려 하면?
+![Image](https://github.com/user-attachments/assets/7d7b8eac-d01e-4872-8952-f58698339081)
+- 에러 발생 !!
+
+#### 5. 질문과 답변 조회
+![Image](https://github.com/user-attachments/assets/47a6e657-d499-4a7e-a35f-b204a2ebc45d)
+- postId를 PathParameter로 입력하면 그 질문과 답변글들을 조회 가능
+
+#### 6. 좋아요/싫어요 달기
+![Image](https://github.com/user-attachments/assets/40f6552c-c7f5-44b2-bb19-26960f1a28a9)
+✨ 좋아요/싫어요 연타 방지를 어떻게 할까... 생각하다가 
+
+(1) 좋아요-> 좋아요/ (2) 좋아요-> 싫어요/ (3) 싫어요-> 싫어요/(4) 싫어요->좋아요
+
+모두 에러 처리 나도록 했습니다.
+
+(1) 의 경우
+
+<img src="https://github.com/user-attachments/assets/ec241205-d2d6-4be4-b1d5-0a5f7c42d535" width="70%">
+
+(2),(4)의 경우
+
+<img src="https://github.com/user-attachments/assets/19aee750-7f83-4041-9fc5-8a6c8673d7c2" width="70%">
+
+**결국, LIKE/DISLIKE가 있는 경우, 삭제한 후에만 새로 달 수 있습니다.**
+
+#### 7. 좋아요/싫어요 삭제
+<img src="https://github.com/user-attachments/assets/9c3f6c42-b3a9-4dcc-8591-57c919f30b3e" width="50%">
+
+ ***
+
+❔Hashtag를 이용한 질문글 찾기를 위해 HashtagController을 따로 둘지, PostController에 포함시킬지 고민중입니다. 어떻게 하셨나요❔
+
+***
+### 부가 구현 설명
+
+**1. ErrorStatus + 성공 응답 처리**
+ - exception과 ErrorStatus, SuccessStatus 등을 추가하였습니다. 
+ - ErrorStatus에서는 에러 처리를 Custom하여 추가합니다.
+
+**2. Swagger**
+- SwaggerConfig를 이용한 Swagger 테스트 설정
+
+**3. Converter**
+- DTO <-> Entity 간 변환을 Converter에서 처리
+- 서비스 로직의 간결성을 위해
+
+**4. Service + ServiceImpl 사용**
+- Service는 인터페이스 구현 + ServiceImpl은 비즈니스 로직 처리
+- 확장성을 위해
+
+**5. AWS S3 BUCKET 사용**
+- 이미지 업로드를 위해 사용
+- MultiPartFile 형식으로 이미지를 S3 버킷에 업로드 후, 이미지 URL을 반환하여 DB에 저장

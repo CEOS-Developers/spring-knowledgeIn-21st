@@ -1,0 +1,63 @@
+package com.ceos21.spring_boot.controller;
+
+import com.ceos21.spring_boot.base.ApiResponse;
+import com.ceos21.spring_boot.base.status.SuccessStatus;
+import com.ceos21.spring_boot.dto.Answer.AnswerRequestDTO;
+import com.ceos21.spring_boot.dto.Answer.AnswerResponseDTO;
+import com.ceos21.spring_boot.dto.post.PostRequestDTO;
+import com.ceos21.spring_boot.dto.post.PostResponseDTO;
+import com.ceos21.spring_boot.service.AnswerService;
+import com.ceos21.spring_boot.service.PostService;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(value = "/post")
+public class PostController {
+
+    private final PostService postService;
+    private final AnswerService answerService;
+
+    // 질문 작성
+    @Operation(summary="질문 작성")
+    @PostMapping(value="", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<PostResponseDTO> addPost(@ModelAttribute @Valid PostRequestDTO request) {
+
+        // 1. 질문 업로드 처리
+        PostResponseDTO result = postService.addPost(request);
+
+        // 2.성공 응답 + 업로드 결과 DTO 반환
+        return ApiResponse.of(SuccessStatus._OK, result);
+
+    }
+
+    // 내가 쓴 모든 질문 조회
+    @Operation(summary = "내가 쓴 질문 조회")
+    @GetMapping(value="")
+    public ApiResponse<List<PostResponseDTO>> getMyPosts(@RequestParam Long userId) {
+
+        // 1. 내가 쓴 질문 가져오기
+        List<PostResponseDTO> myPosts = postService.getPostsByUserId(userId);
+
+        // 2. 성공 응답 반환
+        return ApiResponse.of(SuccessStatus._OK, myPosts);
+    }
+
+    @Transactional
+    //내가 쓴 질문 삭제
+    @Operation(summary = "내가 쓴 질문 삭제")
+    @DeleteMapping(value="")
+    public ApiResponse<Void> deletePost(@RequestParam Long postId, @RequestParam Long userId) {
+
+        postService.deletePost(postId, userId);
+        return ApiResponse.of(SuccessStatus._OK, null);
+    }
+
+}

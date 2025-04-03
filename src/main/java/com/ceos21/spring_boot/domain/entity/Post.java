@@ -30,10 +30,23 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<PostHash> postHashtags;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.PERSIST)
     private List<Comment> comments;
 
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="writer_id")
-    private User writer;
+    private User postWriter;
+
+    public void addImage(Image image) {
+        if (this.images == null) {
+            this.images = new ArrayList<>();
+        }
+        this.images.add(image);
+        image.setPost(this);
+    }
+
+    public void setPostHashtags(List<PostHash> postHashtags) {
+        this.postHashtags = postHashtags;
+    }
+
 }
