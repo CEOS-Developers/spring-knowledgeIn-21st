@@ -27,14 +27,16 @@ class CommentTest {
     @Test
     void createComment() {
         //given
-        Post post = Post.createQuestion("title", "content");
-        postRepository.save(post);
-
         User user = User.builder()
                 .name("최근호")
                 .nickname("olaf")
                 .build();
         userRepository.save(user);
+
+        Post post = Post.createQuestion("title", "content",user);
+        postRepository.save(post);
+
+
 
         Comment comment = Comment.create(user, post, post.getContent());
 
@@ -49,14 +51,15 @@ class CommentTest {
     @Test
     void deleteComment() {
         //given
-        Post post = Post.createQuestion("title", "content");
-        postRepository.save(post);
-
         User user = User.builder()
                 .name("최근호")
                 .nickname("olaf")
                 .build();
         userRepository.save(user);
+
+        Post post = Post.createQuestion("title", "content",user);
+        postRepository.save(post);
+
 
         Comment comment = Comment.create(user, post, post.getContent());
 

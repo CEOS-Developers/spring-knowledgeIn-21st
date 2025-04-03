@@ -1,9 +1,12 @@
 package com.ceos21.knowledgeIn.domain.post;
 
+import com.ceos21.knowledgeIn.domain.user.User;
 import com.ceos21.knowledgeIn.repository.HashTagRepository;
 import com.ceos21.knowledgeIn.repository.PostRepository;
+import com.ceos21.knowledgeIn.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,14 +26,30 @@ class PostHashTagTest {
     HashTagRepository hashTagRepository;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     EntityManager em;
+
+    Post post = null;
+
+    User user = null;
+
+    @BeforeEach
+    void init() {
+        user = User.builder()
+                .name("최근호")
+                .nickname("olaf")
+                .build();
+        userRepository.save(user);
+
+        post = Post.createQuestion("title", "content", user);
+        postRepository.save(post);
+    }
 
     @Test
     void createPostHashTag() {
         //given
-        Post post = Post.createQuestion("title", "content");
-        postRepository.save(post);
-
         String content = "hallo content";
         HashTag hashTag = HashTag.builder()
                 .content(content)
@@ -41,7 +60,6 @@ class PostHashTagTest {
 
 
         //when
-        post.addPostHashTag(postHashTag);
         em.flush();
 
         Post findPost = postRepository.findById(post.getId()).get();
@@ -54,9 +72,6 @@ class PostHashTagTest {
     @Test
     void deletePostHashTag() {
         //given
-        Post post = Post.createQuestion("title", "content");
-        postRepository.save(post);
-
         String content = "hallo content";
         HashTag hashTag = HashTag.builder()
                 .content(content)

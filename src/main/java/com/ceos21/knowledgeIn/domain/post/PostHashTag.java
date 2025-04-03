@@ -21,6 +21,8 @@ public class PostHashTag {
     private Post post;
 
     public static PostHashTag create(HashTag hashTag, Post post) {
+        if (hashTag == null || post == null) throw new IllegalArgumentException("인자에 Null 값이 있습니다");
+
         PostHashTag postHashTag = PostHashTag.builder()
                 .hashTag(hashTag)
                 .post(post)

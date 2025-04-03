@@ -1,7 +1,9 @@
 package com.ceos21.knowledgeIn.domain.post;
 
+import com.ceos21.knowledgeIn.domain.user.User;
 import com.ceos21.knowledgeIn.repository.ImageRepository;
 import com.ceos21.knowledgeIn.repository.PostRepository;
+import com.ceos21.knowledgeIn.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,12 +23,21 @@ class ImageTest {
     @Autowired
     ImageRepository imageRepository;
     @Autowired
+    UserRepository userRepository;
+    @Autowired
     EntityManager em;
 
     Post post = null;
+    User user = null;
     @BeforeEach
     void init() {
-        post = Post.createQuestion("title", "content");
+        user = User.builder()
+                .name("최근호")
+                .nickname("olaf")
+                .build();
+        userRepository.save(user);
+
+        post = Post.createQuestion("title", "content", user);
         postRepository.save(post);
     }
 
