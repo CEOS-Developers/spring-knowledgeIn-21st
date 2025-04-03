@@ -98,8 +98,8 @@ boolean으로 그렸는데<br>
         Optional<Post> findPost = postRepository.findById(userPost.getId());
         // then
         assertThat(findPost).isEmpty();
-        userPost.getPostImages().forEach(postImage -> {
-            Optional<PostImage> findPostImage = postImageRepository.findById(postImage.getId());
+        userPost.getPostImages().forEach(image -> {
+            Optional<PostImage> findPostImage = postImageRepository.findById(image.getId());
             assertThat(findPostImage).isEmpty();
         });
     }
@@ -117,8 +117,8 @@ boolean으로 그렸는데<br>
     @Transactional
     void savePostTestWithRelation() {
         // given
-        List<PostImage> postImageList = make2PostImages();
-        Post newPost = makeTestPostWithImages(postImageList);
+        List<PostImage> imageList = make2PostImages();
+        Post newPost = makeTestPostWithImages(imageList);
         // when
         Post savedPost = postRepository.save(newPost);
         // then
@@ -195,3 +195,281 @@ virtual foreign key를 지원하기 때문에<br>
 <br>
 
 <img width="744" alt="Image" src="https://github.com/user-attachments/assets/ba8c2b3e-4fea-4e72-b232-cc1cc0b4b3b8" />
+
+
+## PUT VS PATCH
+
+
+
+<https://mangkyu.tistory.com/251>
+
+
+## Path variable VS Query parameter
+
+
+
+## DELETE : Soft delete & Response
+
+<https://hongong.hanbit.co.kr/http-%EC%83%81%ED%83%9C-%EC%BD%94%EB%93%9C-%ED%91%9C-1xx-5xx-%EC%A0%84%EC%B2%B4-%EC%9A%94%EC%95%BD-%EC%A0%95%EB%A6%AC/>
+
+
+## DTO 불변성 feat. Record
+
+
+Record type
+- final 제한자 추가
+- 생성자
+- equals
+- getter
+- hashcode, toString
+
+## N+1 문제를 실전적으로 해결해 보자!
+
+결론부터
+
+나의 경우 default batch size를 걸고 일단 넘어간다.<br>
+스트레스 받으면서 모든걸 튜닝하고 싶지 않기도 하고.. 그정도로 필요하다고 생각하지 않는다.<br>
+병목이 발생해 문제가 생기면 그 부분만 튜닝하면 그만!<br>
+
+default batch size는 한번에 가져오는 레코드 수를 뜻하고<br>
+fetch join만큼 강력하게 한방 쿼리는 아니지만<br>
+N+1을 1+1로 해결하는 느낌이다.
+
+다시말해 연관관계가 x가 있으면 x+1<br>
+나의 경우 post에 연관관계가 image, hashtag, reply<br>
+3+1 -> 4번의 쿼리가 나갈것이다.<br>
+
+실제로 확인해 보자
+
+<img width="1559" alt="Image" src="https://github.com/user-attachments/assets/9b8352e0-2ef0-4104-a008-c74edf201545" />
+
+
+14개의 post, 3개의 이미지, 7개의 해시태그를 모두 불러오는데 쿼리 딱 4번이면 괜찮은 것 같다.<br>
+(내가 설정한 100개를 넘지 않으면 계속 4번으로 유지)
+
+```
+select p1_0.id,p1_0.content,p1_0.created_at,p1_0.deleted_at,p1_0.nickname_public,p1_0.title,p1_0.updated_at,p1_0.user_id,p1_0.view_count from post p1_0 where (p1_0.deleted_at IS NULL);
+select i1_0.post_id,i1_0.id,i1_0.created_at,i1_0.reply_id,i1_0.storage_url,i1_0.updated_at,i1_0.upload_file_name from image i1_0 where i1_0.post_id in (2,3,4,5,6,7,8,9,10,11,12,13,14,15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+select ht1_0.post_id,ht1_0.id,ht1_0.tag from hashtag ht1_0 where ht1_0.post_id in (2,3,4,5,6,7,8,9,10,11,12,13,14,15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+select r1_0.post_id,r1_0.id,r1_0.accepted,r1_0.content,r1_0.created_at,r1_0.parent_id,r1_0.updated_at,r1_0.user_id from reply r1_0 where r1_0.post_id in (2,3,4,5,6,7,8,9,10,11,12,13,14,15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+```
+
+## 다시 돌아온 AOP - 공통 응답 포맷 + 예외처리
+
+** AOP라고 했지만 Spring AOP를 사용하는 기술이 아님<br>
+**응답 포맷에 대한 관심사**에 대해 논하는 것이기 때문에 AOP라고 표현!!
+
+
+프론트엔드와 협업해 본 경험이 있다면,<br>
+통일된 공통 응답 포맷으로 주세요~<br>
+라는 요청을 들어본 적이 있을 것이다.
+
+보통 ApiResponse(CommonResponse)를 응답으로 사용해 이를 해결했을텐데,<br>
+RestControllerAdvice를 활용해 처리하는 방법에 대해 소개해 보겠다!!
+
+이번에도 가상의 상황을 세워보고 좋은 해결책에 대해 생각해 보자<br>
+
+우리는 백엔드 팀장이고<br>
+다른 부서에서 공통 응답 포맷 요구사항이 있어 열심히 Api Response를 만들어<br>
+팀원들에게 이 포맷을 사용해 달라고 했다.
+
+하지만 팀원들의 코드는 다음과 같았다.
+
+```java
+
+@GetMapping("/test")
+public String test(){
+    return "test";
+}
+
+@GetMapping("/test2")
+public ResponseEntity<String> test2(){
+    return ResponseEntity.status(OK).body("test2");
+}
+
+@GetMapping("/test3")
+public ResponseEntity<CommonResponse<String>> test3(){
+    return ResponseEntity.status(OK).body(new CommonResponse<>());
+}
+```
+
+누구는 String, 누구는 ResponseEntity, 누구는 ApiResponse를 body로..
+
+실행결과<br>
+<img width="842" alt="Image" src="https://github.com/user-attachments/assets/712d5990-865a-4060-982d-6f49a074cbeb" />
+
+<img width="834" alt="Image" src="https://github.com/user-attachments/assets/ecebef9e-ee91-470c-a674-fbdcd0ba3bdd" />
+
+<img width="856" alt="Image" src="https://github.com/user-attachments/assets/66674c23-0e05-4f10-93b8-c1736929f785" />
+
+우리는 이걸 어떻게 해결해야 할까?<br>
+팀원들을 한명 한명 찾아가 수정을 부탁해야 할까?<br>
+시간도 많이 들고 한명 한명 말하며 갈등이 생길 가능성은?
+
+그리고 방심한 사이에 코드가 push 되어 다른 부서에서 이상한 응답을 이미 봐버렸다면?<br>
+책임은 누가 져야 할까?<br>
+아마 팀장인 우리가 지게 될 것이다.. 
+
+나는 기술적으로 안전장치를 만들어<br>
+프로젝트를 성공적으로 이끄는 것이 최고라고 생각한다.<br>
+이제 코드를 보자
+```java
+
+@RestControllerAdvice
+public class ResponseInterceptor implements ResponseBodyAdvice {
+
+    @Override
+    public boolean supports(MethodParameter returnType, Class converterType) {
+        return true;
+    }
+
+    @Override
+    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+
+        if (body instanceof CommonResponse) {
+            return body;
+        }
+
+        int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
+
+        // swagger 제외
+        String path = request.getURI().getPath();
+        if (path.contains("swagger") || path.contains("api-docs") || path.contains("webjars")) {
+            return body;
+        }
+
+        // 조건부 메시지 처리: 2xx -> "Success", 그 외 -> "Error"
+        String message = (status >= 200 && status < 300) ? "OK" : "Error";
+
+        CommonResponse<Object> commonResponse = new CommonResponse<>();
+        commonResponse.setStatus(status);
+        commonResponse.setMessage(message);
+        commonResponse.setData(body);
+
+        // 응답을 String으로 내는 경우 따로 예외처리
+        if (body instanceof String) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.writeValueAsString(commonResponse);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("String response conversion error", e);
+            }
+        }
+        return commonResponse;
+    }
+
+}
+```
+응답 종류와 상관 없이 응답을 가로채<br>
+공통 응답 포맷으로 만들어주는 코드이다.
+
+적용 후 실행결과
+
+<img width="851" alt="Image" src="https://github.com/user-attachments/assets/3a35fdfd-0cb8-4a39-ba0d-6da70548da45" />
+
+<img width="852" alt="Image" src="https://github.com/user-attachments/assets/af922fa5-7f60-484e-a756-289c07ccd182" />
+
+<img width="825" alt="Image" src="https://github.com/user-attachments/assets/1ef47ee3-9cf9-45af-a8a8-681560afd468" />
+
+세가지 방식 모두 통일된 응답 포맷으로 나간다.
+
+이를 적용한 지식인 프로젝트 응답은 이렇게 생겼다
+```json
+{
+  "status": 200,
+  "message": "OK",
+  "data": [
+    {
+      "title": "string",
+      "content": "string",
+      "viewCount": 9007199254740991,
+      "nicknamePublic": true,
+      "images": [
+        {
+          "storageUrl": "string",
+          "uploadFileName": "string"
+        }
+      ],
+      "hashTags": [
+        {
+          "tag": "string"
+        }
+      ],
+      "replies": [
+        {
+          "content": "string",
+          "accepted": true,
+          "images": [
+            {
+              "storageUrl": "string",
+              "uploadFileName": "string"
+            }
+          ],
+          "replyChildren": [
+            {
+              "content": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+예외처리도 마찬가지
+
+```json
+{
+    "status": 400,
+    "message": "Error",
+    "data": {
+        "path": "/api/post/v1",
+        "messageDetail": "요청 본문이 누락되었거나 올바르지 않습니다.",
+        "errorDetail": "Required request body is missing: public org.springframework.http.ResponseEntity<com.ceos21.knowledgein.post.dto.PostDto> com.ceos21.knowledgein.post.controller.PostController.createPost(com.ceos21.knowledgein.post.dto.request.RequestCreatePost,java.lang.Long)"
+    }
+}
+```
+```json
+{
+    "status": 404,
+    "message": "Error",
+    "data": {
+        "path": "/api/post/v1/123",
+        "messageDetail": "게시글을 찾을 수 없습니다.",
+        "errorDetail": null
+    }
+}
+```
+
+<img width="855" alt="Image" src="https://github.com/user-attachments/assets/c6dd4639-4ad6-48b7-8e34-b83964d4fcb9" />
+
+<img width="855" alt="Image" src="https://github.com/user-attachments/assets/654518bc-6bbd-4ce7-8c45-bc9d5007bdaa" />
+
+곧 있을 아이디에이션 프로젝트를 개발할때<br>
+프론트엔드에게 이렇게 응답을 깔끔하게 주면 엄청나게 사랑 받을 것 같지 않은가?!?<br>
+거기다 실수를 방지할 수 있는 시스템으로 백엔드 팀원의 사랑은 덤<br>
+
+우리 모두 다른 팀원에게 사랑받는 개발자가 되자! 
+
+## 결과
+
+Create
+
+<img width="790" alt="Image" src="https://github.com/user-attachments/assets/cebb9f60-c896-4113-89fc-fa2da28bd402" />
+<img width="489" alt="Image" src="https://github.com/user-attachments/assets/86d0ba0e-28b8-4a1b-836d-833aa5d4df49" />
+
+현재 업로드한 이미지는 로컬에 저장, 베포할때 경로를 버킷으로 변경하면 됨 
+
+
+Read
+
+<img width="688" alt="Image" src="https://github.com/user-attachments/assets/cc497900-75d7-45e9-9d63-ce0928d20283" />
+<img width="804" alt="Image" src="https://github.com/user-attachments/assets/4c18902a-daa2-4b67-8dfb-ebaad1f7f5ad" />
+
+Soft Delete
+
+<img width="431" alt="Image" src="https://github.com/user-attachments/assets/0145d1ef-d744-4fc5-80e7-fa4175214388" />
+<img width="597" alt="Image" src="https://github.com/user-attachments/assets/41634786-f4df-4075-a15b-85b02ac58f1d" />
+
+시간 부족이라는 핑계로 인해 로깅+테스트 코드 작성은 못했다<br>
+다음에 꼭 작성하겠습니다ㅜㅜ
