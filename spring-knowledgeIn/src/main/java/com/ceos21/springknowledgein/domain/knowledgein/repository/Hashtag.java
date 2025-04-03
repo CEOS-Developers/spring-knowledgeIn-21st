@@ -1,10 +1,12 @@
 package com.ceos21.springknowledgein.domain.knowledgein.repository;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @Entity
 public class Hashtag {
     @Id

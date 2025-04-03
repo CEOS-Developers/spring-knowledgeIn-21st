@@ -33,3 +33,38 @@ Post(참조하는 쪽) - Comment(참조받는 쪽) 단방향 @One(Post)ToMany(Co
 
 
 단위테스트
+
+------------------------------------
+개발순서
+
+Repository => Dto => Service => Controller
+
+: 이 순서대로 해야 can't solve 빨간줄 안 만나면서 개발을 할 수 있다.
+
+DTO란? Data Transfer Object
+프론트와 데이터를 주고 받을 때 엔티티에 있는 모든 데이터를 주고 받으면 효율적이지 않으니 프론트와 교환할 정보만 쏙 빼서 저장하는 오브젝트트
+
+
+Lombok 어노테이션 정리
+@Getter: get 메서드를 자동으로 만듬 ex. dto.getTitle()
+
+@NoArgsConstructor: 기본 생성자(빈 생성자) 특히 Entity를 JPA에 등록할 때 꼭 필요함
+@AllArgsConstructor: 명시된 모든 필드의 값을 생성자에 넣고 생성
+@RequiredArgsConstructor: final이 붙은 애의 생성자 만들어줌
+
+
+정적 팩토리 메서드란?
+
+static으로 객체를 생성하는 메서드
+그냥 생성자를 써도 되지만 나중에 복잡해지면 가독성이 좋아져서 쓰는 거 같음(이석원 피셜)
+
+Global Exception : 모든 API마다 예외처리를 하면 중복도 많고 복잡해짐 => 글로벌하게 다루자
+
+
+
+
+
+##Global Exception 처리 후 Swagger 에러가 발생하였음음
+
+전역 예외처리 할 때 사용한 @RestControllerAdvice를 지우니 해결됨.
+ Swagger와 충돌이 일어난 것 같음
