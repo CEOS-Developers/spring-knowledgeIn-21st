@@ -1,9 +1,8 @@
 package com.ceos21.ceos21BE.web.user.entity;
 
 import com.ceos21.ceos21BE.domain.*;
-import com.ceos21.ceos21BE.web.answer.entity.Answer;
 import com.ceos21.ceos21BE.web.comment.entity.Comment;
-import com.ceos21.ceos21BE.web.question.entity.Question;
+import com.ceos21.ceos21BE.web.post.entity.Post;
 import com.ceos21.ceos21BE.web.reaction.entity.Reaction;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,10 +25,8 @@ public class UserEntity extends BaseEntity {
 
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Question> questions;
+    private List<Post> posts;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Answer> answers;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Comment> comments;

@@ -2,10 +2,10 @@ package com.ceos21.ceos21BE.config.dummy;
 
 import com.ceos21.ceos21BE.web.hashtag.entity.Hashtag;
 import com.ceos21.ceos21BE.web.hashtag.repository.HashtagRepository;
-import com.ceos21.ceos21BE.web.question.entity.Question;
-import com.ceos21.ceos21BE.web.question.repository.QuestionRepository;
-import com.ceos21.ceos21BE.web.questionhashtag.entity.QuestionHashtag;
-import com.ceos21.ceos21BE.web.questionhashtag.repository.QuestionHashtagRepository;
+import com.ceos21.ceos21BE.web.post.entity.Post;
+import com.ceos21.ceos21BE.web.post.repository.PostRepository;
+import com.ceos21.ceos21BE.web.posthashtag.entity.PostHashtag;
+import com.ceos21.ceos21BE.web.posthashtag.repository.PostHashtagRepository;
 import com.ceos21.ceos21BE.web.user.entity.UserEntity;
 import com.ceos21.ceos21BE.web.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +20,9 @@ import java.util.List;
 public class Dummy implements CommandLineRunner {
 
     private final UserRepository userRepository;
-    private final QuestionRepository questionRepository;
+    private final PostRepository postRepository;
     private final HashtagRepository hashtagRepository;
-    private final QuestionHashtagRepository questionHashtagRepository;
+    private final PostHashtagRepository postHashtagRepository;
 
     @Override
     public void run(String... args) {
@@ -40,14 +40,14 @@ public class Dummy implements CommandLineRunner {
                     .build());
 
             // 질문글 생성
-            Question question = Question.builder()
+            Post post = Post.builder()
                     .title("테스트용 질문입니다")
                     .content("이건 더미 데이터예요.")
                     .user(user)
-                    .questionHashtags(new ArrayList<>()) // 초기화 중요!
+                    .postHashtags(new ArrayList<>()) // 초기화 중요!
                     .build();
 
-            questionRepository.save(question);
+            postRepository.save(post);
 
             // 해시태그 추가
             List<String> tags = List.of("더미", "테스트");
@@ -57,13 +57,13 @@ public class Dummy implements CommandLineRunner {
                                 Hashtag.builder().name(tagName).build()
                         ));
 
-                QuestionHashtag qh = QuestionHashtag.builder()
-                        .question(question)
+                PostHashtag qh = PostHashtag.builder()
+                        .post(post)
                         .hashtag(tag)
                         .build();
 
-                question.getQuestionHashtags().add(qh);
-                questionHashtagRepository.save(qh);
+                post.getPostHashtags().add(qh);
+                postHashtagRepository.save(qh);
             }
         }
     }

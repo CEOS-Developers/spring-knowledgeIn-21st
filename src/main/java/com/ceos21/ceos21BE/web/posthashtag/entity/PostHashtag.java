@@ -1,5 +1,6 @@
-package com.ceos21.ceos21BE.web.image.entity;
+package com.ceos21.ceos21BE.web.posthashtag.entity;
 
+import com.ceos21.ceos21BE.web.hashtag.entity.Hashtag;
 import com.ceos21.ceos21BE.web.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,15 +10,16 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Image {
+public class PostHashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long imageId;
-
-    private String url;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hashtag_id")
+    private Hashtag hashtag;
 }
