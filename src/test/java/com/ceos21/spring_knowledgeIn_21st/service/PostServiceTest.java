@@ -1,26 +1,21 @@
 package com.ceos21.spring_knowledgeIn_21st.service;
 
-import com.ceos21.spring_knowledgeIn_21st.domain.comment.application.CommentService;
-import com.ceos21.spring_knowledgeIn_21st.domain.comment.domain.Comment;
 import com.ceos21.spring_knowledgeIn_21st.domain.post.dao.PostRepository;
 import com.ceos21.spring_knowledgeIn_21st.domain.post.domain.Post;
 import com.ceos21.spring_knowledgeIn_21st.domain.user.dao.UserRepository;
 import com.ceos21.spring_knowledgeIn_21st.domain.user.domain.User;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 import java.util.List;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
+@Rollback(false)
 @Transactional
 public class PostServiceTest {
 
@@ -30,42 +25,53 @@ public class PostServiceTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private CommentService commentService;
-
     private User user;
     private Post post;
 
-    @BeforeEach
-    void setUp() {
-        // User 저장
-        user = new User("testUser", "test@example.com", "password");
-        userRepository.save(user);  // User 저장
-
-        // Post 저장
-        post = new Post(user, "테스트 제목", "테스트 내용");
-        postRepository.save(post);
-    }
-
     @Test
-    void 게시글에_댓글_3개를_저장하고_조회한다() {
+    void storePostTest(){
         // given
-        Comment comment1 = new Comment(user, post, "댓글1");
-        Comment comment2 = new Comment(user, post, "댓글2");
-        Comment comment3 = new Comment(user, post, "댓글3");
+        User user = User.builder()
+                .name("yeonee")
+                .email("amlily9011@gmail.com")
+                .password("1234")
+                .build();
 
-        commentService.saveComment(post.getId(), comment1);
-        commentService.saveComment(post.getId(), comment2);
-        commentService.saveComment(post.getId(), comment3);
+        userRepository.save(user);
 
         // when
-        List<Comment> comments = commentService.findCommentsByPostId(post.getId());
+        Post post1 = Post.builder()
+                .user(user)
+                .title("1st post")
+                .content("첫번째 포스트인가요?")
+                .build();
+
+        Post post2 = Post.builder()
+                .user(user)
+                .title("2nd post")
+                .content("두번째 포스트인가요?")
+                .build();
+
+        Post post3 = Post.builder()
+                .user(user)
+                .title("3rd post")
+                .content("세번째 포스트인가요?")
+                .build();
+
+        postRepository.save(post1);
+        postRepository.save(post2);
+        postRepository.save(post3);
+
+        // 콘솔에 출력
+        System.out.println("Saved Posts:");
+        postRepository.findAll().forEach(post ->
+                System.out.println(post.getTitle() + " - " + post.getContent())
+        );
 
         // then
-        assertThat(comments).hasSize(3);
-        assertThat(comments).extracting("content").containsExactly("댓글1", "댓글2", "댓글3");
-        assertThat(comments).allMatch(comment -> comment.getPost().equals(post));
-        assertThat(comments).allMatch(comment -> comment.getUser().equals(user));
+        List<Post> postList = postRepository.findAll();
+        assertThat(postList).hasSize(3);
+
     }
 
 }

@@ -1,40 +1,30 @@
-package com.ceos21.spring_knowledgeIn_21st.domain.comment.domain;
+package com.ceos21.spring_knowledgeIn_21st.domain.reaction.domain;
 
 import com.ceos21.spring_knowledgeIn_21st.domain.answer.domain.Answer;
 import com.ceos21.spring_knowledgeIn_21st.domain.baseEntity.domain.BaseEntity;
-import com.ceos21.spring_knowledgeIn_21st.domain.post.domain.Post;
 import com.ceos21.spring_knowledgeIn_21st.domain.user.domain.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Builder
-@Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "comments")
-public class Comment extends BaseEntity {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+public class Reaction extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id")
+    @Column(name = "reaction_id")
     private Long id;
 
-    @NotBlank
-    private String content;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reaction_type")
+    private ReactionType type;
 
-    @NotBlank
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Post post;
-
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "answer_id")
     private Answer answer;
