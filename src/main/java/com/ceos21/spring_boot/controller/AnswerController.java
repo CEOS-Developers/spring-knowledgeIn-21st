@@ -1,6 +1,7 @@
 package com.ceos21.spring_boot.controller;
 
 import com.ceos21.spring_boot.base.ApiResponse;
+import com.ceos21.spring_boot.base.auth.CustomUserDetails;
 import com.ceos21.spring_boot.base.exception.CustomException;
 import com.ceos21.spring_boot.base.status.ErrorStatus;
 import com.ceos21.spring_boot.base.status.SuccessStatus;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +28,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/answer")
 // likeDislike controller을 따로 만들지 않고 answerController에 포함
 
 public class AnswerController {
@@ -36,11 +37,13 @@ public class AnswerController {
 
     // 답변 작성
     @Operation(summary="답변 작성")
-    @PostMapping(value="", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<AnswerResponseDTO> addAnswer(@ModelAttribute @Valid AnswerRequestDTO request) {
+    @PostMapping(value="/answer", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<AnswerResponseDTO> addAnswer(@AuthenticationPrincipal CustomUserDetails userDetails,@ModelAttribute @Valid AnswerRequestDTO request) {
+
+        Long writerId = userDetails.getUserId();
 
         // 1. 답변 업로드 처리
-        AnswerResponseDTO result = answerService.addAnswer(request);
+        AnswerResponseDTO result = answerService.addAnswer(writerId,request);
 
         // 2.성공 응답 + 업로드 결과 DTO 반환
         return ApiResponse.of(SuccessStatus._OK, result);
@@ -49,7 +52,7 @@ public class AnswerController {
 
     // 특정 질문에 대한 답변들 조회
     @Operation(summary="답변 조회")
-    @GetMapping(value="/{postId}")
+    @GetMapping(value="permit/answer/{postId}")
     public ApiResponse<AnswerAndPostDTO> getAnswersByPostId(@PathVariable Long postId) {
 
         AnswerAndPostDTO result = answerService.getAnswersByPostId(postId);
@@ -62,10 +65,12 @@ public class AnswerController {
     // 답변에 대한 좋아요/싫어요
     @Transactional
     @Operation(summary="좋아요/싫어요")
-    @PostMapping(value="/likeDislike")
-    ApiResponse<LikeResponseDTO> AddLikes(@RequestBody LikeRequestDTO likeRequestDTO) {
+    @PostMapping(value="answer/likeDislike")
+    ApiResponse<LikeResponseDTO> AddLikes(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody LikeRequestDTO likeRequestDTO) {
 
-        LikeResponseDTO likeResponse= likeService.addLikes(likeRequestDTO);
+        Long userId = userDetails.getUserId();
+
+        LikeResponseDTO likeResponse= likeService.addLikes(likeRequestDTO,userId);
         return ApiResponse.of(SuccessStatus._OK, likeResponse);
 
     }
@@ -74,8 +79,10 @@ public class AnswerController {
     // 답변에 대한 좋아요/싫어요 삭제
     @Transactional
     @Operation(summary="좋아요/싫어요")
-    @DeleteMapping(value="/likeDislike")
-    public ApiResponse<Void> deleteLikes(@RequestParam Long answerId, @RequestParam Long userId) {
+    @DeleteMapping(value="answer/likeDislike")
+    public ApiResponse<Void> deleteLikes(@RequestParam Long answerId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        Long userId = userDetails.getUserId();
 
         likeService.deleteLikes(answerId,userId);
         return ApiResponse.of(SuccessStatus._OK, null);

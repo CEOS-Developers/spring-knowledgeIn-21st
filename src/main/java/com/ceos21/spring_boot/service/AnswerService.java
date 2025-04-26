@@ -7,7 +7,7 @@ import com.ceos21.spring_boot.dto.Answer.AnswerResponseDTO;
 
 public interface AnswerService {
 
-    AnswerResponseDTO addAnswer(AnswerRequestDTO answerRequest);
+    AnswerResponseDTO addAnswer(Long writerId,AnswerRequestDTO answerRequest);
 
     AnswerAndPostDTO getAnswersByPostId(Long postId);
 

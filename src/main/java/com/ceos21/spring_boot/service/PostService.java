@@ -8,7 +8,7 @@ import com.ceos21.spring_boot.dto.post.PostResponseDTO;
 import java.util.List;
 
 public interface PostService {
-    PostResponseDTO addPost(PostRequestDTO postRequest);
+    PostResponseDTO addPost(PostRequestDTO postRequest, Long writerId);
 
     List<PostResponseDTO> getPostsByUserId(Long userId);
 

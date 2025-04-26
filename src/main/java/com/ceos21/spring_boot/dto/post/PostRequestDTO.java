@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class PostRequestDTO {
 
-    private Long writerId;
     private String title;
     private String content;
     private List<String> hashtags;

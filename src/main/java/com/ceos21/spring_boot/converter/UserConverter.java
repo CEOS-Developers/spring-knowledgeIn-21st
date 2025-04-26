@@ -23,6 +23,7 @@ public class UserConverter {
     public static UserResponseDTO toUserResponseDTO(User user ) {
 
         return UserResponseDTO.builder()
+                .id (user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .role(user.getRole().name())
@@ -31,6 +32,7 @@ public class UserConverter {
 
     public static LoginResponseDTO toLoginResponseDTO(User user, String accessToken) {
         return  LoginResponseDTO.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .role(user.getRole().name())

@@ -35,18 +35,19 @@ public class AnswerServiceImpl implements AnswerService {
 
     // 질문글에 대한 답변 작성
     @Transactional
-    public AnswerResponseDTO addAnswer(AnswerRequestDTO answerRequest) {
+    public AnswerResponseDTO addAnswer(Long writerId,AnswerRequestDTO answerRequest) {
         // 1. 질문글 가져오기
         Post post = postRepository.findById(answerRequest.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorStatus.POST_NOT_FOUND));
 
         // 2. 자신이 작성한 질문글엔 답변 불가
-        if (post.getPostWriter().getId().equals(answerRequest.getWriterId())) {
+        if (post.getPostWriter().getId().equals(writerId)) {
             throw new CustomException(ErrorStatus.CANNOT_ANSWER);
         }
 
+
         // 3. 답변 작성자 가져오기
-        User writer = userRepository.findById(answerRequest.getWriterId())
+        User writer = userRepository.findById(writerId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
 
 

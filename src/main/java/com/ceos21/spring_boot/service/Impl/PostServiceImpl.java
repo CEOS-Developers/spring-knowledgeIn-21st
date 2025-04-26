@@ -36,10 +36,10 @@ public class PostServiceImpl implements PostService {
 
     // 질문글에 대한 답변 작성
     @Transactional
-    public PostResponseDTO addPost(PostRequestDTO postRequest) {
+    public PostResponseDTO addPost(PostRequestDTO postRequest,Long writerId) {
 
         // 1. 질문 작성자 가져오기
-        User writer = userRepository.findById(postRequest.getWriterId())
+        User writer = userRepository.findById(writerId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
 
 

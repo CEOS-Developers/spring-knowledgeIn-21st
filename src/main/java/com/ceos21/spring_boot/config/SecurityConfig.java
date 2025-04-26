@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable) //HTTP Basic 비활성화
 //                특정 url패턴에 대해서는 Authentication객체 요구하지 않음.(인증처리 제외)
                 .authorizeHttpRequests(a -> a.requestMatchers("/user/create", "/user/login", "/connect/**", "/v3/api-docs/**",
-                        "/swagger-ui/**", "/swagger-ui.html").permitAll().anyRequest().authenticated())
+                        "/swagger-ui/**", "/swagger-ui.html","permit/**").permitAll().anyRequest().authenticated())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //세션방식을 사용하지 않겠다라는 의미
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

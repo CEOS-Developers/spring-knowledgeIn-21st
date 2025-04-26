@@ -29,14 +29,14 @@ public class LikeServiceImpl implements LikeService {
 
     // 좋아요/싫어요 달기
     @Transactional
-    public LikeResponseDTO addLikes(LikeRequestDTO likeRequest) {
+    public LikeResponseDTO addLikes(LikeRequestDTO likeRequest,Long userId) {
 
         //1. 답변 조회
         Answer answer = answerRepository.findById(likeRequest.getAnswerId())
                 .orElseThrow(() -> new CustomException(ErrorStatus.ANSWER_NOT_FOUND));
 
         // 2. 사용자 조회
-        User user = userRepository.findById(likeRequest.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
 
         // 기존 likeDislike 존재 확인
