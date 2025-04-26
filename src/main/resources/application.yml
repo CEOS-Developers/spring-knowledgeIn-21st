@@ -27,3 +27,7 @@ cloud:
       auto: false
     stack:
       auto: false
+
+jwt:
+  secretKey: ${jwt.secretKey}
+  expiration: 60

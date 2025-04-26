@@ -22,6 +22,8 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //2. User 관련 에러
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER_4001", "해당 유저를 찾을 수 없습니다."),
+    DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "USER_4002", "이미 가입된 유저입니다."),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "USER_4003", "비밀번호가 일치하지 않습니다."),
 
     //3. 이미지 관련 에러
     IMAGE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "IMAGE_4001", "이미지 업로드 실패"),
