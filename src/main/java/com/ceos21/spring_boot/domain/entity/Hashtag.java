@@ -19,7 +19,7 @@ public class Hashtag extends BaseEntity {
     @Column(length=30)
     private String content;
 
-    @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "hashtag")
     private List<PostHash> postHashtags;
 
     // String만 받는 생성자 추가

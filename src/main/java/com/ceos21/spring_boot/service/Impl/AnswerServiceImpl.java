@@ -7,6 +7,7 @@ import com.ceos21.spring_boot.domain.entity.*;
 import com.ceos21.spring_boot.dto.Answer.*;
 import com.ceos21.spring_boot.repository.AnswerRepository;
 import com.ceos21.spring_boot.domain.enums.LikeStatus;
+import com.ceos21.spring_boot.repository.CommentRepository;
 import com.ceos21.spring_boot.repository.PostRepository;
 import com.ceos21.spring_boot.repository.UserRepository;
 import com.ceos21.spring_boot.service.AnswerService;
@@ -32,6 +33,7 @@ public class AnswerServiceImpl implements AnswerService {
     private final UserRepository userRepository;
     private final S3UploadService s3UploadService;
     private final ImageService imageService;
+    private final CommentRepository commentRepository;
 
     // 질문글에 대한 답변 작성
     @Transactional
@@ -100,5 +102,24 @@ public class AnswerServiceImpl implements AnswerService {
         );
     }
 
+    // 답변 삭제
+    @Transactional
+    public void deleteAnswer(Long answerId,Long userId) {
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new CustomException(ErrorStatus.ANSWER_NOT_FOUND));
+
+        // answer삭제시 comment는 그대로 둠
+        List<Comment> comments = commentRepository.findAllByAnswer(answer);
+        for (Comment comment : comments) {
+            comment.setAnswer(null);
+        }
+
+        //Answer 작성자 != 삭제 요청자
+        if (!answer.getAnswerWriter().getId().equals(userId)) {
+            throw new CustomException(ErrorStatus.CANNOT_DELETE_ANSWER);
+        }
+
+        answerRepository.delete(answer);
+    }
 
 }

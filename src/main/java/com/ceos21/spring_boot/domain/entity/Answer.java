@@ -22,7 +22,7 @@ public class Answer {
     @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL)
     private List<Image> images;
 
-    @OneToMany(mappedBy = "answer", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "answer")
     private List<Comment> comments;
 
     @ManyToOne(fetch= FetchType.LAZY)

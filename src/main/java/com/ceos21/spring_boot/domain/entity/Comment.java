@@ -29,11 +29,16 @@ public class Comment extends BaseEntity {
     private Post post;
 
     @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="answer_id")
+    @JoinColumn(name="answer_id",nullable = true)
     private Answer answer;
 
 
     @Enumerated(EnumType.STRING)
     private TargetStatus targetStatus;
 
+    public void setAnswer(Answer answer) {
+        this.answer = answer;
     }
+
+
+}

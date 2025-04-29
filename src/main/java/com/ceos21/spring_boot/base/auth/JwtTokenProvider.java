@@ -3,6 +3,7 @@ package com.ceos21.spring_boot.base.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.ceos21.spring_boot.domain.entity.User;
@@ -40,5 +41,17 @@ public class JwtTokenProvider {
                 .signWith(SECRET_KEY)
                 .compact();
         return token;
+    }
+
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+    // 토큰 무효화
+    public void invalidateToken(String token) {
     }
 }

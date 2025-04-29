@@ -9,5 +9,4 @@ import java.util.List;
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     List<Answer> findByPostId(Long postId);
     List<Answer> findAllByPostId(Long postId);
-
 }

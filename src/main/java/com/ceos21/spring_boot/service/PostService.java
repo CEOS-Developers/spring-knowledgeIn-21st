@@ -13,4 +13,6 @@ public interface PostService {
     List<PostResponseDTO> getPostsByUserId(Long userId);
 
     void deletePost(Long postId, Long userId);
+
+    List<PostResponseDTO> getPostsByHashtag(String hashtag);
 }

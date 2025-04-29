@@ -8,4 +8,5 @@ import com.ceos21.spring_boot.dto.user.UserSignupRequestDTO;
 public interface UserService {
     UserResponseDTO signUp(UserSignupRequestDTO request);
     LoginResponseDTO login(LoginRequestDTO request);
+    void logout(String token);
 }

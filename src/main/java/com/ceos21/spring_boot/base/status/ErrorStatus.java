@@ -18,7 +18,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //1. Post 관련 에러
     POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST_4001", "해당 질문을 찾을 수 없습니다."),
-    CANNOT_DELETE(HttpStatus.BAD_REQUEST, "POST_4002", "해당 질문을 삭제할 권한이 없습니다."),
+    CANNOT_DELETE_POST(HttpStatus.BAD_REQUEST, "POST_4002", "해당 질문을 삭제할 권한이 없습니다."),
 
     //2. User 관련 에러
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER_4001", "해당 유저를 찾을 수 없습니다."),
@@ -31,12 +31,19 @@ public enum ErrorStatus implements BaseErrorCode {
     //4. Answer 관련 에러
     CANNOT_ANSWER(HttpStatus.BAD_REQUEST, "Answer_4001", "본인의 글엔 답변 불가합니다."),
     ANSWER_NOT_FOUND(HttpStatus.BAD_REQUEST, "Answer_4002", "해당 답변을 찾을 수 없습니다."),
+    CANNOT_DELETE_ANSWER(HttpStatus.BAD_REQUEST, "Answer_4003", "답변을 삭제할 권한이 없습니다."),
 
     //5. 좋아요 싫어요 관련 에러
     CANNOT_CHECK_BOTH(HttpStatus.BAD_REQUEST, "LikeDislike_4001", "좋아요와 싫어요를 모두 누를 수 없습니다."),
     DUPLICATE_LIKE(HttpStatus.BAD_REQUEST, "LikeDislike_4002", "이미 좋아요를 눌렀습니다."),
     DUPLICATE_DISLIKE(HttpStatus.BAD_REQUEST, "LikeDislike_4003","이미 싫어요를 눌렀습니다." ),
-    LIKE_DISLIKE_NOT_FOUND(HttpStatus.BAD_REQUEST, "LIKEDISLIKE_4001", "해당 좋아요/싫어요를 찾을 수 없습니다.");
+    LIKE_DISLIKE_NOT_FOUND(HttpStatus.BAD_REQUEST, "LikeDislike_4004", "해당 좋아요/싫어요를 찾을 수 없습니다."),
+    CANNOT_DELETE_LIKES(HttpStatus.BAD_REQUEST, "LikeDislike_4005","해당 좋아요/싫어요를 삭제할 권한이 없습니다."),
+
+    //6. 댓글 관련 에러
+    INVALID_TARGET_STATUS(HttpStatus.BAD_REQUEST, "COMMENT_4001","해당하는 TargetStatus가 없습니다." ),
+    COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT_4002","해당하는 댓글이 없습니다."),
+    CANNOT_DELETE_COMMENT(HttpStatus.BAD_REQUEST, "COMMENT_4003","해당 댓글을 삭제할 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

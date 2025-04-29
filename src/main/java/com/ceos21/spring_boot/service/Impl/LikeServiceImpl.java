@@ -102,7 +102,7 @@ public class LikeServiceImpl implements LikeService {
 
         // 4. 좋아요 싫어요 작성자 = 요창자 ?
         if (!likeDislike.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorStatus.CANNOT_DELETE);
+            throw new CustomException(ErrorStatus.CANNOT_DELETE_LIKES);
         }
 
         // 5. 좋아요/싫어요 삭제

@@ -25,4 +25,8 @@ public class PostHash extends BaseEntity{
         this.post = post;
         this.hashtag = hashtag;
     }
+
+    public void setPost(Post post) {
+        this.post = post;
+    }
 }

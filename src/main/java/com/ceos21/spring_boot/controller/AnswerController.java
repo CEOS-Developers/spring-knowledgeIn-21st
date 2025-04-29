@@ -50,6 +50,21 @@ public class AnswerController {
 
     }
 
+    // 답변 삭제
+    @Transactional
+    @Operation(summary="답변 삭제")
+    @DeleteMapping(value="/answer")
+    public ApiResponse<Void> deleteAnswer(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam Long answerId) {
+
+        Long userId = userDetails.getUserId();
+
+        answerService.deleteAnswer(answerId,userId);
+        return ApiResponse.of(SuccessStatus._OK, null);
+
+    }
+
+
+
     // 특정 질문에 대한 답변들 조회
     @Operation(summary="답변 조회")
     @GetMapping(value="permit/answer/{postId}")
@@ -88,4 +103,6 @@ public class AnswerController {
         return ApiResponse.of(SuccessStatus._OK, null);
 
     }
+
+
 }

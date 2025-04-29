@@ -45,6 +45,7 @@ public class UserServiceImpl implements UserService {
         return UserConverter.toUserResponseDTO(user);
 
     }
+
     //로그인
     public LoginResponseDTO login(LoginRequestDTO request) {
 
@@ -59,5 +60,11 @@ public class UserServiceImpl implements UserService {
         String accessToken = jwtTokenProvider.createToken(user);
 
         return UserConverter.toLoginResponseDTO(user, accessToken);
+    }
+
+    // 로그아웃
+    public void logout(String token) {
+        jwtTokenProvider.invalidateToken(token);
+
     }
 }

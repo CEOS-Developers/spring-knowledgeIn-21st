@@ -22,7 +22,6 @@ public class CustomUserDetails implements UserDetails {
         this.authorities = authorities;
     }
 
-    // Constructor that only sets the username and authorities (without password or userId)
     public CustomUserDetails(String username, List<GrantedAuthority> authorities) {
         this.username = username;
         this.authorities = authorities;

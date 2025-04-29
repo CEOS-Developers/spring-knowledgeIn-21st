@@ -10,6 +10,7 @@ import com.ceos21.spring_boot.dto.user.UserResponseDTO;
 import com.ceos21.spring_boot.dto.user.UserSignupRequestDTO;
 import com.ceos21.spring_boot.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,4 +49,14 @@ public class UserController {
     }
 
 
+    // 로그아웃
+    @Operation(summary = "로그아웃")
+    @PostMapping("/logout")
+    public ApiResponse<String> logout(HttpServletRequest request) {
+
+        String token = jwtTokenProvider.resolveToken(request);
+        userService.logout(token);
+
+        return ApiResponse.of(SuccessStatus._OK,null);
+    }
 }

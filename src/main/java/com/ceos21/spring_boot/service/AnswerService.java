@@ -11,4 +11,6 @@ public interface AnswerService {
 
     AnswerAndPostDTO getAnswersByPostId(Long postId);
 
+    void deleteAnswer(Long answerId, Long userId);
+
 }
