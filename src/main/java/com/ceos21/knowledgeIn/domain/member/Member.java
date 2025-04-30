@@ -1,11 +1,10 @@
 package com.ceos21.knowledgeIn.domain.member;
 
 import com.ceos21.knowledgeIn.domain.comment.Comment;
+import com.ceos21.knowledgeIn.domain.member.domain.MemberRole;
 import com.ceos21.knowledgeIn.domain.post.Post;
 import com.ceos21.knowledgeIn.global.domain.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -28,6 +27,9 @@ public class Member extends BaseEntity {
     private String nickname;
 
     private String phone;
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
 
     @Builder.Default
     @OneToMany(mappedBy = "member")

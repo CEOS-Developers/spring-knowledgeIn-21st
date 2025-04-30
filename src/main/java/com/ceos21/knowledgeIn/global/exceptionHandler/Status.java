@@ -40,6 +40,7 @@ public enum Status {
      */
     // 멤버
     MEMBER_ALREADY_EXISTS(HttpStatus.CONFLICT,"MEMBER4000","이미 존재하는 회원입니다."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND,"MEMBER4001","존재하지 않는 회원입니다."),
 
     //게시글
     QUESTION_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN,"POST4000","답변이 존재하는 질문은 삭제할 수 없습니다."),
