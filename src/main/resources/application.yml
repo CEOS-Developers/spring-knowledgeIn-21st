@@ -28,5 +28,12 @@ etc:
   front-url: ${FRONT_URL}
   front-auth-success: ${FRONT_URL}/auth/success
 
+jwt:
+  expiration:
+    access: ${ACCESS_EXPIRATION}
+    refresh: ${REFRESH_EXPIRATION}
+  secret: ${JWT_SECRET}
+
+
 file:
   dir: ${DIR}
