@@ -304,3 +304,141 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 **5. AWS S3 BUCKET 사용**
 - 이미지 업로드를 위해 사용
 - MultiPartFile 형식으로 이미지를 S3 버킷에 업로드 후, 이미지 URL을 반환하여 DB에 저장
+
+---
+### WEEK 4. 로그인/회원가입 추가 + 이 외 기능 구현
+
+#### 1. 회원가입 + 로그인
+**1) 로그인 정보를 받아오기 위한 CustomUserDetails**
+``` java
+public class CustomUserDetails implements UserDetails {
+
+    private Long userId;
+    private String username;
+    private String password;
+    private Collection<? extends GrantedAuthority> authorities;
+
+    public CustomUserDetails(Long userId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.authorities = authorities;
+    }
+```
+이후 **@AuthenticationPrincipal** 로 로그인 정보를 주입받았다.
+
+**2) Spring Security**
+ ```java
+    @Bean
+    public SecurityFilterChain myFilter(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                .csrf(AbstractHttpConfigurer::disable) //csrf 비활성화
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(a -> a.requestMatchers("/user/create", "/user/login", "/user/logout", "/connect/**", "/v3/api-docs/**",
+                        "/swagger-ui/**", "/swagger-ui.html","permit/**").permitAll().anyRequest().authenticated())
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+
+    @Bean
+    public PasswordEncoder makePassword() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+}
+```
+- 로그인/회원가입/스웨거 등은 인증 절차 없이 필터를 통과,
+  로그인하지 않은 사용자가 볼 수 있는 화면 (질문+답변 조회) 등은 엔드포인트를 "**permit/**"으로 시작하게 하여 필터 통과
+- 비밀번호 암호화를 위한 인코더 생성
+
+**3) JwtAuthFilter**
+ ```java
+ UserDetails userDetails = new CustomUserDetails(userId, username, null, authorities);
+
+    // Authentication 객체 설정
+ Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+```
+
+- JWT 안의 정보로 CustomUserDetails 객체를 만든다.
+  이 때, 비밀번호는 이미 토큰으로 인증된 상태이므로 null 처리
+
+- 만든 Authentication을 SecurityContextHolder에 심어 추후 @AuthenticationPrincipal을 통해 로그인 정보를 꺼냄.
+
+#### 2. 로그인 + 비로그인 구분
+![](https://velog.velcdn.com/images/dohyunii/post/40c0d955-447e-4d68-87d1-83deb398b807/image.png)
+- **post를 예로 들면**
+
+  **<내가 쓴 질문 조회/질문 작성/내가 쓴 질문 삭제>** 등의 api는 로그인 정보를 받아와야 하므로 **/post**로 시작함
+  <**해시태그별 글 조회**>는 로그인하지 않은 사용자도 조회 가능하므로 **/permit**으로 시작해 필터 통과함
+
+#### 3. 추가 구현 기능
+**(1) 회원가입, 로그인**
+- 회원가입 시 email, nickname, password 입력
+  ![](https://velog.velcdn.com/images/dohyunii/post/39504893-04dd-4dc2-a376-26cd6ba8b9c0/image.png)
+- 이후 로그인 시 토큰 반환
+  ![](https://velog.velcdn.com/images/dohyunii/post/216e208c-c063-481e-9c64-c155a43494c0/image.png)
+
+**(2) 해시태그별 글 조회**
+  ![](https://velog.velcdn.com/images/dohyunii/post/314325ad-831e-4615-8112-9831b5f53743/image.png)![](https://velog.velcdn.com/images/dohyunii/post/45c1c7f5-5c5c-446b-9cce-278c02aab72b/image.png)
+
+- **post 삭제 시, post와 hashtag의 관계는 끊고 hashtag는 남겨둠**
+``` java
+       //4. Post 삭제시 hashtag는 그대로 -> 해당 hashtag의 postId를 null로 설정
+        List<PostHash> postHashtags = post.getPostHashtags();
+        for (PostHash postHash : postHashtags) {
+            postHash.setPost(null);
+        }
+```
+![](https://velog.velcdn.com/images/dohyunii/post/9238ccca-1a0b-4081-a5d0-292bc395f77e/image.png)
+: 삭제된 post이기 때문에 post_hash 테이블의 post_id가 null로 바뀌었다.
+
+**(3) 댓글 관련**
+- 댓글은 **POST, ANSWER**에 남길 수 있다. 이를 TargetStatus로 구분하였다.
+![](https://velog.velcdn.com/images/dohyunii/post/71277bc1-08ba-4f2a-ac8e-af22e5dcbb49/image.png)
+: TargetStatus에는 POST 또는 ANSWER과 그의 id를 넣으면 된다.
+
+
+❶ **Post**에 댓글 남김
+![](https://velog.velcdn.com/images/dohyunii/post/17fb05b4-0d1d-48b4-a8de-8192884fd689/image.png)
+
+❷ **Answer**에 댓글 남김
+![](https://velog.velcdn.com/images/dohyunii/post/4086b03d-2f08-4aef-a0a1-7c77201a9c88/image.png)
+
+![](https://velog.velcdn.com/images/dohyunii/post/17752005-f2e9-47bb-9d7c-eab40883095e/image.png)
+
+- **Post 삭제 시** 댓글과 답변이 모두 삭제되도록, **Answer만 삭제시** 댓글은 그대로 남도록 했다.
+```
+        // answer삭제시 comment는 그대로 둠
+        List<Comment> comments = commentRepository.findAllByAnswer(answer);
+        for (Comment comment : comments) {
+            comment.setAnswer(null);
+        }
+```
+![](https://velog.velcdn.com/images/dohyunii/post/05232126-f1fe-4c91-b15e-4811bb3a636c/image.png)
+: answer 삭제 후 위와 달리 comment_id 5의 answer_id가 null로 바뀌었다.
+
+🤔이렇게 하면 나중에 어디에 달렸던 댓글인지 알 수 없지 않나 ..??
+
+**-> soft delete**로 변경
+
+- Answer 엔티티에 추가
+
+ ``` java
+ @Where(clause = "is_deleted = false")
+ // @Where을 두어 isdeleted=false인 것만 조회하도록 함
+ 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+ ```
+ 
+ - Answer을 실제로 삭제하는 대신 is_deleted를 true로 설정하여 관계는 그대로 둔다.
+   - answer삭제시 answer_id 5의 is_deleted 가 1로 변경
+   ![](https://velog.velcdn.com/images/dohyunii/post/5cfdcc23-dbcb-4902-828a-104cf0157b83/image.png)
+   - comment 테이블을 보면, answer_id 5가 그대로 남아있다.
+   ![](https://velog.velcdn.com/images/dohyunii/post/6095ebc9-993b-424b-ac14-cad21ca939b6/image.png)
+   - 글 조회시, is_deleted=false인 답변만 조회된다.
+![](https://velog.velcdn.com/images/dohyunii/post/5e43c3f1-3e8d-49dc-b28d-49fe9c722ef4/image.png)
+
+

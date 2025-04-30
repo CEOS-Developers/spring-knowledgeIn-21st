@@ -108,18 +108,13 @@ public class AnswerServiceImpl implements AnswerService {
         Answer answer = answerRepository.findById(answerId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.ANSWER_NOT_FOUND));
 
-        // answer삭제시 comment는 그대로 둠
-        List<Comment> comments = commentRepository.findAllByAnswer(answer);
-        for (Comment comment : comments) {
-            comment.setAnswer(null);
-        }
-
         //Answer 작성자 != 삭제 요청자
         if (!answer.getAnswerWriter().getId().equals(userId)) {
             throw new CustomException(ErrorStatus.CANNOT_DELETE_ANSWER);
         }
 
-        answerRepository.delete(answer);
+        // answer삭제시 comment는 그대로 둠 -> soft delete
+        answer.setIsDeleted(true);
     }
 
 }

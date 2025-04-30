@@ -22,11 +22,6 @@ public class CustomUserDetails implements UserDetails {
         this.authorities = authorities;
     }
 
-    public CustomUserDetails(String username, List<GrantedAuthority> authorities) {
-        this.username = username;
-        this.authorities = authorities;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities != null ? authorities : Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
