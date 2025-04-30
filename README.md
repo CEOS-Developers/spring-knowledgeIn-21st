@@ -378,10 +378,13 @@ public class CustomUserDetails implements UserDetails {
 - 회원가입 시 email, nickname, password 입력
 <img src="https://velog.velcdn.com/images/dohyunii/post/39504893-04dd-4dc2-a376-26cd6ba8b9c0/image.png" width="60%" />
 - 이후 로그인 시 토큰 반환
+  
   ![](https://velog.velcdn.com/images/dohyunii/post/216e208c-c063-481e-9c64-c155a43494c0/image.png)
 
 **(2) 해시태그별 글 조회**
- <img src="https://velog.velcdn.com/images/dohyunii/post/314325ad-831e-4615-8112-9831b5f53743/image.png" width="40%" /> ![](https://velog.velcdn.com/images/dohyunii/post/45c1c7f5-5c5c-446b-9cce-278c02aab72b/image.png)
+
+ <img src="https://velog.velcdn.com/images/dohyunii/post/314325ad-831e-4615-8112-9831b5f53743/image.png" width="40%" /> 
+ ![](https://velog.velcdn.com/images/dohyunii/post/45c1c7f5-5c5c-446b-9cce-278c02aab72b/image.png)
 
 - **post 삭제 시, post와 hashtag의 관계는 끊고 hashtag는 남겨둠**
 ``` java
@@ -401,9 +404,11 @@ public class CustomUserDetails implements UserDetails {
 
 
 ❶ **Post**에 댓글 남김
+
 <img src="https://velog.velcdn.com/images/dohyunii/post/17fb05b4-0d1d-48b4-a8de-8192884fd689/image.png" width="50%" />
 
 ❷ **Answer**에 댓글 남김
+
 <img src="https://velog.velcdn.com/images/dohyunii/post/4086b03d-2f08-4aef-a0a1-7c77201a9c88/image.png" width="50%" />
 
 ![](https://velog.velcdn.com/images/dohyunii/post/17752005-f2e9-47bb-9d7c-eab40883095e/image.png)
