@@ -28,11 +28,17 @@ public class UserEntity extends BaseTimeEntityWithDeletion {
     @Column(length = 30)
     private String name;
 
+    @Column(length = 30, nullable = false, unique = true)
+    private String email;
+
     @Column(nullable = false, unique = true)
     private String nickName;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String passWord;
+
+    private boolean isDeleted;
+    private boolean isEnabled;
 
     @Enumerated(STRING)
     private Role role;
