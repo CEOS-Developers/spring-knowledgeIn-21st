@@ -384,6 +384,7 @@ public class CustomUserDetails implements UserDetails {
 **(2) 해시태그별 글 조회**
 
  <img src="https://velog.velcdn.com/images/dohyunii/post/314325ad-831e-4615-8112-9831b5f53743/image.png" width="40%" /> 
+ 
  ![](https://velog.velcdn.com/images/dohyunii/post/45c1c7f5-5c5c-446b-9cce-278c02aab72b/image.png)
 
 - **post 삭제 시, post와 hashtag의 관계는 끊고 hashtag는 남겨둠**
