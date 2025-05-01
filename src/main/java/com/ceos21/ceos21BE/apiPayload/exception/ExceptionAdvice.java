@@ -3,6 +3,7 @@ package com.ceos21.ceos21BE.apiPayload.exception;
 import com.ceos21.ceos21BE.apiPayload.ApiResponse;
 import com.ceos21.ceos21BE.apiPayload.code.ErrorReasonDTO;
 import com.ceos21.ceos21BE.apiPayload.code.status.ErrorStatus;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import java.util.Optional;
 
 
 @Slf4j
+@Hidden
 @RestControllerAdvice(annotations = {RestController.class})
 public class ExceptionAdvice extends ResponseEntityExceptionHandler{
 

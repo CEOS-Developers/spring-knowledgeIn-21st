@@ -1,8 +1,11 @@
 package com.ceos21.ceos21BE.config;
 
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,16 +13,27 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI openAPI() {
-        return new OpenAPI()
-                .components(new Components())
-                .info(apiInfo());
-    }
+    public OpenAPI SwaggerAPI(){
+        Info info = new Info()
+                .title("CEOS 21 NAVER API")
+                .description("CEOS 21 네이버 클론 코딩 명세서")
+                .version("1.0.0");
 
-    private Info apiInfo() {
-        return new Info()
-                .title("API Test") // API의 제목
-                .description("Let's practice Swagger UI") // API에 대한 설명
-                .version("1.0.0"); // API의 버전
+        String jwtSchemeName = "JWT TOKEN";
+        //API 요청 헤더에 인증 정보 포함
+        SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwtSchemeName);
+        //SecuritySchemes 등록
+        Components components = new Components()
+                .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
+                        .name(jwtSchemeName)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT"));
+
+        return new OpenAPI()
+                .addServersItem(new Server().url("/"))
+                .info(info)
+                .addSecurityItem(securityRequirement)
+                .components(components);
     }
 }

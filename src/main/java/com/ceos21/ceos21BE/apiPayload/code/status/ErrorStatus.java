@@ -32,7 +32,13 @@ public enum ErrorStatus implements BaseErrorCode {
     _QUESTION_DELETE_FAIL(HttpStatus.BAD_REQUEST, "QUESTION4003", "질문 삭제에 실패하였습니다."),
     _HASHTAG_ALREADY_EXISTS(HttpStatus.CONFLICT, "HASHTAG4001", "이미 존재하는 해시태그입니다."),
     _COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT4000", "해당 댓글을 찾을 수 없습니다."),
-    _USER_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "COMMENT4001", "해당 댓글에 대한 권한이 없습니다.");
+    _USER_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "COMMENT4001", "해당 댓글에 대한 권한이 없습니다."),
+    _EMAIl_NOT_FOUNd(HttpStatus.NOT_FOUND, "COMMENT4002", "해당 이메일을 찾을 수 없습니다."),
+    _EMAIL_DUPLICATED(HttpStatus.BAD_REQUEST, "COMMENT4002", "중복된 이메일입니다."),
+    _PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "COMMENT4003", "비밀번호가 일치하지 않습니다."),
+    _TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT4004", "해당 토큰을 찾을 수 없습니다."),
+    _TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "COMMENT4005", "해당 토큰이 만료되었습니다."),
+    _TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "COMMENT4006", "해당 토큰이 유효하지 않습니다."),;
 
 
     private final HttpStatus httpStatus;
