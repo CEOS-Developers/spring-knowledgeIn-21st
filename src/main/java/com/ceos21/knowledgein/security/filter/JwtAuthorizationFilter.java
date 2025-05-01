@@ -1,6 +1,7 @@
 package com.ceos21.knowledgein.security.filter;
 
-import com.ceos21.knowledgein.security.exception.SecurityErrorCode;
+import com.ceos21.knowledgein.redis.entity.RefreshToken;
+import com.ceos21.knowledgein.redis.service.RefreshTokenRedisService;
 import com.ceos21.knowledgein.security.exception.TokenException;
 import com.ceos21.knowledgein.security.jwt.JwtProvider;
 import jakarta.servlet.FilterChain;
@@ -17,14 +18,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Optional;
 
-import static com.ceos21.knowledgein.security.exception.SecurityErrorCode.*;
+import static com.ceos21.knowledgein.security.exception.SecurityErrorCode.REFRESH_EXPIRED;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final RefreshTokenRedisService refreshTokenRedisService;
 
 
     @Override
@@ -44,10 +46,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private void validate(HttpServletResponse response, String accessToken) {
-        // access 만료 - refresh token 도입 시 재발급 로직 여기에 추가
         if (!jwtProvider.validateToken(accessToken)) {
-            throw new TokenException(ACCESS_EXPIRED);
+
+            String userId = jwtProvider.getSubject(accessToken);
+            Optional<RefreshToken> optionalRefresh = refreshTokenRedisService.findRefreshToken(Long.parseLong(userId));
+            // refresh 만료
+            if (optionalRefresh.isEmpty()) {
+                log.debug("Refresh token is not found. Redirect to login page.");
+                throw new TokenException(REFRESH_EXPIRED);
+            }
+
+            // refresh redis에 존재하고 유효
+            String refreshToken = optionalRefresh.get().getRefreshToken();
+            if (jwtProvider.validateToken(refreshToken)) {
+                log.debug("Access token is expired. Trying to reissue with refresh token.");
+                // 재발급
+                String newAccessToken = jwtProvider.reissueWithRefresh(refreshToken);
+                response.setHeader("access", newAccessToken);
+            }
         }
+
     }
 
     private void setAuthentication(String accessToken) {

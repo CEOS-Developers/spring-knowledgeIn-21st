@@ -53,9 +53,9 @@ public class JwtProvider {
         return generateToken(authentication, ACCESS_TOKEN_EXPIRE_TIME, "access", userId);
     }
 
-//    public String generateRefreshToken(Authentication authentication, String userId) {
-//        return generateToken(authentication, REFRESH_TOKEN_EXPIRE_TIME, "refresh", userId);
-//    }
+    public String generateRefreshToken(Authentication authentication, String userId) {
+        return generateToken(authentication, REFRESH_TOKEN_EXPIRE_TIME, "refresh", userId);
+    }
 
     private String generateToken(Authentication authentication, Long expirationMs, String category, String userId) {
 
@@ -73,7 +73,6 @@ public class JwtProvider {
                 .compact();
     }
 
-
     // 만료 되었을 때만 false 반환
     public Boolean validateToken(String token) {
         try {
@@ -87,6 +86,12 @@ public class JwtProvider {
         } catch (SecurityException e) {
             throw new TokenException(INVALID_SIGNATURE);
         }
+    }
+
+    public String reissueWithRefresh(String refreshToken) {
+        Authentication authentication = getAuthentication(refreshToken);
+        String userId = getSubject(refreshToken);
+        return generateAccessToken(authentication, userId);
     }
 
     public Authentication getAuthentication(String token) {
@@ -108,6 +113,10 @@ public class JwtProvider {
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
+    }
+
+    public String getSubject(String token) {
+        return parseClaims(token).getSubject();
     }
 
 

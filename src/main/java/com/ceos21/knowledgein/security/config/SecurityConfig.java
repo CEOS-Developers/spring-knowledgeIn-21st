@@ -1,10 +1,15 @@
 package com.ceos21.knowledgein.security.config;
 
-import com.ceos21.knowledgein.security.filter.JwtAuthFilter;
+import com.ceos21.knowledgein.security.filter.CustomAuthenticationFilter;
+import com.ceos21.knowledgein.security.filter.JwtAuthorizationFilter;
 import com.ceos21.knowledgein.security.filter.JwtExceptionFilter;
+import com.ceos21.knowledgein.security.handler.JwtAuthenticationFailureHandler;
+import com.ceos21.knowledgein.security.handler.JwtAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -22,9 +27,12 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
-    private final JwtAuthFilter jwtAuthFilter;
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
+    private final JwtAuthenticationFailureHandler jwtAuthenticationFailureHandler;
 
+    private final AuthenticationConfiguration authenticationConfiguration;
 
     private static final String[] WHITE_LIST = {
             "/**",
@@ -56,8 +64,9 @@ public class SecurityConfig {
 //                )
 
                 // 필터 추가
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, jwtAuthFilter.getClass());
+                .addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthorizationFilter, CustomAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, jwtAuthorizationFilter.getClass());
 
         return http.build();
     }
@@ -76,5 +85,19 @@ public class SecurityConfig {
     }
 
 
+    @Bean
+    public CustomAuthenticationFilter customAuthenticationFilter() throws Exception {
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager(authenticationConfiguration));
+        customAuthenticationFilter.setFilterProcessesUrl("/api/user/v1/login");
+        customAuthenticationFilter.setAuthenticationSuccessHandler(jwtAuthenticationSuccessHandler);
+        customAuthenticationFilter.setAuthenticationFailureHandler(jwtAuthenticationFailureHandler);
+        customAuthenticationFilter.afterPropertiesSet();
+        return customAuthenticationFilter;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
 }
