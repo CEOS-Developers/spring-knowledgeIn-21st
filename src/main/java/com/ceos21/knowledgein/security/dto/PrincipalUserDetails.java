@@ -1,6 +1,7 @@
 package com.ceos21.knowledgein.security.dto;
 
 import com.ceos21.knowledgein.user.domain.UserEntity;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
+@Getter
 public class PrincipalUserDetails implements UserDetails, OAuth2User {
 
     private final UserEntity userEntity;
@@ -42,17 +44,17 @@ public class PrincipalUserDetails implements UserDetails, OAuth2User {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return userEntity.isEnabled();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return userEntity.isEnabled();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return userEntity.isEnabled();
     }
 
     @Override
@@ -62,7 +64,6 @@ public class PrincipalUserDetails implements UserDetails, OAuth2User {
 
 
     // OAuth2User
-
     @Override
     public Map<String, Object> getAttributes() {
         return attributes;
