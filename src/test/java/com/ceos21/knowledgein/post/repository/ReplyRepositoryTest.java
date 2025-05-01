@@ -70,7 +70,7 @@ class ReplyRepositoryTest {
     }
 
     private UserEntity makeTestUser(String name) {
-        return UserEntity.of(name, "test-nick", "1234");
+        return UserEntity.of("test@naver.com" ,name, "test-nick", "1234");
     }
 
     private List<Image> make2PostImages() {
