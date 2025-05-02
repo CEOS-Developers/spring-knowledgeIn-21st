@@ -40,30 +40,21 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         log.debug("Access token from request: {}", accessToken);
 
-        validate(response, accessToken);
+        validateAndReissue(response, accessToken);
         setAuthentication(accessToken);
         filterChain.doFilter(request, response);
     }
 
-    private void validate(HttpServletResponse response, String accessToken) {
+    private void validateAndReissue(HttpServletResponse response, String accessToken) {
         if (!jwtProvider.validateToken(accessToken)) {
 
             String userId = jwtProvider.getSubject(accessToken);
             Optional<RefreshToken> optionalRefresh = refreshTokenRedisService.findRefreshToken(Long.parseLong(userId));
-            // refresh 만료
-            if (optionalRefresh.isEmpty()) {
-                log.debug("Refresh token is not found. Redirect to login page.");
-                throw new TokenException(REFRESH_EXPIRED);
-            }
+            // refresh 만료 - redis 존재하지 않음
+            checkRefreshExpire(optionalRefresh);
 
             // refresh redis에 존재하고 유효
-            String refreshToken = optionalRefresh.get().getRefreshToken();
-            if (jwtProvider.validateToken(refreshToken)) {
-                log.debug("Access token is expired. Trying to reissue with refresh token.");
-                // 재발급
-                String newAccessToken = jwtProvider.reissueWithRefresh(refreshToken);
-                response.setHeader("access", newAccessToken);
-            }
+            reIssueAccess(response, optionalRefresh);
         }
 
     }
@@ -72,4 +63,21 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         Authentication authentication = jwtProvider.getAuthentication(accessToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
+
+    private void checkRefreshExpire(Optional<RefreshToken> optionalRefresh) {
+        if (optionalRefresh.isEmpty()) {
+            log.debug("Refresh token is not found. Redirect to login page.");
+            throw new TokenException(REFRESH_EXPIRED);
+        }
+    }
+
+    private void reIssueAccess(HttpServletResponse response, Optional<RefreshToken> optionalRefresh) {
+        String refreshToken = optionalRefresh.get().getRefreshToken();
+        if (jwtProvider.validateToken(refreshToken)) {
+            // 재발급
+            String newAccessToken = jwtProvider.reissueWithRefresh(refreshToken);
+            response.setHeader("access", newAccessToken);
+        }
+    }
+
 }
