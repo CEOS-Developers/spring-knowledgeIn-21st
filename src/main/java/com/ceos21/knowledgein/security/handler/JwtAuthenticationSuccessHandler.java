@@ -1,8 +1,11 @@
 package com.ceos21.knowledgein.security.handler;
 
+import com.ceos21.knowledgein.global.dto.CommonResponse;
 import com.ceos21.knowledgein.redis.service.RefreshTokenRedisService;
 import com.ceos21.knowledgein.security.dto.PrincipalUserDetails;
 import com.ceos21.knowledgein.security.jwt.JwtProvider;
+import com.ceos21.knowledgein.user.dto.UserDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +25,7 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
     private final RefreshTokenRedisService refreshTokenRedisService;
     @Value("${jwt.expiration.refresh}")
     private Long refreshTokenExpiration;
+    private final ObjectMapper objectMapper;
 
 
     @Override
@@ -37,10 +41,22 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
         refreshTokenRedisService.saveRefreshToken(Long.parseLong(userId), refreshToken, refreshTokenExpiration);
 
         response.setHeader("access", accessToken);
+        writeBodyWithUserDto(response, authentication);
     }
 
     private String findUserIdFromAuthentication(Authentication authentication) {
         PrincipalUserDetails principal = (PrincipalUserDetails) authentication.getPrincipal();
         return principal.getUserEntity().getId().toString();
+    }
+
+    private void writeBodyWithUserDto(HttpServletResponse response, Authentication authentication) throws IOException {
+        UserDto user = UserDto.from(authentication);
+        CommonResponse<UserDto> common = CommonResponse.<UserDto>builder()
+                .status(HttpServletResponse.SC_OK)
+                .message("OK")
+                .data(user)
+                .build();
+
+        response.getWriter().write(objectMapper.writeValueAsString(common));
     }
 }

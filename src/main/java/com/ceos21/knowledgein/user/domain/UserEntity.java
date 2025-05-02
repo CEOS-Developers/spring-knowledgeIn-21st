@@ -36,7 +36,7 @@ public class UserEntity extends BaseTimeEntityWithDeletion {
     private String nickName;
 
     @Column(nullable = true)
-    private String passWord;
+    private String password;
 
     private boolean isDeleted;
     private boolean isEnabled;
@@ -48,18 +48,21 @@ public class UserEntity extends BaseTimeEntityWithDeletion {
         return UserEntity.builder()
                 .name(name)
                 .nickName(nickName)
-                .passWord(passWord)
+                .password(passWord)
                 .email(email)
                 .role(USER)
                 .build();
     }
 
     @Builder(access = PRIVATE)
-    private UserEntity(String name, String email, String nickName, String passWord, Role role) {
+    private UserEntity(String name, String email, String nickName, String password, Role role) {
+        this.isDeleted = false;
+        this.isEnabled = true;
+
         this.role = role;
         this.name = name;
         this.email = email;
         this.nickName = nickName;
-        this.passWord = passWord;
+        this.password = password;
     }
 }

@@ -1,7 +1,6 @@
 package com.ceos21.knowledgein.security.filter;
 
 import com.ceos21.knowledgein.security.exception.TokenException;
-import com.ceos21.knowledgein.security.jwt.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,8 +16,6 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtExceptionFilter extends OncePerRequestFilter {
-
-    private final JwtProvider jwtProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

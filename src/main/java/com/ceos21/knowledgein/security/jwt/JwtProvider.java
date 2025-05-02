@@ -1,5 +1,6 @@
 package com.ceos21.knowledgein.security.jwt;
 
+import com.ceos21.knowledgein.security.dto.PrincipalUserDetails;
 import com.ceos21.knowledgein.security.exception.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,7 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -41,6 +42,7 @@ public class JwtProvider {
     @Value("${jwt.expiration.refresh}")
     private Long REFRESH_TOKEN_EXPIRE_TIME;
     private SecretKey secretKey;
+    private final UserDetailsService userDetailsService;
 
 
     @PostConstruct
@@ -66,6 +68,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .subject(userId)
                 .claim("category", category)
+                .claim("email", authentication.getName())
                 .claim("authorities", authorities)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
@@ -100,8 +103,7 @@ public class JwtProvider {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        // security User
-        User principal = new User(claims.getSubject(), "", authorities);
+        PrincipalUserDetails principal = (PrincipalUserDetails) userDetailsService.loadUserByUsername(claims.get("email", String.class));
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 

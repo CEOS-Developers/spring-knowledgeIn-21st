@@ -1,6 +1,6 @@
 package com.ceos21.knowledgein.security.filter;
 
-import com.ceos21.knowledgein.user.domain.UserEntity;
+import com.ceos21.knowledgein.security.dto.request.RequestLogin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,16 +22,16 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        final UsernamePasswordAuthenticationToken authRequest;
+        final UsernamePasswordAuthenticationToken authenticationToken;
 
         try {
-            UserEntity user = new ObjectMapper().readValue(request.getInputStream(), UserEntity.class);
-            authRequest = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassWord());
+            RequestLogin requestUser = new ObjectMapper().readValue(request.getInputStream(), RequestLogin.class);
+            authenticationToken = new UsernamePasswordAuthenticationToken(requestUser.email(), requestUser.password());
         } catch (IOException e) {
             throw new AuthenticationServiceException("Authentication failed", e);
         }
 
-        setDetails(request, authRequest);
-        return this.getAuthenticationManager().authenticate(authRequest);
+        setDetails(request, authenticationToken);
+        return this.getAuthenticationManager().authenticate(authenticationToken);
     }
 }
