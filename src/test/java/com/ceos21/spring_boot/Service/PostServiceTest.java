@@ -1,10 +1,10 @@
 package com.ceos21.spring_boot.Service;
 
-import com.ceos21.spring_boot.DTO.PostRequestDTO;
-import com.ceos21.spring_boot.DTO.PostResponseDTO;
-import com.ceos21.spring_boot.Domain.User;
-import com.ceos21.spring_boot.Repository.PostRepository;
-import com.ceos21.spring_boot.Repository.UserRepository;
+import com.ceos21.spring_boot.DTO.post.PostRequestDTO;
+import com.ceos21.spring_boot.DTO.post.PostResponseDTO;
+import com.ceos21.spring_boot.Domain.user.User;
+import com.ceos21.spring_boot.Repository.user.UserRepository;
+import com.ceos21.spring_boot.Service.post.PostService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

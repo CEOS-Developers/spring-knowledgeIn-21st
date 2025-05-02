@@ -1,8 +1,8 @@
 /*package com.ceos21.spring_boot.Repository;
 
-import com.ceos21.spring_boot.Domain.Comment;
-import com.ceos21.spring_boot.Domain.Post;
-import com.ceos21.spring_boot.Domain.User;
+import com.ceos21.spring_boot.Domain.Post.Comment;
+import com.ceos21.spring_boot.Domain.Post.Post;
+import com.ceos21.spring_boot.Domain.User.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
