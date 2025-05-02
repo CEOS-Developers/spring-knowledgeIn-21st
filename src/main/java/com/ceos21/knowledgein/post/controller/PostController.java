@@ -5,14 +5,17 @@ import com.ceos21.knowledgein.post.dto.PostDto;
 import com.ceos21.knowledgein.post.dto.request.RequestCreatePost;
 import com.ceos21.knowledgein.post.dto.request.RequestUpdatePost;
 import com.ceos21.knowledgein.post.service.PostService;
+import com.ceos21.knowledgein.security.dto.PrincipalUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/post/v1")
@@ -24,9 +27,9 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<PostDto> createPost(@ModelAttribute @Valid RequestCreatePost requestCreatePost,
-                                                // TODO: spring security 구현 후 수정
-//                                              @AuthenticationPrincipal PrincipalUserDetails currentUser,
-                                              @RequestHeader("userId") Long userId){
+                                              @AuthenticationPrincipal PrincipalUserDetails currentUser){
+
+        Long userId = currentUser.getUserEntity().getId();
 
         PostDto result = postService.createPost(requestCreatePost, userId);
         return ResponseEntity.status(CREATED).body(result);
