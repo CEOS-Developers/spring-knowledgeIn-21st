@@ -5,6 +5,7 @@ import com.ceos21.knowledgein.security.filter.JwtAuthorizationFilter;
 import com.ceos21.knowledgein.security.filter.JwtExceptionFilter;
 import com.ceos21.knowledgein.security.handler.JwtAuthenticationFailureHandler;
 import com.ceos21.knowledgein.security.handler.JwtAuthenticationSuccessHandler;
+import com.ceos21.knowledgein.security.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +15,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -27,12 +27,15 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
+
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
     private final JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
     private final JwtAuthenticationFailureHandler jwtAuthenticationFailureHandler;
 
     private final AuthenticationConfiguration authenticationConfiguration;
+
+    private final CustomOAuth2UserService customOauth2UserService;
 
     private static final String[] WHITE_LIST = {
             "/api/user/v1/login",
@@ -58,11 +61,11 @@ public class SecurityConfig {
                 )
 
                 // oauth
-//                .oauth2Login(oauth2 -> oauth2
-//                        .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
-//                        .successHandler(oAuth2SuccessHandler)
-//                        .failureHandler(oAuth2FailureHandler)
-//                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
+                        .successHandler(jwtAuthenticationSuccessHandler)
+                        .failureHandler(jwtAuthenticationFailureHandler)
+                )
 
                 // 필터 추가
                 .addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
