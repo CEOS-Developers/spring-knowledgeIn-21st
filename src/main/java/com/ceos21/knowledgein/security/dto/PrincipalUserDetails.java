@@ -34,7 +34,7 @@ public class PrincipalUserDetails implements UserDetails, OAuth2User {
 
     @Override
     public String getPassword() {
-        return "";
+        return userEntity.getPassword();
     }
 
     @Override

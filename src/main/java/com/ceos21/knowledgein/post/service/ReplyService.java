@@ -7,6 +7,7 @@ import com.ceos21.knowledgein.post.domain.Reply;
 import com.ceos21.knowledgein.post.dto.ReplyDto;
 import com.ceos21.knowledgein.post.dto.request.RequestCreateReply;
 import com.ceos21.knowledgein.post.dto.request.RequestCreateReplyChildren;
+import com.ceos21.knowledgein.post.exception.PostException;
 import com.ceos21.knowledgein.post.repository.ReplyRepository;
 import com.ceos21.knowledgein.user.domain.UserEntity;
 import com.ceos21.knowledgein.user.service.UserService;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.ceos21.knowledgein.post.exception.PostErrorCode.REPLY_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +67,7 @@ public class ReplyService {
 
     private Reply findReplyOrThrow(Long replyId) {
         return replyRepository.findById(replyId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new PostException(REPLY_NOT_FOUND));
     }
 
     private Reply createNewReplyEntity(RequestCreateReply request, UserEntity user, Post post, List<Image> images) {
