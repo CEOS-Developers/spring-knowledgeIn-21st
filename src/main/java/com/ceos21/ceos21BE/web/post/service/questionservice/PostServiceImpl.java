@@ -96,12 +96,12 @@ public class PostServiceImpl implements PostService{
 
     @Override
     @Transactional
-    public void deletePost(DeletePostRequest request) {
+    public void deletePost(DeletePostRequest request, String email) {
 
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> new PostHandler(ErrorStatus._POST_NOT_FOUND));
 
-        if(!post.getUser().getUserId().equals(request.getUserId())) {
+        if(!post.getUser().getEmail().equals(email)) {
             throw new PostHandler(ErrorStatus._FORBIDDEN);
         }
 

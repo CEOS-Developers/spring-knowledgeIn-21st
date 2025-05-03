@@ -1,12 +1,14 @@
 package com.ceos21.ceos21BE.web.post.controller;
 
 import com.ceos21.ceos21BE.apiPayload.ApiResponse;
+import com.ceos21.ceos21BE.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.web.post.dto.request.CreatePostRequest;
 import com.ceos21.ceos21BE.web.post.dto.request.DeletePostRequest;
 import com.ceos21.ceos21BE.web.post.dto.request.UpdatePostRequest;
 import com.ceos21.ceos21BE.web.post.dto.response.PostResponse;
 import com.ceos21.ceos21BE.web.post.service.questionservice.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,13 +39,12 @@ public class PostController {
     @DeleteMapping("/delete/{postId}")
     public ApiResponse<String> deletePost(
             @PathVariable Long postId,
-            @RequestParam Long userId) {
+            @AuthenticationPrincipal CustomDetails customDetails) {
 
         DeletePostRequest request = DeletePostRequest.builder()
                 .postId(postId)
-                .userId(userId)
                 .build();
-        postService.deletePost(request);
+        postService.deletePost(request, customDetails.getUsername());
         return ApiResponse.onSuccess("삭제 성공");
     }
 

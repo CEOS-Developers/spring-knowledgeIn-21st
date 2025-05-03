@@ -2,6 +2,7 @@ package com.ceos21.ceos21BE.config;
 
 
 import com.ceos21.ceos21BE.jwt.JwtAuthenticationFilter;
+import com.ceos21.ceos21BE.jwt.JwtAuthorizationFilter;
 import com.ceos21.ceos21BE.jwt.JwtUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -86,8 +87,13 @@ public class SecurityConfig {
         JwtAuthenticationFilter loginFilter = new JwtAuthenticationFilter(
                 authenticationManager(authenticationConfiguration), jwtUtil);
         loginFilter.setFilterProcessesUrl("/login");
+
+        JwtAuthorizationFilter authorizationFilter = new JwtAuthorizationFilter(jwtUtil);
+
+
         http.
-                addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
+                addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

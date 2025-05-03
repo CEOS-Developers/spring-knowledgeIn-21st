@@ -7,5 +7,6 @@ import lombok.Getter;
 @Builder
 public class DeletePostRequest {
     private Long postId;
-    private Long userId;
+    //private Long userId;
+    // 이제 jwt 방식으로 인증 할 것임
 }

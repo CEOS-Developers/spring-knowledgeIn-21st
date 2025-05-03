@@ -18,7 +18,7 @@ public interface PostService {
     PostResponse updatePost(UpdatePostRequest request, Long requestUserId, Long postId);
 
     // 게시글 삭제
-    void deletePost(DeletePostRequest request);
+    void deletePost(DeletePostRequest request, String email);
 
     // 해시태그로 게시글 목록 조회
     List<PostResponse> getPostsByHashtag(String HashtagName);
