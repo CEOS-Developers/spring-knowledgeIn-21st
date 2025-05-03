@@ -14,5 +14,9 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
+  jwt:
+    secret: bXlzZWNyZXRrZXk=
+    access-token-expiration: 3600000 # 1시간
+
 server:
   port: 8080
