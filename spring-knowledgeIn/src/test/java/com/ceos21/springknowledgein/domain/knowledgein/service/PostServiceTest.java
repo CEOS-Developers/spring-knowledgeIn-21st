@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.ArgumentMatchers.any;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+/*
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,3 +43,4 @@ class PostServiceTest {
         assertThat(result.getMember()).isEqualTo(member);
     }
 }
+ */

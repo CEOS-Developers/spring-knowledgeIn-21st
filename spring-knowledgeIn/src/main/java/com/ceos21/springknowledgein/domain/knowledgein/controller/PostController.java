@@ -3,8 +3,11 @@ package com.ceos21.springknowledgein.domain.knowledgein.controller;
 import com.ceos21.springknowledgein.domain.knowledgein.Dto.PostCreateDto;
 import com.ceos21.springknowledgein.domain.knowledgein.repository.Post;
 import com.ceos21.springknowledgein.domain.knowledgein.service.PostService;
+import com.ceos21.springknowledgein.domain.user.repository.Member;
+import com.ceos21.springknowledgein.security.user.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,13 +20,14 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody PostCreateDto postCreateDto) {
-        Post post = postService.createPost(postCreateDto);
+    public ResponseEntity<Post> createPost(@RequestBody PostCreateDto postCreateDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Member member = userDetails.getMember();
+        Post post = postService.createPost(postCreateDto, member);
         return ResponseEntity.ok(post);
     }
 
     @GetMapping
-    public List<Post> getALlPosts() {
+    public List<Post> getAllPosts() {
         return postService.getAllPosts();
     }
 

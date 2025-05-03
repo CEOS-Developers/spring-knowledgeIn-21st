@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.ceos21.springknowledgein.domain.knowledgein.repository.Post;
 import com.ceos21.springknowledgein.domain.knowledgein.repository.PostRepository;
+import com.ceos21.springknowledgein.domain.user.UserRoleEnum;
 import com.ceos21.springknowledgein.domain.user.repository.Member;
 import com.ceos21.springknowledgein.domain.user.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +34,7 @@ public class PostRepositoryTest {
     @DisplayName("Post 저장 및 조회 테스트")
     void saveAndFindPosts() {
         //given: 테스트 데이터 생성
-        Member member = new Member("testuser", "testpassword");
+        Member member = new Member("testuser", "testpassword", UserRoleEnum.ROLE_USER);
         memberRepository.save(member);
 
         Post post1 = new Post("Title1", "Content1", member);
