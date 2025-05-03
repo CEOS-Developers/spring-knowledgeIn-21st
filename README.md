@@ -81,7 +81,20 @@ JWT를 이용한 회원가입 로그인 구현
 
 유저 구현 방법
 
-1.
-2.
-3.
-4.
+1. 세션 + 쿠키
+2. Access Token(JWT)
+3. Access Token + Refresh Token
+4. OAuth 2.0
+
+세션
+
+
+쿠키
+
+
+Access Token + Refresh Token 전달 및 보관 방식
+=> AccessToken Authorization 헤더 + RefreshToken Cookie
+
+프론트는 AccessToken을 메모리 or localStorage에 저장장
+
+
