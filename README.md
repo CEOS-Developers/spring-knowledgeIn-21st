@@ -627,3 +627,361 @@ if (request.getPostType() == PostType.ANSWER) {
     - Reference Doc: [@BeforeEach 사용](https://mimah.tistory.com/entry/Spring-Boot-AfterEach-BeforeEach-%EC%98%88%EC%A0%9C)
 - 특정 게시글 조회 성공 & 특정 게시글 조회 실패 테스트 → 성공
     - 실패 테스트는 에러 코드 비교 (`ErrorStatus.POST_NOT_FOUND`가 나오도록)
+
+---
+# Week4 Submission
+
+## 스프링 시큐리티 (Spring Security)
+
+### Spring Security 핵심 기능
+
+- 핵심 기능
+    - Authentication (인증): 누가 들어오는지 확인
+    - Authorization (인가): 들어온 사람이 어디에 갈 수 있는지 결정
+    - 다양한 보안 위협 방어
+
+- Authentication (인증)
+    - 사용자가 제공한 credential (아이디, 비번 등)을 확인하여 신원 검증
+    - `Authentication` 인터페이스: 인증된 사용자의 정보를 담음
+
+    ```java
+    public interface Authentication extends Principal, Serializable {
+        Collection<? extends GrantedAuthority> getAuthorities();
+        Object getCredentials();
+        Object getDetails(); 
+        Object getPrincipal(); 
+        boolean isAuthenticated();
+        void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException;
+    }
+    ```
+
+    - `getAuthorities()`: “이 사람이 어떤 정보를 가졌냐?”에 해당, 역할/권한 반환
+    - `getPrincipal()`: “누구냐?”에 해당, 사용자 ID, username, 또는 UserDetails 객체 전체 등을 반환
+
+- Authorization (인가)
+    - 인증된 사용자가 특정 리소스에 접근할 수 있는지, 특정 동작을 수행할 수 있는지를 결정
+
+### Spring Security 주요 컴포넌트
+
+- `AuthenticationManager`
+    - Authentication 과정을 관리하는 중심 컴포넌트
+    - 사용자가 로그인을 시도할 때, `AuthenticationManager`가 사용자의 자격 증명 (이메일, 비밀번호 등)을 받아 이를 인증할 수 있는 프로세스를 호출
+
+      ![pic1](./readme-src/week4-1.png)
+
+- `AuthenticationProvider`
+    - 실제로 인증 로직을 처리하는 역할을 담당
+    - 여러 `AuthenticationProvider`가 존재할 수 있으며, 각각은 특정 인증 방식을 처리
+        - 이메일, 비번을 하나의 `AuthenticationProvider`에서 처리하고, 다른 소셜 로그인은 또다른 `AuthenticationProvider`에서 담당하는 방식
+
+          ![pic2](./readme-src/week4-2.png)
+
+- `UserDetailsService`
+    - 사용자 정보를 불러오고 검증하는 서비스
+    - 데이터베이스 또는 다른 저장소에서 사용자 정보를 가져오고, 이를 `UserDetails` 객체로 반환
+    - `UserDetails` 객체: 사용자의 아이디, 비밀번호, 권한(Role) 등 다양한 정보를 포함
+
+- `SecurityContext`
+    - 인증이 완료된 사용자 정보를 저장하는 컨텍스트
+    - 애플리케이션 전반에서 공유되며 `SecurityContextHolder`로 접근 가능
+
+      ![pic3](./readme-src/week4-3.png)
+
+- `SecurityContextHolder`
+    - 현재 보안 컨텍스트에 대한 세부 정보를 보관
+    - `ThreadLocal`을 사용하여 동일한 스레드 내에서는 각 사용자의 인증 정보를 개별적으로 유지
+    - → 요청마다 인증된 사용자의 정보를 보존하고, 다른 요청에서는 다른 사용자의 정보 처리 가능
+    1. 인증된 사용자 정보를 `SecurityContext`에 저장 및 관리
+    2. 이후 요청에서 `SecurityContext`를 통해 인증된 정보를 참조하여 사용자의 권한이나 인증 상태를 확인
+    3. 애플리케이션 어디서나 `SecurityContextHolder.getContext()` 메서드를 통해 인증 정보 접근 가능
+
+        ```java
+        Authentication authentication 
+        		= SecurityContextHolder.getContext().getAuthentication();
+        		
+        String username = authentication.getName();  // 사용자 이름
+        Object principal = authentication.getPrincipal();
+        Collection<? extends GrantedAuthority> authorities 
+        		= authentication.getAuthorities();  // 권한 목록
+        ```
+
+
+
+### Spring Security Filter Chain
+
+- Filter Chain
+    - Spring Security에서 HTTP 요청을 처리할 때 사용하는 일련의 필터들
+    - 각 필터 → 특정 보안 기능 담당
+    1. `SecurityContextPersistenceFilter`
+        - 요청 간 `SecurityContext`(얘가 뭐냐고? 인증이 완료된 사용자 정보를 저장하는 컨텍스트) 유지
+        - 새 요청이 들어오면 이전 인증된 사용자 정보 복원
+    2. `UsernamePasswordAuthenticationFilter`
+        - 폼 기반 로그인 처리
+        - 사용자가 제출한 username과 pw를 확인하여 인증 시도
+
+        ```java
+        SecurityContextHolder.getContext().getAuthentication()
+        → UsernamePasswordAuthenticationToken
+        → principal = User 객체
+        → authorities = [ROLE_USER]
+        ```
+
+    3. `AnonymousAuthenticationFilter`
+        - 이전 필터에서 인증되지 않은 요청에 대해 익명 사용자 인증 제공
+        - 로그인 안 한 유저에 대해서 `SecurityContext`에 anonymous user로 저장됨
+
+        ```java
+        SecurityContextHolder.getContext().getAuthentication()
+        → AnonymousAuthenticationToken
+        → principal = "anonymousUser"
+        → authorities = [ROLE_ANONYMOUS]
+        ```
+
+    4. `ExceptionTranslationFilter`
+        - Spring Security 예외를 HTTP 응답으로 변환
+        - 인증 실패 → 로그인 페이지로 리다이렉트 OR 인가 실패 → 403 오류
+    5. `FilterSecurityInterceptor`
+        - 접근 제어 결정을 내리는 마지막 필터
+        - 현재 인증된 사용자가 요청한 리소스에 접근할 권한이 있는지 확인
+
+- Filter Chain 동작 방식
+    1. 클라이언트 요청 들어옴 → Filter Chain의 첫 번째 필터부터 순차적으로 통과
+    2. 각 필터는 요청을 검사하고 작업 수행
+    3. 필터는 요청을 다음 필터로 전달하거나 특정 조건에 따라 요청 처리 중단
+    4. 모든 필터를 통과한 요청만이 실제 애플리케이션 로직에 도달
+
+       ![pic4](./readme-src/week4-4.png)
+
+### Spring Security 인증, 인가 흐름
+
+![pic5](./readme-src/week4-5.png)
+
+- Authentication (인증) 흐름
+    - 사용자의 신원을 확인하는 과정
+    1. **사용자 로그인 요청**: 사용자가 로그인 폼에 credentials(이메일, 비밀번호 등)을 입력하고 제출
+    2. **Authentication Filter**:  `UsernamePasswordAuthenticationFilter`가 요청을 가로채고 `Authentication` 객체 생성
+    3. **Authentication Manager**: `AuthenticationManager`은 적절한 `AuthenticationProvider`을 선택하여 인증을 위임 (`AuthenticationManager`가  `AuthenticationProvider`의 parent 관계)
+    4. **Authentication Provider**: 선택된 `AuthenticationProvider`은 `UserDetailsService`를 사용하여 사용자 정보를 로드하고 로드된 정보를 바탕으로 비밀번호 검증 (얘가 실제 인증 로직을 처리하니까)
+    5. **User Details Service**: 데이터베이스나 다른 저장소에서 사용자 정보 조회
+    6. **Security Context**: 인증이 성공하면, `Authentication` 객체가 `SecurityContext`에 저장됨
+
+- Authorization (인가) 흐름
+    - 인증된 사용자가 특정 리소스에 접근할 권한이 있는지 확인하는 과정
+    1. **리소스 접근 요청**: 인증된 사용자가 보호된 리소스에 접근 시도
+    2. **Filter Security Interceptor**: `FilterSecurityInterceptor`가 요청을 가로채고 권한 검사를 시작
+    3. **Access Decision Manager**: `AccessDecisionManager`가 현재 사용자의 권한과 요청된 리소스의 필요 권한 비교
+    4. **권한 확인**: `SecurityContext`에서 현재 인증된 사용자의 권한 정보 조회
+    5. **접근 결정**: 사용자의 권한이 충분하면 리소스 접근이 허용되고, 권한이 부족하면 `AccessDeniedException`이 발생하고 접근 거부됨
+
+
+### Spring Security 관련 Dependencies
+
+```groovy
+dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+		testImplementation 'org.springframework.security:spring-security-test'
+}
+```
+
+- Dependencies만 추가해도 `localhost:8080/login`으로 로그인 테스트 가능
+
+  ![pic6](./readme-src/week4-6.png)
+
+## JWT 인증(Authentication)
+
+- Dependencies 추가
+
+    ```jsx
+    // jtw dependencies
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    ```
+
+- `application.yml`에 다음 사항 추가
+
+    ```json
+    jwt:
+    	secret: ${jwt_secret} // 터미널에 openssl rand -hex 64 입력하면 생성해줌
+    ```
+
+
+- JWT 구성요소
+
+  ![pic7](./readme-src/week4-7.png)
+    - Header: 어떠한 알고리즘으로 암호화 할 것인지, 어떠한 토큰을 사용할 것 인지
+    - Payload: 전달하려는 정보
+    - Signature: 헤더와 페이로드를 합친 후 서버가 지정한 secret key로 암호화 시켜 토큰을 변조하기 어렵게 만듦
+- JWT 동작 원리
+
+  ![pic8](./readme-src/week4-8.png)
+    1. 사용자 id, pw 입력하여 로그인 요청
+    2. 서버는 회원DB에 사용자가 있는지 확인
+    3. 사용자의 로그인 요청 확인 후 secret key로 토큰 발급
+    4. 토큰을 사용자에 전달
+    5. 서비스 요청 및 권한 확인 위하여 헤더에 데이터 요청
+    6. 데이터 확인 후 Access token으로 사용자 정보 확인
+    7. 클라이언트 요청에 대한 응답과 요청한 데이터 전달
+
+- `CustomUserDetails`
+    - 사용자 인증 객체 정의; 우리의 User 객체와 Spring Security 보안 시스템을 연결해줌
+    - Spring Security에서 로그인한 사용자 정보를 담는 객체 (User 객체와의 중간다리 역할)
+- `JwtAuthenticationFilter`
+    - 모든 HTTP 요청에 대해 JWT 토큰을 검증하고 인증 객체를 Security Context에 설정하는 역할
+- `TokenProvider`
+    - createAccessToken()
+        - 액세스 토큰 생성 (24시간 유효)
+        - 토큰에 사용자 email + Role 포함
+    - createRefreshToken()
+        - 리프레시 토큰 생성 (1주일 유효)
+        - 토큰에 사용자 email 포함
+    - getEmailFromToken()
+        - JWT에서 email(subject) 추출
+    - getAuthentication()
+        - JWT 기반으로 Authentication 객체 생성
+    - validateToken()
+        - 토큰 유효성 검사
+        - 로그아웃 여부 검사 - Redis에 블랙리스트로 저장된 토큰인지 확인
+    - reissue()
+        - 토큰 재발급
+        - 리프레시 토큰의 만료일이 엑세스 토큰보다 빠르면 리프레시 토큰도 갱신
+
+## Redis 사용
+
+- Dependencies 추가
+
+    ```jsx
+    // redis dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    ```
+
+- `redis-server`로 터미널에서 Redis 실행하고 `application.yml`에 다음 사항 추가
+
+    ```json
+    data:
+      redis:
+      host: localhost
+      port: 6379 // 기본 포트 번호
+    ```
+
+
+- 캐시 서버 (Cache Server)
+    - 사용자가 많아지게 된다면 데이터베이스가 과부하 위험 → 캐시 서버(Redis) 사용!
+    - 같은 요청이 여러번 들어오면 캐시 서버에 저장되어있는 이전 요청 결과값을 바로 내려줄 수 있음 → DB 부하 줄이고 서비스 속도 느려지지 않도록 해줌
+
+- Redis (Remote Dictionary Server)
+    - 디스크나 SSD가 아닌 메모리에 데이터를 저장하는 인메모리 NoSQL Key-Value 저장소
+    - Data type (Collection) 지원
+
+- Redis Session Clustering
+    - 모든 서버가 같은 Redis Session 저장소를 바라보게 하는 방법 → 외부로 Session 저장소를 분리
+    - 하나의 서버에서 세션이 생성될 때 한 번만 저장소에 저장 → 메모리 부하 절감
+    - 세션 저장소는 서버에 상태(state)를 저장하므로 저장소 접근이 잦음 → Redis는 인메모리 방식이라 메모리 낭비를 줄일 수 있음
+
+      ![pic9](./readme-src/week4-9.png)
+      ![pic10](./readme-src/week4-10.png)
+    - Reference: [redis session clustering](https://ksh-coding.tistory.com/128)
+
+
+
+## JWT with Redis
+
+- JWT의 장점
+    - 서버에 메모리에 저장하는 방식인 세션과 다르게 JWT의 경우엔 서버 메모리 확보가 필요없음
+    - 클라이언트가 토큰을 가지고 있다가 요청이 오면 헤더에 해당 토큰을 보내줘서 토큰 검사를 함
+- JWT의 단점
+    - Stateless라서 자동 삭제되지 않음 → 해킹의 위험 → 해결하고자 Redis 사용!
+- JWT + Redis
+
+  ![pic11](./readme-src/week4-11.png)
+    - JWT refresh token이 해킹당하면 access token을 재발급(reissue) 할 수 있음
+    - 저 access token의 소유자가 정당한 소유자인지 확인하기 위해 이를 redis에 저장해서 사용
+- 정당한 소유자인지 검증하는 흐름
+    1. 사용자가 로그인하면 Redis에 {Key= email(다른거 가능), Value= refresh token}으로 저장됨
+    2. Reissue 요청이 들어오면:
+        - 요청 안의 refresh token이 유효한지 확인 (JWT 유효성 검사)
+        - Redis에서 email 기반으로 저장된 refresh token 꺼냄
+        - 요청에 들어온 refresh token과 redis에 저장된 token이 일치하는지 비교
+        - 같으면 “정당한ㅋㅋ” 사용자로 간주하고 access token 재발급 해줌
+        - 다르면 도난된 토큰으로 간주하고 예외 발생시킴
+- Reference: [jwt+redis](https://velog.io/@yeomyaloo/Spring-security-JWT%EC%99%80-Redis)
+
+## 관련 구현 / 인증, 인가 테스트
+
+### 회원가입 및 로그인 관련 API
+
+![pic12](./readme-src/week4-12.png)
+1. 회원가입
+    - `PasswordEncoder`로 비밀번호가 암호화된 새로운 user 객체를 생성
+
+        ```java
+        public static User toAuthUser(UserRequestDTO.SignUpRequestDto request, PasswordEncoder passwordEncoder) {
+            return User.builder()
+                    .nickName(request.getNickName())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .roleType(request.getRoleType())
+                    .build();
+        }
+        ```
+
+2. 로그인
+    - `TokenProvider`로 access token, refresh token을 생성
+    - Refresh token을 Redis에 저장 (나중에 access token이 만료되면 refresh token으로 reissue가 가능해야하므로 레디스에 저장해둠)
+3. 로그아웃
+    - Refresh token은 access token을 재발급할 수 있는 **마스터 키**이기 때문에, 유저가 로그아웃하면 더 이상 쓸 수 없어야 함
+    - Redis에 저장해뒀던 refresh token 삭제 (reissue된 access token 없이 재로그인 하는 것을 방지)
+    - Access token을 redis에 블랙리스트로 저장
+        - Access token은 stateless라 자체적으로 “무효”라는 정보를 담을 수 없어서 로그아웃을 해도 access token이 유효하게 보일 수 있기때문에 Redis에 이 토큰은 무효하다고 명시적으로 기록
+
+    ```java
+    // 1. RefreshToken을 redis에서 삭제
+    // 2. AccessToken을 redis에 무효라고 명시적으로 저장
+    redisService.deleteValue(existingUser.getEmail()); // 재로그인 방지
+    redisService.setValue(accessToken, "logout", tokenProvider.getExpirationTime(accessToken)); // AccessToken을 블랙리스트에 저장
+    ```
+
+4. 새로운 access token 발급
+    - Refresh token으로 새로운 access token을 발급해주는 로직
+    - 사용하려는 refresh token이 유효하지 않으면 에러 - 로그인을 안한 사용자의 refresh token은 redis에 없으므로 유효하지 않다고 뜸
+    - 사용자가 보낸 refresh token과 사용자의 email을 기반으로 redis에서 찾은 refresh token을 비교해서 둘이 일치하는지 확인 - 일치하지 않으면 예외 발생
+    - Refresh token을 가지고 `TokenProvider`로 새로운 access token을 만들어줌 (만약 refresh token이 곧 만료되려하면 새 refresh token도 발급해줌
+
+### 회원가입 및 로그인 테스트
+
+- 회원가입
+
+    ```json
+    {
+      "nickName": "tris",
+      "email": "tris@gmail.com",
+      "password": "tris123",
+      "roleType": "USER"
+    }
+    
+    {
+      "isSuccess": true,
+      "code": "COMPLETE_SIGNUP",
+      "message": "회원가입이 완료되었습니다."
+    }
+    ```
+  ![pic13](./readme-src/week4-13.png)
+
+- 로그인
+  ![pic14](./readme-src/week4-14.png)
+
+- 로그아웃
+  ![pic15](./readme-src/week4-15.png)
+
+- Access token 재발급
+  ![pic16](readme-src/week4-16.png)
+
+### 토큰이 필요한 API 구현 및 테스트
+
+- 토큰을 제공하지 않고 게시물을 작성하려고 하면 유저를 찾을 수 없다는 에러 반환 (게시물 삭제, 업데이트도 마찬가지로 해당)
+
+  ![pic17](readme-src/week4-17.png)
+
+- 토큰을 제공해주면 제대로 게시물 작성 가능
+
+  ![pic18](readme-src/week4-18.png)
