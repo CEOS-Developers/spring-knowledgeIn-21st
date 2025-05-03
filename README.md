@@ -328,23 +328,23 @@ public class CustomUserDetails implements UserDetails {
 이후 **@AuthenticationPrincipal** 로 로그인 정보를 주입받았다.
 
 **2) Spring Security**
- ```java
+```java
     @Bean
-    public SecurityFilterChain myFilter(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                .csrf(AbstractHttpConfigurer::disable) //csrf 비활성화
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(a -> a.requestMatchers("/user/create", "/user/login", "/user/logout", "/connect/**", "/v3/api-docs/**",
-                        "/swagger-ui/**", "/swagger-ui.html","permit/**").permitAll().anyRequest().authenticated())
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
+public SecurityFilterChain myFilter(HttpSecurity httpSecurity) throws Exception {
+    return httpSecurity
+            .csrf(AbstractHttpConfigurer::disable) //csrf 비활성화
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(a -> a.requestMatchers("/user/create", "/user/login", "/user/logout", "/connect/**", "/v3/api-docs/**",
+                    "/swagger-ui/**", "/swagger-ui.html","permit/**").permitAll().anyRequest().authenticated())
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+}
 
-    @Bean
-    public PasswordEncoder makePassword() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
+@Bean
+public PasswordEncoder makePassword() {
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+}
 }
 ```
 - 로그인/회원가입/스웨거 등은 인증 절차 없이 필터를 통과,
@@ -367,7 +367,7 @@ public class CustomUserDetails implements UserDetails {
 - 만든 Authentication을 SecurityContextHolder에 심어 추후 @AuthenticationPrincipal을 통해 로그인 정보를 꺼냄.
 
 #### 2. 로그인 + 비로그인 구분
-![](https://velog.velcdn.com/images/dohyunii/post/40c0d955-447e-4d68-87d1-83deb398b807/image.png)
+<img src="https://velog.velcdn.com/images/dohyunii/post/40c0d955-447e-4d68-87d1-83deb398b807/image.png" width="60%" />
 - **post를 예로 들면**
 
   **<내가 쓴 질문 조회/질문 작성/내가 쓴 질문 삭제>** 등의 api는 로그인 정보를 받아와야 하므로 **/post**로 시작함
@@ -450,13 +450,12 @@ else {
   ![](https://velog.velcdn.com/images/dohyunii/post/d21155e1-2f01-40c0-9d04-2beefd15892c/image.png)
 
 
-
-
 #### 4. 추가 구현 기능
 **(1) 회원가입, 로그인**
 - 회원가입 시 email, nickname, password 입력
-  ![](https://velog.velcdn.com/images/dohyunii/post/39504893-04dd-4dc2-a376-26cd6ba8b9c0/image.png)
+<img src="https://velog.velcdn.com/images/dohyunii/post/39504893-04dd-4dc2-a376-26cd6ba8b9c0/image.png" width="60%" />
 - 이후 로그인 시 토큰 반환
+
   ![](https://velog.velcdn.com/images/dohyunii/post/7362e2c7-ac0d-46c5-9a8a-229122a3ab61/image.png)
 - 로그인할 때 리프레시 토큰을 쿠키에 저장
 ```java
@@ -465,7 +464,10 @@ else {
 ```
 
 **(2) 해시태그별 글 조회**
-  ![](https://velog.velcdn.com/images/dohyunii/post/314325ad-831e-4615-8112-9831b5f53743/image.png)![](https://velog.velcdn.com/images/dohyunii/post/45c1c7f5-5c5c-446b-9cce-278c02aab72b/image.png)
+
+ <img src="https://velog.velcdn.com/images/dohyunii/post/314325ad-831e-4615-8112-9831b5f53743/image.png" width="40%" /> 
+ 
+ ![](https://velog.velcdn.com/images/dohyunii/post/45c1c7f5-5c5c-446b-9cce-278c02aab72b/image.png)
 
 - **post 삭제 시, post와 hashtag의 관계는 끊고 hashtag는 남겨둠**
 ``` java
@@ -480,15 +482,17 @@ else {
 
 **(3) 댓글 관련**
 - 댓글은 **POST, ANSWER**에 남길 수 있다. 이를 TargetStatus로 구분하였다.
-![](https://velog.velcdn.com/images/dohyunii/post/71277bc1-08ba-4f2a-ac8e-af22e5dcbb49/image.png)
+<img src="https://velog.velcdn.com/images/dohyunii/post/71277bc1-08ba-4f2a-ac8e-af22e5dcbb49/image.png" width="50%" />
 : TargetStatus에는 POST 또는 ANSWER과 그의 id를 넣으면 된다.
 
 
 ❶ **Post**에 댓글 남김
-![](https://velog.velcdn.com/images/dohyunii/post/17fb05b4-0d1d-48b4-a8de-8192884fd689/image.png)
+
+<img src="https://velog.velcdn.com/images/dohyunii/post/17fb05b4-0d1d-48b4-a8de-8192884fd689/image.png" width="50%" />
 
 ❷ **Answer**에 댓글 남김
-![](https://velog.velcdn.com/images/dohyunii/post/4086b03d-2f08-4aef-a0a1-7c77201a9c88/image.png)
+
+<img src="https://velog.velcdn.com/images/dohyunii/post/4086b03d-2f08-4aef-a0a1-7c77201a9c88/image.png" width="50%" />
 
 ![](https://velog.velcdn.com/images/dohyunii/post/17752005-f2e9-47bb-9d7c-eab40883095e/image.png)
 
