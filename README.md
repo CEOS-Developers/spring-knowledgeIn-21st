@@ -373,12 +373,96 @@ public class CustomUserDetails implements UserDetails {
   **<내가 쓴 질문 조회/질문 작성/내가 쓴 질문 삭제>** 등의 api는 로그인 정보를 받아와야 하므로 **/post**로 시작함
   <**해시태그별 글 조회**>는 로그인하지 않은 사용자도 조회 가능하므로 **/permit**으로 시작해 필터 통과함
 
-#### 3. 추가 구현 기능
+#### 3. 로그아웃 + 엑세스 토큰 재발급
+(1) **로그아웃**
+
+- 리프레시 토큰을 레디스에 저장하는 방법도 있다는데 일단 DB에 저장함.
+- **RefreshToken** entity 추가
+```java
+public class RefreshToken {
+    @Id
+    private Long userId;
+
+    private String refreshToken;
+```
+- 로그아웃 시, 저장해두었던 사용자의 refreshToken이 삭제되고 재로그인 해야 한다.
+
+(2)**엑세스 토큰 재발급**
+- 엑세스 토큰의 유효기간은 30분, 리프레시 토큰의 유효기간은 30일로 설정
+- 엑세스 토큰 만료 시, 리프레시 토큰을 이용해 엑세스 토큰을 재발급 받는다.
+- 클라이언트가 리프레시 토큰을 요청과 함께 쿠키에서 보내면, 서버에서 이를 검증하여 엑세스 토큰을 갱신한다.
+
+❶ **리프레시 토큰 검증**
+```java
+RefreshToken savedToken = refreshTokenRepository.findByUserId(userId)
+        .orElseThrow(() -> new CustomException(ErrorStatus.INVALID_REFRESH_TOKEN));
+
+if (!savedToken.getRefreshToken().equals(refreshToken)) {
+    throw new CustomException(ErrorStatus.INVALID_REFRESH_TOKEN);
+
+TokenDTO newTokenDTO = jwtTokenProvider.createToken(user);
+}
+```
+: DB에서 사용자의 리프레시 토큰을 조회하고 비교한 뒤, jwtTokenProvider.createToken(user)를 호출해 새 토큰 발급한다.
+
+```java
+  // DB에 리프레시 토큰 업데이트
+/ savedToken.setRefreshToken(newTokenDTO.getRefreshToken());
+
+쿠키에 새로운 리프레시 토큰 저장
+jwtTokenProvider.setRefreshTokenInCookies(response, newTokenDTO.getRefreshToken());
+
+```
+: 발급 받은 새 토큰을 cookie와 db에 업데이트한다.
+
+❷ **JwtTokenProvider**
+```java
+
+if (existingToken != null) {
+        try {
+        // 리프레시 토큰이 유효한지 확인
+        Jwts.parserBuilder()
+                        .setSigningKey(SECRET_KEY)
+                        .build()
+                        .parseClaimsJws(existingToken.getRefreshToken());
+
+        //유효하면 재사용 (리프레시 토큰은 그대로)
+        refreshToken = existingToken.getRefreshToken();
+            } catch (ExpiredJwtException e) {
+        // 만료된 경우 새로 발급
+        refreshToken = createRefreshToken(user);
+                existingToken.setRefreshToken(refreshToken);
+                refreshTokenRepository.save(existingToken);
+            }
+                    } 
+else {
+        refreshToken = createRefreshToken(user);
+            refreshTokenRepository.save(new RefreshToken(user.getId(), refreshToken));
+        }
+
+```
+- 리프레시 토큰의 만료기한이 남았다면 그대로 반환, 만료기한이 지났다면 새로 발급 받아야한다.
+- 리프레시 토큰이 만료된 경우, **재로그인해야 한다는 에러** 터트림.
+
+**실행결과**
+![](https://velog.velcdn.com/images/dohyunii/post/4d0309e3-5d3c-4b55-93cb-299ce2a8bb1a/image.png)
+- 리프레시 토큰 만료 시,
+  ![](https://velog.velcdn.com/images/dohyunii/post/d21155e1-2f01-40c0-9d04-2beefd15892c/image.png)
+
+
+
+
+#### 4. 추가 구현 기능
 **(1) 회원가입, 로그인**
 - 회원가입 시 email, nickname, password 입력
   ![](https://velog.velcdn.com/images/dohyunii/post/39504893-04dd-4dc2-a376-26cd6ba8b9c0/image.png)
 - 이후 로그인 시 토큰 반환
-  ![](https://velog.velcdn.com/images/dohyunii/post/216e208c-c063-481e-9c64-c155a43494c0/image.png)
+  ![](https://velog.velcdn.com/images/dohyunii/post/7362e2c7-ac0d-46c5-9a8a-229122a3ab61/image.png)
+- 로그인할 때 리프레시 토큰을 쿠키에 저장
+```java
+        // 쿠키에 리프레시 토큰 저장
+        jwtTokenProvider.setRefreshTokenInCookies(response, tokenDTO.getRefreshToken());
+```
 
 **(2) 해시태그별 글 조회**
   ![](https://velog.velcdn.com/images/dohyunii/post/314325ad-831e-4615-8112-9831b5f53743/image.png)![](https://velog.velcdn.com/images/dohyunii/post/45c1c7f5-5c5c-446b-9cce-278c02aab72b/image.png)

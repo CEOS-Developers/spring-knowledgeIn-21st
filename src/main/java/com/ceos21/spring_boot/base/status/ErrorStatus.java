@@ -24,6 +24,9 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER_4001", "해당 유저를 찾을 수 없습니다."),
     DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "USER_4002", "이미 가입된 유저입니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "USER_4003", "비밀번호가 일치하지 않습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "USER_4003", "존재하지 않는 리프레시 토큰입니다."),
+    INVALID_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "USER_4003", "존재하지 않는 엑세스 토큰입니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "USER_4003", "리프레시토큰이 만료되었습니다. 재로그인해주세요."),
 
     //3. 이미지 관련 에러
     IMAGE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "IMAGE_4001", "이미지 업로드 실패"),

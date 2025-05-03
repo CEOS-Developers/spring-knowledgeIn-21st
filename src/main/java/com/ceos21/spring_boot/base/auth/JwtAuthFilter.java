@@ -1,7 +1,10 @@
 package com.ceos21.spring_boot.base.auth;
 
 import com.ceos21.spring_boot.base.exception.CustomException;
+import com.ceos21.spring_boot.dto.user.TokenDTO;
+import com.ceos21.spring_boot.service.Impl.UserServiceImpl;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -10,6 +13,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,10 +31,17 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+@Slf4j
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
     @Value("${jwt.secretKey}")
     private String secretKey;
+
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public JwtAuthFilter(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -38,6 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String token = request.getHeader("Authorization");
+        String refreshToken = request.getHeader("refreshToken");
 
         try {
             if (token != null && token.startsWith("Bearer ")) {
@@ -64,13 +76,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-
         } catch (JwtException | IllegalArgumentException e) {
-            // JWT 검증 실패 시 CustomException 처리
-            throw new CustomException(ErrorStatus.COMMON_BAD_REQUEST);
-        } catch (CustomException ex) {
-            // CustomException 처리
-            throw ex;
+            if (e instanceof ExpiredJwtException) {
+
+                if (refreshToken != null) {
+                    TokenDTO newTokens = jwtTokenProvider.refreshAccessToken(request, response);
+                    response.setHeader("NewAccessToken", newTokens.getAccessToken());
+                    response.setHeader("NewRefreshToken", newTokens.getRefreshToken());
+                } else {
+                    throw new CustomException(ErrorStatus.REFRESH_TOKEN_EXPIRED);
+                }
+            } else {
+                throw new CustomException(ErrorStatus.COMMON_BAD_REQUEST);
+            }
         }
 
         filterChain.doFilter(request, response);

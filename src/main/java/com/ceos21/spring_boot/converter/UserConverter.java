@@ -30,13 +30,14 @@ public class UserConverter {
                 .build();
     }
 
-    public static LoginResponseDTO toLoginResponseDTO(User user, String accessToken) {
+    public static LoginResponseDTO toLoginResponseDTO(User user, String accessToken,String refreshToken) {
         return  LoginResponseDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .role(user.getRole().name())
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 

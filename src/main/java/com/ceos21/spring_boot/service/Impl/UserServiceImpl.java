@@ -2,28 +2,29 @@ package com.ceos21.spring_boot.service.Impl;
 
 import com.ceos21.spring_boot.base.auth.JwtTokenProvider;
 import com.ceos21.spring_boot.base.exception.CustomException;
-import com.ceos21.spring_boot.converter.PostConverter;
 import com.ceos21.spring_boot.converter.UserConverter;
 import com.ceos21.spring_boot.domain.entity.User;
 import com.ceos21.spring_boot.base.status.ErrorStatus;
-import com.ceos21.spring_boot.dto.user.LoginRequestDTO;
-import com.ceos21.spring_boot.dto.user.LoginResponseDTO;
-import com.ceos21.spring_boot.dto.user.UserResponseDTO;
+import com.ceos21.spring_boot.dto.user.*;
+import com.ceos21.spring_boot.repository.RefreshTokenRepository;
 import com.ceos21.spring_boot.repository.UserRepository;
 import com.ceos21.spring_boot.service.UserService;
-import com.ceos21.spring_boot.dto.user.UserSignupRequestDTO;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     //회원가입
     @Transactional
@@ -46,8 +47,8 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    //로그인
-    public LoginResponseDTO login(LoginRequestDTO request) {
+    @Transactional
+    public LoginResponseDTO login(LoginRequestDTO request, HttpServletResponse response) {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
@@ -57,14 +58,19 @@ public class UserServiceImpl implements UserService {
         }
 
         // JWT 생성
-        String accessToken = jwtTokenProvider.createToken(user);
+        TokenDTO tokenDTO = jwtTokenProvider.createToken(user);
 
-        return UserConverter.toLoginResponseDTO(user, accessToken);
+        // 쿠키에 리프레시 토큰 저장
+        jwtTokenProvider.setRefreshTokenInCookies(response, tokenDTO.getRefreshToken());
+
+        return UserConverter.toLoginResponseDTO(user, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
     }
 
     // 로그아웃
-    public void logout(String token) {
-        jwtTokenProvider.invalidateToken(token);
-
+    @Transactional
+    public void logout(Long userId) {
+        refreshTokenRepository.deleteByUserId(userId);
     }
+
+
 }

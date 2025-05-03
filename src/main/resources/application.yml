@@ -30,4 +30,5 @@ cloud:
 
 jwt:
   secretKey: ${jwt.secretKey}
-  expiration: 60
+  accessTokenExpirationMinutes: 30
+  refreshTokenExpirationDays: 30
