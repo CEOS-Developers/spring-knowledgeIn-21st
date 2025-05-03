@@ -368,6 +368,7 @@ public PasswordEncoder makePassword() {
 
 #### 2. 로그인 + 비로그인 구분
 <img src="https://velog.velcdn.com/images/dohyunii/post/40c0d955-447e-4d68-87d1-83deb398b807/image.png" width="60%" />
+
 - **post를 예로 들면**
 
   **<내가 쓴 질문 조회/질문 작성/내가 쓴 질문 삭제>** 등의 api는 로그인 정보를 받아와야 하므로 **/post**로 시작함
@@ -445,7 +446,9 @@ else {
 - 리프레시 토큰이 만료된 경우, **재로그인해야 한다는 에러** 터트림.
 
 **실행결과**
-![](https://velog.velcdn.com/images/dohyunii/post/4d0309e3-5d3c-4b55-93cb-299ce2a8bb1a/image.png)
+
+<img src="https://velog.velcdn.com/images/dohyunii/post/4d0309e3-5d3c-4b55-93cb-299ce2a8bb1a/image.png" width="60%" />
+
 - 리프레시 토큰 만료 시,
   ![](https://velog.velcdn.com/images/dohyunii/post/d21155e1-2f01-40c0-9d04-2beefd15892c/image.png)
 
