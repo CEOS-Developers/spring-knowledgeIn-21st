@@ -9,6 +9,7 @@ import com.ceos21.knowledgeIn.domain.post.PostService;
 import com.ceos21.knowledgeIn.global.exceptionHandler.ApiResponse;
 import com.ceos21.knowledgeIn.global.exceptionHandler.Status;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/comments")
+@Tag(name="댓글")
+@RequestMapping("api/comments")
 public class CommentController {
 
     private final PostService postService;

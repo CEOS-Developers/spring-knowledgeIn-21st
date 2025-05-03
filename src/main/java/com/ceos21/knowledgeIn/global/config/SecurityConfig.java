@@ -46,7 +46,14 @@ public class SecurityConfig {
         //경로 권한 설정
         http.authorizeHttpRequests((auth)->auth
                 .requestMatchers("/api/members/signUp","api/members/signIn").permitAll()
-                .requestMatchers(HttpMethod.POST,"/").hasAuthority("MEMBER")
+                .requestMatchers(HttpMethod.GET,"api/posts/**","api/comments/**").permitAll()
+                //스웨거 docs 관련 모든 경로 허용
+                .requestMatchers(
+                        "/api/v1/auth/**",
+                        "/swagger-ui/**",
+                        "/swagger-resources/**",
+                        "/v3/api-docs/**"
+                ).permitAll()
                 .requestMatchers("/").hasAnyAuthority("MEMBER", "ADMIN")
                 .anyRequest().authenticated()
         );

@@ -69,18 +69,18 @@ public class PostService {
     }
 
 
-    public Page<Post> getPostList(Integer page, Integer size, String sort, String search) {
+    public Page<Post> getPostList(Pageable pageable, String search) {
 
-        Sort sorted;
+//        Sort sorted;
+//
+//        switch (sort){
+//            case "ANS_DESC": sorted = Sort.by(Sort.Direction.DESC, "answerCnt"); break;
+//            case "ANS_ASC": sorted = Sort.by(Sort.Direction.ASC, "answerCnt"); break;
+//            case "RECENT":
+//            default: sorted = Sort.by(Sort.Direction.DESC, "createdAt");
+//        }
 
-        switch (sort){
-            case "ANS_DESC": sorted = Sort.by(Sort.Direction.DESC, "answerCnt"); break;
-            case "ANS_ASC": sorted = Sort.by(Sort.Direction.ASC, "answerCnt"); break;
-            case "RECENT":
-            default: sorted = Sort.by(Sort.Direction.DESC, "createdAt");
-        }
-
-        return postRepository.findAll(PageRequest.of(page,size, sorted));
+        return postRepository.findByContentContains(search,pageable);
     }
 
     @Transactional

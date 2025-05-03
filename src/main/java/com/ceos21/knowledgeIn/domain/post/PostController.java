@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,11 +52,10 @@ public class PostController {
     //질문글 목록 조회
     @GetMapping("/")
     @Operation(summary = "질문 목록 조회 API", description = "홈에서 질문 목록을 조회하는 API")
-    public ApiResponse<Page<PostResponseDTO>> getPostList(@RequestParam Integer page, @RequestParam Integer size,
-                                                          @RequestParam(defaultValue = "DESC") String sort,
-                                                          @RequestParam(required = false) String search){
+    public ApiResponse<Page<PostResponseDTO>> getPostList(@ParameterObject Pageable pageable,
+                                                          @RequestParam(required = false,defaultValue = "") String search){
 
-        Page<PostResponseDTO> body = postService.getPostList(page, size, sort, search).map(PostResponseDTO::from);
+        Page<PostResponseDTO> body = postService.getPostList(pageable,search).map(PostResponseDTO::from);
         return ApiResponse.onSuccess(body);
 
     }
