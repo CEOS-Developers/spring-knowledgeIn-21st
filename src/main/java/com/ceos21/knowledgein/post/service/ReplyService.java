@@ -33,7 +33,7 @@ public class ReplyService {
 
         Post post = postService.findPostOrThrow(postId);
         List<Image> images = postService.storeImage(request.images());
-        List<HashTag> hashTags = postService.createHashTagEntity(request.hashTags());
+        List<HashTag> hashTags = postService.createHashTagEntityList(request.hashTags());
         UserEntity user = userService.findUserByIdReturnEntity(userId);
 
         Reply reply = createNewReplyEntity(request, user, post, images);
@@ -55,6 +55,16 @@ public class ReplyService {
         return ReplyDto.from(reply);
     }
 
+    @Transactional
+    public ReplyDto acceptReply(Long postId, Long replyId, Long userId) {
+        Post post = postService.findPostOrThrow(postId);
+        Reply reply = findReplyOrThrow(replyId);
+
+        postService.validatePostOwner(post, userId);
+
+        reply.accept();
+        return ReplyDto.from(reply);
+    }
 
     private Reply createReplyEntityWithParent(RequestCreateReplyChildren requestCreateReply, UserEntity user, Post post, Reply parent) {
         return Reply.createWithParent(

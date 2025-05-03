@@ -59,8 +59,12 @@ public class PostController {
 
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<CommonResponse<Void>> deletePost(@PathVariable Long postId){
-        postService.deletePost(postId);
+    public ResponseEntity<CommonResponse<Void>> deletePost(@PathVariable Long postId,
+                                                           @AuthenticationPrincipal PrincipalUserDetails currentUser){
+
+        Long userId = currentUser.getUserEntity().getId();
+
+        postService.deletePost(postId, userId);
         CommonResponse<Void> response = new CommonResponse<>(200, "성공적으로 삭제되었습니다.", null);
         return ResponseEntity.status(OK).body(response);
     }

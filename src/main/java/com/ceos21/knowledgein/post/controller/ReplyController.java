@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("api/post/v1/{postId}/reply")
@@ -42,6 +43,18 @@ public class ReplyController {
 
         ReplyDto result = replyService.createReplyChildren(postId, replyId, requestCreateReply, userId);
         return ResponseEntity.status(CREATED).body(result);
+    }
+
+    @PatchMapping("/{replyId}")
+    public ResponseEntity<ReplyDto> acceptReply(
+            @PathVariable Long postId,
+            @PathVariable Long replyId,
+            @AuthenticationPrincipal PrincipalUserDetails currentUser) {
+
+        Long userId = currentUser.getUserEntity().getId();
+
+        ReplyDto result = replyService.acceptReply(postId, replyId, userId);
+        return ResponseEntity.status(OK).body(result);
     }
 
 
