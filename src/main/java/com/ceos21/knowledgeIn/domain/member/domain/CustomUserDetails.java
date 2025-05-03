@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 @AllArgsConstructor
-public class CustomUserDetails extends BaseEntity implements UserDetails {
+public class CustomUserDetails implements UserDetails {
 
     private Member member;
 

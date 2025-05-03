@@ -17,6 +17,7 @@ public class CustomUserDetailService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
 
+    //일반 멤버 엔티티 -> userDetails 객체로 변환하는 메서드
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
@@ -24,5 +25,9 @@ public class CustomUserDetailService implements UserDetailsService {
         CustomUserDetails userDetails = new CustomUserDetails(member);
 
         return userDetails;
+    }
+
+    public Member findMemberByUserDetails(UserDetails userDetails) {
+        return memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(()->new GeneralException(Status.MEMBER_NOT_FOUND));
     }
 }

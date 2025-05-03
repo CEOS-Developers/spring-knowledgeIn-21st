@@ -38,7 +38,7 @@ public class Post extends BaseEntity {
     private Integer likeCnt = 0;
 
     @Builder.Default
-    private Integer disLikeCnt = 0;
+    private Integer dislikeCnt = 0;
 
     @Builder.Default
     private Integer commentCnt = 0;
@@ -85,8 +85,15 @@ public class Post extends BaseEntity {
         return this;
     }
 
-    public void setAnswerCnt(Boolean isAdd) {
+    public Integer setAnswerCnt(Boolean isAdd) {
         if(isAdd){answerCnt++;}
         else {answerCnt--;}
+        return answerCnt;
+    }
+
+    public Integer setCommentCnt(Boolean isAdd) {
+        if(isAdd){commentCnt++;}
+        else {commentCnt--;}
+        return commentCnt;
     }
 }

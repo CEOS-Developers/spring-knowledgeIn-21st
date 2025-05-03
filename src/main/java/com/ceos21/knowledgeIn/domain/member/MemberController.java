@@ -1,5 +1,6 @@
 package com.ceos21.knowledgeIn.domain.member;
 
+import com.ceos21.knowledgeIn.domain.member.dto.JwtTokenDTO;
 import com.ceos21.knowledgeIn.domain.member.dto.MemberRequestDTO;
 import com.ceos21.knowledgeIn.domain.member.dto.MemberResponseDTO;
 import com.ceos21.knowledgeIn.domain.member.service.MemberService;
@@ -23,8 +24,8 @@ public class MemberController {
     private final MemberRepository memberRepository;
 
 
-    @PostMapping("/join")
-    public ApiResponse<MemberResponseDTO.MemberInfoDTO> join(@RequestBody MemberRequestDTO.MemberJoinDTO requestDTO) {
+    @PostMapping("/signUp")
+    public ApiResponse<MemberResponseDTO.MemberInfoDTO> join(@RequestBody MemberRequestDTO.JoinDTO requestDTO) {
 
         boolean isMember = memberRepository.existsByEmail(requestDTO.getEmail());
         if(isMember) {
@@ -36,5 +37,15 @@ public class MemberController {
 
         return ApiResponse.onSuccess(body);
 
+    }
+
+    @PostMapping("/signIn")
+    public ApiResponse<JwtTokenDTO> signIn(@RequestBody MemberRequestDTO.SignInDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        String password = requestDTO.getPassword();
+
+        JwtTokenDTO body = memberService.signIn(email, password);
+
+        return ApiResponse.onSuccess(body);
     }
 }

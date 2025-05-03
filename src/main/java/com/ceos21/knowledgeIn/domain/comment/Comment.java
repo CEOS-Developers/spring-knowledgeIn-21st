@@ -4,6 +4,8 @@ import com.ceos21.knowledgeIn.domain.post.Post;
 import com.ceos21.knowledgeIn.domain.member.Member;
 import com.ceos21.knowledgeIn.global.domain.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 
@@ -20,6 +22,7 @@ public class Comment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
+    @NotNull
     private Member member;
 
     private String content;
