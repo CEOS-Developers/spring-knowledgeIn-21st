@@ -1,53 +1,62 @@
 package com.ceos21.spring_knowledgeIn_21st.domain.user.domain;
 
-import com.ceos21.spring_knowledgeIn_21st.domain.commentDislike.domain.CommentDislike;
-import com.ceos21.spring_knowledgeIn_21st.domain.commentLike.domain.CommentLike;
+import com.ceos21.spring_knowledgeIn_21st.domain.answer.domain.Answer;
+import com.ceos21.spring_knowledgeIn_21st.domain.comment.domain.AnswerComment;
+import com.ceos21.spring_knowledgeIn_21st.domain.comment.domain.BaseComment;
+import com.ceos21.spring_knowledgeIn_21st.domain.comment.domain.PostComment;
+import com.ceos21.spring_knowledgeIn_21st.domain.user.enums.UserRole;
+import com.ceos21.spring_knowledgeIn_21st.global.common.BaseEntity;
 import com.ceos21.spring_knowledgeIn_21st.domain.post.domain.Post;
+import com.ceos21.spring_knowledgeIn_21st.domain.reaction.domain.Reaction;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Builder
 @Entity
-@Getter @Setter
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "users")
-public class User {
+public class User extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
-    @NotNull
+    @NotBlank
     private String name;
 
-    @NotNull
+    @NotBlank
     @Column(name = "user_email")
     private String email;
 
-    @NotNull
+    @NotBlank
     @Column(name = "user_password")
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<CommentDislike> commentDislikes = new ArrayList<>();
+    private List<Answer> answers  = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<CommentLike> commentLikes = new ArrayList<>();
+    private List<PostComment> postComments = new ArrayList<>();
 
-    public User(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.posts = new ArrayList<>();
-        this.commentDislikes = new ArrayList<>();
-        this.commentLikes = new ArrayList<>();
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<AnswerComment> answerComments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Reaction> reactions  = new ArrayList<>();
+
 }

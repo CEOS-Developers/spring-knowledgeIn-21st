@@ -1,19 +1,10 @@
 package com.ceos21.spring_knowledgeIn_21st.domain.user.dao;
 
-import com.ceos21.spring_knowledgeIn_21st.domain.post.domain.Post;
 import com.ceos21.spring_knowledgeIn_21st.domain.user.domain.User;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public class UserRepository {
+import java.util.Optional;
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public void save(User user) {
-        em.persist(user);
-    }
-
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
 }
