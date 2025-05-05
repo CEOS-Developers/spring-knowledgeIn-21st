@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.knowledgein.springboot.apiPayload.code.BaseCode;
+import com.knowledgein.springboot.apiPayload.code.ReasonDTO;
 import com.knowledgein.springboot.apiPayload.code.status.SuccessStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,10 +21,25 @@ public class ApiResponse<T> {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T result;
 
+    public ApiResponse(ReasonDTO reason, T result) {
+        this.isSuccess = reason.getIsSuccess();
+        this.code = reason.getCode();
+        this.message = reason.getMessage();
+        this.result = result;
+    }
+
 
     // 성공한 경우 응답 생성
     public static <T> ApiResponse<T> onSuccess(T result){
         return new ApiResponse<>(true, SuccessStatus._OK.getCode() , SuccessStatus._OK.getMessage(), result);
+    }
+
+    public static <T> ApiResponse<T> onSuccess(SuccessStatus status) {
+        return new ApiResponse<>(status.getReason(), null);
+    }
+
+    public static <T> ApiResponse<T> onSuccess(SuccessStatus status, T result) {
+        return new ApiResponse<>(status.getReason(), result);
     }
 
     public static <T> ApiResponse<T> of(BaseCode code, T result){

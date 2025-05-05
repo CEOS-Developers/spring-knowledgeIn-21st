@@ -33,10 +33,7 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     @Override
     @Transactional
-    public Post createPost(PostRequestDTO.CreateDto request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-
+    public Post createPost(PostRequestDTO.CreateDto request, User user) {
         Post question = null;
 
         // postType == PostType.QUESTION -> questionId is null
@@ -79,11 +76,11 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     @Override
     @Transactional
-    public List<PostResponseDTO.ResultDto> deletePost(Long postId, Long userId) {
+    public List<PostResponseDTO.ResultDto> deletePost(Long postId, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
 
-        if (!Objects.equals(userId, post.getUser().getId())) throw new GeneralException(ErrorStatus.USER_NOT_AUTHORIZED);
+        if (!Objects.equals(user, post.getUser())) throw new GeneralException(ErrorStatus.USER_NOT_AUTHORIZED);
 
         List<PostResponseDTO.ResultDto> deletedList = new ArrayList<>();
 
@@ -102,11 +99,11 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     @Override
     @Transactional
-    public Post updatePost(Long postId, Long userId, PostRequestDTO.UpdateDto request) {
+    public Post updatePost(Long postId, User user, PostRequestDTO.UpdateDto request) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
 
-        if (!Objects.equals(userId, post.getUser().getId())) throw new GeneralException(ErrorStatus.USER_NOT_AUTHORIZED);
+        if (!Objects.equals(user, post.getUser())) throw new GeneralException(ErrorStatus.USER_NOT_AUTHORIZED);
 
         // For orphan removal
         List<Hashtag> originalHashtags = post.getPostHashtagList().stream()

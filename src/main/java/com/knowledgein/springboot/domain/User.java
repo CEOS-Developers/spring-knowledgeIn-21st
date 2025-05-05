@@ -1,6 +1,8 @@
 package com.knowledgein.springboot.domain;
 
 import com.knowledgein.springboot.domain.common.BaseEntity;
+import com.knowledgein.springboot.domain.enums.PostType;
+import com.knowledgein.springboot.domain.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,14 +19,18 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 10)
-    private String name;
-
     @Column(nullable = false, length = 15)
     private String email;
 
     @Column(nullable = false, length = 10)
-    private String nickname;
+    private String nickName;
+
+    @Column(nullable = false, length = 100)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(10) DEFAULT 'USER'")
+    private RoleType roleType;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
@@ -48,5 +54,9 @@ public class User extends BaseEntity {
 
     public void addPost(Post post) {
         postList.add(post);
+    }
+
+    public void updatePassword(String password){
+        this.password = password;
     }
 }
