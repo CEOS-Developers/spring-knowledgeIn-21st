@@ -6,7 +6,7 @@ import com.ceos21.knowledgeIn.domain.post.Image;
 import com.ceos21.knowledgeIn.domain.post.Post;
 import com.ceos21.knowledgeIn.exception.CustomJisikInException;
 import com.ceos21.knowledgeIn.exception.ErrorCode;
-import com.ceos21.knowledgeIn.fileManage.FileStorageService;
+import com.ceos21.knowledgeIn.file.manage.FileStorageService;
 import com.ceos21.knowledgeIn.repository.ImageRepository;
 import com.ceos21.knowledgeIn.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -57,19 +57,6 @@ public class ImageService {
     }
 
     //update
-    //delete
-    public void deleteImage(Long id) {
-        imageRepository.deleteById(id);
-    }
-
-    public List<ImageResponseDTO> findAllImagesByPostId(Long postId) {
-        List<Image> images = imageRepository.findAllByPostId(postId);
-
-        return images.stream()
-                .map(image -> ImageResponseDTO.from(image))
-                .collect(Collectors.toList());
-    }
-
     @Transactional
     public ImageResponseDTO modifyImage(Long imageId, MultipartFile file) {
         Image findImage = imageRepository.findById(imageId).orElseThrow();
@@ -94,4 +81,18 @@ public class ImageService {
 
         return ImageResponseDTO.from(findImage);
     }
+
+    //delete
+    public void deleteImage(Long id) {
+        imageRepository.deleteById(id);
+    }
+
+    public List<ImageResponseDTO> findAllImagesByPostId(Long postId) {
+        List<Image> images = imageRepository.findAllByPostId(postId);
+
+        return images.stream()
+                .map(image -> ImageResponseDTO.from(image))
+                .collect(Collectors.toList());
+    }
+
 }

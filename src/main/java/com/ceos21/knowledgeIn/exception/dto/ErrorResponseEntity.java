@@ -3,7 +3,6 @@ package com.ceos21.knowledgeIn.exception.dto;
 import com.ceos21.knowledgeIn.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @AllArgsConstructor

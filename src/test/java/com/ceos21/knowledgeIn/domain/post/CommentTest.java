@@ -4,7 +4,6 @@ import com.ceos21.knowledgeIn.domain.user.User;
 import com.ceos21.knowledgeIn.repository.CommentRepository;
 import com.ceos21.knowledgeIn.repository.PostRepository;
 import com.ceos21.knowledgeIn.repository.UserRepository;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 @SpringBootTest

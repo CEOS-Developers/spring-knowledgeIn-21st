@@ -1,4 +1,4 @@
-package com.ceos21.knowledgeIn.fileManage;
+package com.ceos21.knowledgeIn.file.manage;
 
 import org.springframework.web.multipart.MultipartFile;
 

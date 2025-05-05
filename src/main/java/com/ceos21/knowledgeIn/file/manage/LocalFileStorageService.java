@@ -1,6 +1,5 @@
-package com.ceos21.knowledgeIn.fileManage;
+package com.ceos21.knowledgeIn.file.manage;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

@@ -1,6 +1,5 @@
 package com.ceos21.knowledgeIn.service;
 
-import com.ceos21.knowledgeIn.controller.dto.post.HashTagCreateDTO;
 import com.ceos21.knowledgeIn.controller.dto.post.HashTagResponseDTO;
 import com.ceos21.knowledgeIn.controller.dto.post.PostHashTagResponseDTO;
 import com.ceos21.knowledgeIn.domain.post.HashTag;

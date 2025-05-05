@@ -24,11 +24,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class HashTagServiceTest {
     @Autowired
-    PostService postService;
+    com.ceos21.knowledgeIn.service.PostService
+            postService;
     @Autowired
     UserRepository userRepository;
     @Autowired
-    HashTagService hashTagService;
+    com.ceos21.knowledgeIn.service.HashTagService hashTagService;
     @Autowired
     EntityManager em;
 

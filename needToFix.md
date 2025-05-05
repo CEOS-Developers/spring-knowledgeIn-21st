@@ -3,3 +3,7 @@
 - **필요시 FileStorageService를 S3구현체로 변경**
 - **swagger적용 필요**
 - **답변글에는 title 값도 안들어감... -> 추가적인 구분 사항 로직 넣어야할듯 **
+- **응답형식 통일위한 커스텀ResponseEntity 필요할듯**
+- **질문글과 답변글용 DTO를 분리하면 좋을듯**
+- **질문글 작성자는 답변 불가능**
+- ApiResponse와 BaseErrorCode? 이런거 배워야할듯

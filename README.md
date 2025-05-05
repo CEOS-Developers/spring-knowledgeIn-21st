@@ -206,3 +206,131 @@ Post는 OK, HashTag도 OK. 하지만 PostHashTag에서 오류 발생 시:
 
 - 또 다른 해결책으로는 필드 선언 시 `new ArrayList<>()`로 초기화하거나, `@Builder.Default`를 함께 사용하는 방법도 고려 가능
 - 빌더 패턴과 생성자 패턴을 함께 쓸 때는 예상치 못한 `null` 문제에 주의해야 함
+
+# 4주차
+## JWT 토큰 기반 로그인
+
+### 0. 동작 flow: 자체 로그인 & 토큰
+
+1. **사용자 회원가입** → 회원 생성 & DB 저장
+2. **사용자 로그인**
+  - ID/PW 검증 (`SecurityConfig`의 `UsernamePasswordAuthenticationFilter`가 처리)
+  - 응답으로 AccessToken&RefreshToken 전달 → 클라이언트는 토큰 저장
+3. **인증이 필요한 페이지 이동**
+  - `JwtAuthenticationFilter`에서 토큰 검증  
+    (요청 헤더의 Authorization 필드에서 토큰 추출)
+- `SecurityConfig`가 인증객체가 필요한 URL인지 검증
+
+---
+
+### 1. 용어
+
+- **시크릿 키**: 서버가 가지고 있는 key
+- **토큰**: 사용자에게 발급되는 인증용 데이터
+  - 구조: `[Header].[Payload].[Signature]`
+    ```
+    // 예시
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywiaWF0IjoxNjg1NjAwMDB9.sD25T7GLMfVJ-QKqkQOaKci3dfsk1X_U8koLQUmsK2Q
+    ```
+    - **Header**: 서명에 사용된 알고리즘 정보 (예: HS256, RS256)
+      ```
+      {
+        "alg": "HS256",   // 서명 알고리즘
+        "typ": "JWT"      // 토큰 타입
+      }
+      ```
+    - **Payload**: 사용자 정보
+    - **Signature**: 서버의 서명 (Header + Payload에 대해 Secret으로 서명함)
+
+  - **서명(Signature)로 방어 가능한 것**
+    - 토큰이 위조되지 않았음을 확인 가능
+
+  - **서명으로 방어 불가 항목**
+    | 방어 불가 항목           | 설명                                 |
+    |-------------------------|--------------------------------------|
+    | **토큰 탈취**           | 공격자가 유효한 토큰을 그대로 가져감 |
+    | **재사용 공격 (Replay)**| 탈취한 토큰을 그대로 사용           |
+    | **XSS, CSRF**           | 클라이언트 측 취약점 이용           |
+
+- **Token과 Secret Key의 관계**
+  - Secret을 사용해서 Token에 서명함 (암호화가 아님)
+
+---
+
+### 2. 필요 클래스 구조도
+```angular2html
+com.example.project
+├── config
+│ └── SecurityConfig.java # 스프링 시큐리티 설정
+├── jwt
+│ ├── JwtTokenProvider.java # JWT 생성 및 검증
+│ ├── JwtAuthenticationFilter.java # JWT 인증 필터
+│ └── JwtProperties.java # 설정 값 관리
+├── user
+│ ├── CustomUserDetails.java # 시큐리티 컨텍스트에 저장할 유저정보
+│ └── CustomUserDetailsService.java# UserDetails를 구현
+└── domain
+
+```
+
+
+---
+
+### 3. Spring Security와 JwtFilter
+```angular2html
+요청 ─▶ ① Filter Chain (여기에 JwtAuthenticationFilter 포함)
+└▶ ② AuthorizationManager / AccessDecision
+├─ permitAll → 통과(SecurityContext에 Authentication 객체가 없어도 통과)
+└─ authenticated → SecurityContext에 Authentication 있어야 통과
+```
+
+- Filter가 먼저 실행되어 인증에 성공하면 `Authentication` 객체를 SecurityContext에 저장
+- 이후 SecurityConfig가 인증 객체를 사용해 접근 허용/거부 판단
+
+> **Q. 같은 accessToken으로 여러 번 요청하면 SecurityContext에 인증 객체가 중복 저장되는가?**  
+> **A. NO. 요청마다 SecurityContext는 초기화됨**
+
+> **Q. 토큰 기반 인증에서는 매 요청마다 SecurityContext가 초기화된다면, 세션 인증에서는?**  
+> **A. YES. 세션 인증은 SecurityContext가 HttpSession에 저장되어 세션 만료 전까지 유지됨**
+
+| 항목                | 세션 기반 인증         | JWT 기반 인증 (토큰 기반)     |
+|---------------------|-----------------------|------------------------------|
+| 인증 정보 저장 위치 | 서버 `HttpSession`    | 클라이언트 `Authorization` 헤더 (JWT) |
+| 상태 유지 방식      | 상태 유지 (Stateful)  | 무상태 (Stateless)           |
+| SecurityContext 유지| 세션 만료 전까지 유지 | 요청마다 재생성              |
+| 확장성              | 제한적 (서버 메모리)  | 높음 (서버 간 공유 불필요)   |
+
+- **내부 구조**
+    ```
+    SecurityContextHolder
+       └── SecurityContext
+               └── Authentication (UsernamePasswordAuthenticationToken 등)
+    ```
+
+---
+
+### 4. 로그아웃
+
+| 방식                        | 설명                                                         | 장단점                              |
+|-----------------------------|--------------------------------------------------------------|----------------------------------|
+| **클라이언트 단 토큰 삭제** | 브라우저/앱에서 JWT를 제거                                   | 장:️ 구현 간단<br>단: 서버는 토큰 유효성 모름    |
+| **블랙리스트 (별도 저장소)**| 로그아웃한 access 토큰을 Redis 등 DB에 저장하여 차단         | 장:️ 보안 강화<br>단: 저장소 필요, 성능 고려 필요 |
+| **토큰 만료 짧게 + 리프레시**| refreshToken을 redis에서 삭제, accessToken은 짧게, refresh로 재발급 | 장:️ 일반적 방식<br>단: 구현 복잡도 증가       |
+
+| a | b| c|
+|---|--|--|
+
+### 기타. 첨부자료
+
+1. 로그인
+![로그인](./uploads/login.png)
+2. 토큰을 사용한 api
+![토큰을 사용한 api](./uploads/api_with_token.png)
+3. accessToken 재발행
+![토큰 재발행](./uploads/reproduce_accessToken.png)
+4. Redis안에 refreshToken 확인
+![레디스 리프레시토큰 확인](./uploads/refreshToken_redis.png)
+5. Redis안에 blacklist 확인
+![레디스 블랙리스트 확인](./uploads/blacklist_redis.png)
+
+

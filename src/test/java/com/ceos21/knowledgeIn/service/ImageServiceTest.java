@@ -2,7 +2,6 @@ package com.ceos21.knowledgeIn.service;
 
 import com.ceos21.knowledgeIn.controller.dto.post.ImageCreateDTO;
 import com.ceos21.knowledgeIn.controller.dto.post.ImageResponseDTO;
-import com.ceos21.knowledgeIn.domain.post.Image;
 import com.ceos21.knowledgeIn.domain.post.Post;
 import com.ceos21.knowledgeIn.domain.user.User;
 import com.ceos21.knowledgeIn.repository.PostRepository;
@@ -20,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Transactional
 @SpringBootTest

@@ -1,7 +1,6 @@
 package com.ceos21.knowledgeIn.repository;
 
 import com.ceos21.knowledgeIn.domain.post.HashTag;
-import com.ceos21.knowledgeIn.domain.post.PostHashTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

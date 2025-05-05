@@ -1,9 +1,8 @@
 package com.ceos21.knowledgeIn.service;
 
-import com.ceos21.knowledgeIn.controller.dto.user.UserCreateDTO;
+import com.ceos21.knowledgeIn.controller.dto.auth.SignUpDTO;
 import com.ceos21.knowledgeIn.controller.dto.user.UserResponseDTO;
 import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Transactional
 @SpringBootTest
@@ -24,11 +23,16 @@ class UserServiceTest {
     EntityManager em;
 
     @Test
-    void createUser() {
+    void signUp() {
         //given
-        UserCreateDTO dto = new UserCreateDTO("최근호", "olaf");
+        SignUpDTO dto = SignUpDTO.builder()
+                .name("gno")
+                .nickname("gnonick")
+                .username("asdf")
+                .password("asdf")
+                .build();
         //when
-        Long userId = userService.createUser(dto);
+        Long userId = userService.signUp(dto);
 
         //then
         assertThat(userId).isNotNull();
@@ -37,8 +41,14 @@ class UserServiceTest {
     @Test
     void findUser() {
         //given
-        UserCreateDTO dto = new UserCreateDTO("최근호", "olaf");
-        Long userId = userService.createUser(dto);
+        SignUpDTO dto = SignUpDTO.builder()
+                .name("gno")
+                .nickname("gnonick")
+                .username("asdf")
+                .password("asdf")
+                .build();
+
+        Long userId = userService.signUp(dto);
 
         //when
         UserResponseDTO findUserDTO = userService.findUser(userId);
@@ -50,13 +60,27 @@ class UserServiceTest {
     @Test
     void findAllUsers() {
         //given
-        UserCreateDTO dto1 = new UserCreateDTO("최근호1", "olaf1");
-        UserCreateDTO dto2 = new UserCreateDTO("최근호2", "olaf2");
-        UserCreateDTO dto3 = new UserCreateDTO("최근호3", "olaf3");
-
-        Long userId1 = userService.createUser(dto1);
-        Long userId2 = userService.createUser(dto2);
-        Long userId3 = userService.createUser(dto3);
+        SignUpDTO dto1 = SignUpDTO.builder()
+                .name("gno")
+                .nickname("gnonick")
+                .username("asdf")
+                .password("asdf")
+                .build();
+        SignUpDTO dto2 = SignUpDTO.builder()
+                .name("gno2")
+                .nickname("gnonick")
+                .username("asdf2")
+                .password("asdf")
+                .build();
+        SignUpDTO dto3 = SignUpDTO.builder()
+                .name("gno3")
+                .nickname("gnonick")
+                .username("asdf3")
+                .password("asdf")
+                .build();
+        Long userId1 = userService.signUp(dto1);
+        Long userId2 = userService.signUp(dto2);
+        Long userId3 = userService.signUp(dto3);
 
         //when
         List<UserResponseDTO> allUsers = userService.findAllUsers();
@@ -68,8 +92,13 @@ class UserServiceTest {
     @Test
     void deleteUser() {
         //given
-        UserCreateDTO dto = new UserCreateDTO("최근호", "olaf");
-        Long userId = userService.createUser(dto);
+        SignUpDTO dto = SignUpDTO.builder()
+                .name("gno")
+                .nickname("gnonick")
+                .username("asdf")
+                .password("asdf")
+                .build();
+        Long userId = userService.signUp(dto);
 
         //when
         userService.deleteUser(userId);

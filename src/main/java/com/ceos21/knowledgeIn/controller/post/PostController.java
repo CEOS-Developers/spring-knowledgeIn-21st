@@ -37,6 +37,14 @@ public class PostController {
         return dto;
     }
 
+/*
+    @GetMapping("/posts/hashTags")
+    public List<PostResponseDTO> findAllPostsByHashTag(@RequestParam("hashTags") List<String> hashTags) {
+        //...구현필요-> 개선
+    }
+*/
+
+
     @PutMapping("/posts/{postId}")
     public PostResponseDTO modifyPost(@PathVariable Long postId, @RequestBody PostModifyDTO dto) {
         return postService.modifyPost(dto, postId);
