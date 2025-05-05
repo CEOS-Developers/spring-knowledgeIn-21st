@@ -86,15 +86,63 @@ JWT를 이용한 회원가입 로그인 구현
 3. Access Token + Refresh Token
 4. OAuth 2.0
 
-세션
+쿠키 vs 세션
 
+- 세션과 쿠키가 필요한 이유:
+웹에서 사용자의 상태 정보를 유지하고 저장하는 기술
+HTTP는 기본적으로 stateless이기에 API를 통한 정보 전달이 끝나면 그 정보를 저장하지 않음.
+하지만 로그인 유지처럼 사용자 정보를 계속해서 저장해야하는 상황이 생김. => 이때 세션 또는 쿠키를 사용해서 구현함.
 
 쿠키
+브라우저에 저장되는 데이터
+세션에 비해 보안에 취약, 클라이언트가 수정 가능 =>암호화 필수, 민감한 정보는 담지 않음
+
+세션
+서버에 저장
+
+ex
+
+1. 클라이언트가 서버에 로그인 요청
+2. 서버는 로그인 요청 확인 후 올바른 유저이면 session id를 생성하고 저장
+3. 서버가 클라이언트에 응답을 보낼 때 세션 ID도 같이 보냄.
+4. 클라이언트가 이후 서버에 요청할 때 세션 ID를 같이 보내며 요청
+5. 서버는 세션ID 값을 바탕으로 요청 처리
+
+세션은 서버 기반이기에 쿠키보다 보안적으로 안전, 하지만 서버이기에 쿠키에 비해 느릴 수 있음.
+
+=> 쿠키와 세션을 적절하게 사용하면 효율적으로 작업할 수 있음
+
+OAuth (Open Authoization):
+인터넷 사용자들이 비밀번호를 제공하지 않고 다른 웹사이트 상의 자신들의 정보로 웹사이트나 애플리케이션의 접근 권한을 부여할 수 있는 공통적인 수단
+
+왜 생겼을까?
+
+흐름(구글)
+1. 프론트에서 로그인 요청 -> 구글 로그인 화면으로 리디렉션
+2. 사용자 구글 로그인 성공 -> Google이 Authorization code 전달
+3. 서버는 이 코드를 이용해 access token 요청
+4. access token을 이용해 사용자 정보를 받아옴
+
+관련 용어 
+1. Resource Owner: 사용자 본인
+2. Client: 사용자 정보를 얻고자하는 애플리케이션
+3. Authorization Server: 인증 및 권한 부여를 담당하는 제3자 서버
+4. Resource Server: 보호된 자원을 호스팅하고 제공하는 서버
+
+ex.
+1. 사용자(Resource Owner)가 우리 앱(Client)에서 Google 로그인 버튼 클릭
+2. Google(Authorization Server) 로그인 화면으로 이동해 인증
+3. 인증 완료 → access token 발급
+4. 우리 앱(Client)이 token을 들고 Google API(Resource Server)에서 사용자 정보 요청
+5. 응답으로 사용자 이메일, 이름 등 제공됨
+
+
+
 
 
 Access Token + Refresh Token 전달 및 보관 방식
 => AccessToken Authorization 헤더 + RefreshToken Cookie
 
-프론트는 AccessToken을 메모리 or localStorage에 저장장
+프론트는 AccessToken을 메모리 or localStorage에 저장
 
 
