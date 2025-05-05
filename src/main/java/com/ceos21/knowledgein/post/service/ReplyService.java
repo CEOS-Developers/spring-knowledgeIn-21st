@@ -7,6 +7,7 @@ import com.ceos21.knowledgein.post.domain.Reply;
 import com.ceos21.knowledgein.post.dto.ReplyDto;
 import com.ceos21.knowledgein.post.dto.request.RequestCreateReply;
 import com.ceos21.knowledgein.post.dto.request.RequestCreateReplyChildren;
+import com.ceos21.knowledgein.post.exception.PostException;
 import com.ceos21.knowledgein.post.repository.ReplyRepository;
 import com.ceos21.knowledgein.user.domain.UserEntity;
 import com.ceos21.knowledgein.user.service.UserService;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.ceos21.knowledgein.post.exception.PostErrorCode.REPLY_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +33,7 @@ public class ReplyService {
 
         Post post = postService.findPostOrThrow(postId);
         List<Image> images = postService.storeImage(request.images());
-        List<HashTag> hashTags = postService.createHashTagEntity(request.hashTags());
+        List<HashTag> hashTags = postService.createHashTagEntityList(request.hashTags());
         UserEntity user = userService.findUserByIdReturnEntity(userId);
 
         Reply reply = createNewReplyEntity(request, user, post, images);
@@ -52,6 +55,16 @@ public class ReplyService {
         return ReplyDto.from(reply);
     }
 
+    @Transactional
+    public ReplyDto acceptReply(Long postId, Long replyId, Long userId) {
+        Post post = postService.findPostOrThrow(postId);
+        Reply reply = findReplyOrThrow(replyId);
+
+        postService.validatePostOwner(post, userId);
+
+        reply.accept();
+        return ReplyDto.from(reply);
+    }
 
     private Reply createReplyEntityWithParent(RequestCreateReplyChildren requestCreateReply, UserEntity user, Post post, Reply parent) {
         return Reply.createWithParent(
@@ -64,7 +77,7 @@ public class ReplyService {
 
     private Reply findReplyOrThrow(Long replyId) {
         return replyRepository.findById(replyId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new PostException(REPLY_NOT_FOUND));
     }
 
     private Reply createNewReplyEntity(RequestCreateReply request, UserEntity user, Post post, List<Image> images) {

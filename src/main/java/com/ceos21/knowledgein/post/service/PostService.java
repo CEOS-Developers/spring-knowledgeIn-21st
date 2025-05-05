@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import static com.ceos21.knowledgein.post.exception.PostErrorCode.POST_NOT_FOUND;
+import static com.ceos21.knowledgein.post.exception.PostErrorCode.POST_NOT_OWNER;
 import static java.util.Optional.ofNullable;
 
 @Service
@@ -34,7 +35,7 @@ public class PostService {
     public PostDto createPost(RequestCreatePost request, Long userId) {
 
         List<Image> images = storeImage(request.images());
-        List<HashTag> hashTags = createHashTagEntity(request.hashTags());
+        List<HashTag> hashTags = createHashTagEntityList(request.hashTags());
         UserEntity user = userService.findUserByIdReturnEntity(userId);
 
         Post post = createNewPostEntity(request, hashTags, images, user);
@@ -54,8 +55,9 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId, Long userId) {
         Post post = findPostOrThrow(postId);
+        validatePostOwner(post, userId);
         postRepository.delete(post);
     }
 
@@ -65,7 +67,7 @@ public class PostService {
         Post post = findPostOrThrow(postId);
 
         List<Image> images = storeImage(request.images());
-        List<HashTag> hashTags = createHashTagEntity(request.hashTags());
+        List<HashTag> hashTags = createHashTagEntityList(request.hashTags());
 
         Post updated = post.update(request.title(), request.content(), hashTags, images);
         return PostDto.from(updated);
@@ -87,7 +89,7 @@ public class PostService {
         );
     }
 
-    protected List<HashTag> createHashTagEntity(List<String> tags) {
+    protected List<HashTag> createHashTagEntityList(List<String> tags) {
         return HashTag.of(ofNullable(tags)
                                   .orElse(List.of()));
     }
@@ -95,6 +97,12 @@ public class PostService {
     protected List<Image> storeImage(List<MultipartFile> inputImages) {
         return fileStore.storeFiles(ofNullable(inputImages)
                                             .orElse(List.of()));
+    }
+
+    protected void validatePostOwner(Post post, Long userId) {
+        if (!post.getUser().getId().equals(userId)) {
+            throw new PostException(POST_NOT_OWNER);
+        }
     }
 
 }

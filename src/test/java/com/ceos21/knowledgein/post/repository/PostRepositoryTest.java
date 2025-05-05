@@ -143,7 +143,7 @@ class PostRepositoryTest {
     }
 
     private UserEntity makeTestUser(String name) {
-        return UserEntity.of(name, "test-nick", "1234");
+        return UserEntity.of("test123@naver.com", name, "test-nick", "1234");
     }
 
     private Post makeTestPost(String title, String content) {

@@ -473,3 +473,179 @@ Soft Delete
 
 시간 부족이라는 핑계로 인해 로깅+테스트 코드 작성은 못했다<br>
 다음에 꼭 작성하겠습니다ㅜㅜ
+
+## 인증 방식
+
+### 세션 인증 방식
+
+로그인을 하면 세션 저장소에 사용자 세션을 저장하고 <br>
+세션 ID를 쿠키로 클라이언트에게 전송하는 방식.<br>
+
+쿠키는 브라우저상에서 작동하고 자동적으로 요청에 포함되기 때문에 엄청 간편하다!!<br>
+Spring Security 기본 구현 방식이 세션 인증 방식이다.<br>
+
+하지만 세션 저장소에 세션을 저장하기 때문에 부하가 생길 수 있고 <br>
+
+쿠키를 사용하지 못하는 환경이라면? <br>
+즉 브라우저를 기반으로 작동하지 않는다면? <br>
+
+사용할 수 없다.<br>
+특히!! 분산 환경에서 모든 서버에 똑같은 세션을 저장해야 하기 때문에 오히려 관리가 힘들다<br>
+이를 해결하기 위해 나온 것이 JWT이다.
+
+### JWT
+
+JWT가 무엇인지는 인터넷에 너무너무 많으니 넘어가고<br>
+처음 접했을때 refresh token, black list, rotate refresh, refresh token 서버 저장, refresh token 클라이언트에게 전송 등등..<br>
+너무 많은 내용과 다양한 구현 방식 때문에 혼란스러웠는데<br>
+겪었던 과정 속에서 고민했던 내용들과 개인적인 생각을 적어 보겠다.
+
+### JWT - Access Token
+
+JWT 토큰을 발급하고 나면 이 토큰이 우리가 발급한 것이 맞는지 수학적으로 검증하고, 만료되었는지만 검사한다.<br>
+좀 어렵게 말하면 Verify Signature 부분을 우리의 Secret key로 복호화 해 조작되었는지 검증하는 것이다.<br>
+이게 코드상에서 우리가 구현한 Signature Exception을 발생시키는 부분이다.
+쉽게 말하면 누구에게 발급했는지 기억하지도 않고, 검증하지 않는다는 것.<br>
+
+그럼 누구에게 발급한 토큰인지 확인하지 않기 때문에 토큰이 털린다면 해당 access token이 유효한 시간동안 계속해서 공격을 받을 수 밖에 없다.<br>
+이 해결 방법으로 access token의 유효 시간을 짧게 설정 하는 방법이 고안된 것이다. (예를들어 30분)<br>
+하지만 사용자는 이 경우에 30분마다 다시 로그인을 해야 하기 때문에 불편할 것이다.<br>
+그래서 나온 것이 Refresh Token.
+
+### JWT - Refresh Token: 클라이언트에게 전송
+
+Refresh Token은 Access Token을 발급할 때 함께 발급되는 토큰이다.<br>
+refresh token은 access보다 유효기간이 길고(예를들어 1달)<br>
+사용자가 refresh token을 가지고 있다면 만료된 access token을 재발급 받을 수 있다.<br>
+즉 다시 로그인 하지 않아도 refresh token 유효기간 동안 세션을 유지할 수 있는 것이다.<br>
+(정확히는 세션이 아니지만 세션이라고 표현하겠다)
+
+여기서 refresh token을 가지고 있다면 -> 이 말은 클라이언트가 우리(서버)에게 계속해서 전송을 해야 한다는 뜻이니<br>
+Refresh token을 쿠키에 실어 전송하고, access token을 헤더에 실어 전송하는 방식으로 구현할 수 있다.<br>
+(검색하면 이 자료도 참 많이 나왔던 것 같다)
+
+그런데 처음에 JWT가 나온 배경에서 쿠키를 사용하지 못하는 환경을 해결하기 위해 도입한 것인데,<br>
+refresh token을 위해 쿠키를 사용한다는 것이 조금 이상하지 않나? 생각이 들었다.<br>
+
+그래서 개인적으로 access, refresh 모두 헤더에 실어 전송하는 방식이 더 합리적이라고 생각한다.<br>
+
+그런데 한가지 더!<br>
+Access token이 탈취될까봐 유효기간을 짧게 설정한 것인데<br>
+refresh token을 클라이언트에게 전송한다면 탈취당할 위험이 있는거 아닌가?<br>
+그럼 오히려 더 긴 기간동안 공격받는거 아닌가??<br>
+
+그래서 나온 방법이 blacklist, rotate refresh token이다.<br>
+
+### JWT - Refresh Token: Rotate And BlackList
+
+이 방법은 refresh token 탈취를 대비해 access 토큰을 재발급할 때마다 새로운 refresh token을 발급하고<br>
+기존 refresh token을 블랙리스트에 등록하는 방법이다.<br>
+
+로직으로 설명하면
+- access token과 refresh token을 발급한다.
+- refresh token으로 재발급 요청들어오면
+- refresh token이 블랙리스트에 있는지 확인
+- 블랙리스트에 없다면 새로운 refresh token과 access token을 발급
+- 기존 refresh token을 블랙리스트에 등록
+- 추가로 로그아웃시 refresh token을 블랙리스트에 등록
+
+그럴듯 한지만?<br>
+Refresh Token을 저장한다는 것 자체가 이상하다..<br>
+생각해보면 토큰 관련해서 저장하지 않는 Stateless 방식이 JWT의 장점인데<br>
+여기부터 그 장점이 없어지기 시작한다.<br>
+
+그리고 로직도 무지 복잡하다<br>
+이렇게 토큰을 저장할거라면 그냥 refresh token을 서버에 저장하는게 낫지 않나?<br>
+그래서 refresh token을 서버에서 관리하는 방법이 나왔다.
+
+### JWT - Refresh Token: 서버 저장
+
+이 방법은 Refresh token을 클라언트에게 보내지 않고 서버에 저장하는 방법이다.<br>
+사용자 id와 refresh token을 매핑해 저장하고 access token을 재발급할 때 refresh token이 있는지 확인하는 방법이다.<br>
+대신 부하를 줄이기 위해 refresh token 저장에 Redis를 많이 사용한다.
+
+위 방법보다는 간단하지만 사실 세션 인증 방식이랑 다를게 없다..<br>
+
+개인적으로 내린 결론은<br>
+모놀로식 + 브라우저를 사용하는 웹 서비는 세션 인증 방식<br>
+분산 환경 or 앱을 개발한다면 JWT를 사용하는게 적절하다고 생각한다.
+
+
+## 회원가입 / 로그인
+
+회원가입은 직접 엔드포인트를 만들고 OAuth도 간단하게 추가했다.
+각각 구현할 것은 
+- Controller, Service
+- OAuth dto, OAuth2UserService (핸들러 재사용)
+
+![](https://velog.velcdn.com/images/grammi_boii/post/02a026a9-9fcd-4d50-8538-fd09f4b2aee7/image.png)
+
+로그인은 UsernamePasswordAuthenticationFilter를 상속받아 구현했다. <br>
+
+```java
+public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
+    public CustomAuthenticationFilter(final AuthenticationManager authenticationManager) {
+        super.setAuthenticationManager(authenticationManager);
+    }
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+
+        final UsernamePasswordAuthenticationToken authenticationToken;
+
+        try {
+            RequestLogin requestUser = new ObjectMapper().readValue(request.getInputStream(), RequestLogin.class);
+            authenticationToken = new UsernamePasswordAuthenticationToken(requestUser.email(), requestUser.password());
+        } catch (IOException e) {
+            throw new AuthenticationServiceException("Authentication failed", e);
+        }
+
+        setDetails(request, authenticationToken);
+        return this.getAuthenticationManager().authenticate(authenticationToken);
+    }
+}
+```
+
+successfulAuthentication 메서드를 직접 구현하는 방법도 있는데, 나는 클래스를 분리하는걸 좋아하기도 하고 OAuth success handler와 로직이 동일하기 때문에
+분리하고 스프링 빈으로 등록해 재사용했다.
+
+![](https://velog.velcdn.com/images/grammi_boii/post/dc9fd2c7-d3f2-45ce-bc0c-c7258d85625e/image.png)
+
+![](https://velog.velcdn.com/images/grammi_boii/post/2eef79b8-3ca6-432b-8c2b-2fee3c215593/image.png)
+
+## 테스트
+
+토큰이 없을때<br>
+![](https://velog.velcdn.com/images/grammi_boii/post/745aecf1-e686-472d-a624-58a4654b5842/image.png)
+
+토큰 있을때<br>
+![](https://velog.velcdn.com/images/grammi_boii/post/69f73898-dc5f-42fd-8a2b-a39a66b97716/image.png)
+
+### Postman 자동화
+
+처음에 로그인 후 받은 access token을 복붙을 참 많이 했는데<br>
+이번에 자동화 시키는 방법을 알게 되었다!.!
+
+![](https://velog.velcdn.com/images/grammi_boii/post/6bd0ad76-1a23-4656-a7a8-46308e00e70c/image.png)
+
+Environments에서 환경변수 만들어 주고<br>
+
+![](https://velog.velcdn.com/images/grammi_boii/post/6aacfc0b-af13-40f8-82db-331babcfb97a/image.png)
+
+컬렉션에서 환경변수 선택
+
+![](https://velog.velcdn.com/images/grammi_boii/post/a8ca01c3-79af-4a66-9637-5176c47f0d84/image.png)
+
+토큰을 받아오는 엔드포인트 (로그인)에 script를 적어준다<br>
+```javascript
+var token = pm.response.headers.get("access");
+pm.environment.set("access", token);
+```
+
+![](https://velog.velcdn.com/images/grammi_boii/post/faff45ad-02dd-4937-9280-11cf0040e8a5/image.png)
+
+마지막으로 access token이 필요한 엔드포인트에 하드코딩하지 말고 {{access}}로 적어준다<br>
+아주 편하다
+
+

@@ -25,32 +25,44 @@ public class UserEntity extends BaseTimeEntityWithDeletion {
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
+    @Column(length = 30, nullable = false, unique = true)
+    private String email;
+
+    // 실명
     @Column(length = 30)
     private String name;
 
     @Column(nullable = false, unique = true)
     private String nickName;
 
-    @Column(nullable = false)
-    private String passWord;
+    @Column(nullable = true)
+    private String password;
+
+    private boolean isDeleted;
+    private boolean isEnabled;
 
     @Enumerated(STRING)
     private Role role;
 
-    public static UserEntity of(String name, String nickName, String passWord) {
+    public static UserEntity of(String email, String name, String nickName, String passWord) {
         return UserEntity.builder()
                 .name(name)
                 .nickName(nickName)
-                .passWord(passWord)
+                .password(passWord)
+                .email(email)
                 .role(USER)
                 .build();
     }
 
     @Builder(access = PRIVATE)
-    private UserEntity(String name, String nickName, String passWord, Role role) {
+    private UserEntity(String name, String email, String nickName, String password, Role role) {
+        this.isDeleted = false;
+        this.isEnabled = true;
+
         this.role = role;
         this.name = name;
+        this.email = email;
         this.nickName = nickName;
-        this.passWord = passWord;
+        this.password = password;
     }
 }

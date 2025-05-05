@@ -70,6 +70,10 @@ public class Reply extends BaseTimeEntity {
                 .build();
     }
 
+    public void accept() {
+        this.accepted = true;
+    }
+
     @Builder(access = PRIVATE)
     private Reply(boolean accepted, String content, Reply parent, UserEntity user, Post post, List<Image> images) {
         this.accepted = accepted;
