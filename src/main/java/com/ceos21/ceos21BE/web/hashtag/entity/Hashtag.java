@@ -1,6 +1,6 @@
 package com.ceos21.ceos21BE.web.hashtag.entity;
 
-import com.ceos21.ceos21BE.web.questionhashtag.entity.QuestionHashtag;
+import com.ceos21.ceos21BE.web.posthashtag.entity.PostHashtag;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,5 +19,5 @@ public class Hashtag {
     private String name;
 
     @OneToMany(mappedBy = "hashtag", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<QuestionHashtag> questionHashtags;
+    private List<PostHashtag> postHashtags;
 }

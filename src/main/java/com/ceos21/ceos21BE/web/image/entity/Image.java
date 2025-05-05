@@ -1,7 +1,6 @@
 package com.ceos21.ceos21BE.web.image.entity;
 
-import com.ceos21.ceos21BE.web.question.entity.Question;
-import com.ceos21.ceos21BE.web.answer.entity.Answer;
+import com.ceos21.ceos21BE.web.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,13 +14,10 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long imageId;
 
-    private String imageUrl;
+    private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id")
-    private Question question;
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "answer_id")
-    private Answer answer;
 }
