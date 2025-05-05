@@ -25,9 +25,11 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class TokenProvider implements InitializingBean {
+    @Value("${jwt.access-token-validity-seconds}")
+    private long accessTokenValiditySeconds; // 24시간
 
-    private static final long ACCESS_TOKEN_VALIDITY_SECONDS = 24 * 60 * 60; // 24시간
-    private static final long REFRESH_TOKEN_VALIDITY_SECONDS = 24 * 60 * 60 * 7; // 1주일
+    @Value("${jwt.refresh-token-validity-seconds}")
+    private long refreshTokenValiditySeconds; // 1주일
 
     private Key key;
     private final CustomUserDetailsServiceImpl customUserDetailsService;
@@ -54,13 +56,13 @@ public class TokenProvider implements InitializingBean {
             return claims.getSubject(); // subject = email
         } catch (Exception ex) {
             log.error("JWT parsing failed: {}", ex.getMessage());
-            return null;
+            return new GeneralException(ErrorStatus.UNSUPPORTED_TOKEN).toString();
         }
     }
 
     public String createAccessToken(String email) {
         long now = (new Date()).getTime();
-        Date validity = new Date(now + ACCESS_TOKEN_VALIDITY_SECONDS * 1000);
+        Date validity = new Date(now + accessTokenValiditySeconds * 1000);
         String role = getUserRoleByEmail(email);
 
         return Jwts.builder()
@@ -73,7 +75,7 @@ public class TokenProvider implements InitializingBean {
 
     public String createRefreshToken(String email) {
         long now = (new Date()).getTime();
-        Date validity = new Date(now + REFRESH_TOKEN_VALIDITY_SECONDS * 1000);
+        Date validity = new Date(now + refreshTokenValiditySeconds * 1000);
 
         return Jwts.builder()
                 .setSubject(email)

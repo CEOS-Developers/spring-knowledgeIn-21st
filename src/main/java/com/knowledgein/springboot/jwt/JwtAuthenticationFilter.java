@@ -1,5 +1,6 @@
 package com.knowledgein.springboot.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +15,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
@@ -28,7 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = resolveToken(servletRequest);
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-
                 // JWT에서 사용자의 ID를 추출해서 Authentication 객체 생성
                 Authentication authentication = this.tokenProvider.getAuthentication(jwt);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -37,19 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (JwtException e) {
             log.error("[JWTExceptionHandlerFilter] " + e.getMessage());
-            servletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            servletResponse.setContentType("application/json;charset=UTF-8");
-            servletResponse.getWriter().write("{\"error\": \"Unauthorized - " + e.getMessage() + "\"}");
+            writeErrorResponse(servletResponse, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized - " + e.getMessage());
         } catch (Exception e) {
             log.error("[ExceptionHandlerFilter] " + e.getMessage());
-            handleOtherExceptions(servletResponse, e);
+            writeErrorResponse(servletResponse, HttpServletResponse.SC_BAD_REQUEST, "Error processing request - " + e.getMessage());
         }
-    }
-
-    private void handleOtherExceptions(HttpServletResponse response, Exception ex) throws IOException {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.setContentType("application/json");
-        response.getWriter().write("{\"error\": \"Error processing request - " + ex.getMessage() + "\"}");
     }
 
     public String resolveToken(HttpServletRequest request) {
@@ -59,5 +54,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, int statusCode, String message) throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json;charset=UTF-8");
+
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("error", message);
+
+        objectMapper.writeValue(response.getWriter(), errorBody);
     }
 }

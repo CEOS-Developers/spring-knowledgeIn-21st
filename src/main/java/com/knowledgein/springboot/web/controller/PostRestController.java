@@ -33,9 +33,7 @@ public class PostRestController {
             description = "게시물에 필요한 내용을 작성해서 생성하는 API")
     public ApiResponse<PostResponseDTO.ResultDto> create(@RequestBody PostRequestDTO.CreateDto request,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
-        User user = (userDetails == null) ? null : userDetails.getUser();
-        if (user == null) throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
-
+        User user = checkUser(userDetails);
         Post post = postCommandService.createPost(request, user);
         return ApiResponse.onSuccess(PostConverter.toResultDto(post));
     }
@@ -63,8 +61,7 @@ public class PostRestController {
             description = "지정된 게시물을 삭제하는 API")
     public ApiResponse<List<PostResponseDTO.ResultDto>> delete(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                @PathVariable(name = "postId") Long postId) {
-        User user = (userDetails == null) ? null : userDetails.getUser();
-        if (user == null) throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
+        User user = checkUser(userDetails);
         return ApiResponse.onSuccess(postCommandService.deletePost(postId, user));
     }
 
@@ -74,10 +71,15 @@ public class PostRestController {
     public ApiResponse<PostResponseDTO.UpdatedDto> update(@PathVariable(name = "postId") Long postId,
                                                           @AuthenticationPrincipal CustomUserDetails userDetails,
                                                           @RequestBody PostRequestDTO.UpdateDto request) {
-        User user = (userDetails == null) ? null : userDetails.getUser();
-        if (user == null) throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
+        User user = checkUser(userDetails);
 
         Post updatedPost = postCommandService.updatePost(postId, user, request);
         return ApiResponse.onSuccess(PostConverter.toUpdatedDto(updatedPost));
+    }
+
+    public User checkUser (CustomUserDetails userDetails) {
+        User user = (userDetails == null) ? null : userDetails.getUser();
+        if (user == null) throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
+        return user;
     }
 }

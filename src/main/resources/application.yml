@@ -23,3 +23,5 @@ spring:
       port: 6379
   jwt:
     secret: ${jwt_secret}
+    access-token-validity-seconds: 86400 # 24시간
+    refresh-token-validity-seconds: 604800 # 1주일
