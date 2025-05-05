@@ -15,11 +15,10 @@ import java.util.List;
 public class PostCreateDto {
     private String title;
     private String content;
-    private Member member;
     private List<Image> images;
     private List<Hashtag> hashtags;
 
-    public static PostCreateDto of(String title, String content, Member member,List<Image> images, List<Hashtag> hashtags) {
-        return new PostCreateDto(title, content, member, images, hashtags);
+    public static PostCreateDto of(String title, String content,List<Image> images, List<Hashtag> hashtags) {
+        return new PostCreateDto(title, content, images, hashtags);
     }
 }

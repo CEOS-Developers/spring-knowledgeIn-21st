@@ -1,8 +1,10 @@
 package com.ceos21.springknowledgein.domain.knowledgein.service;
 
 import com.ceos21.springknowledgein.domain.knowledgein.Dto.PostCreateDto;
+import com.ceos21.springknowledgein.domain.knowledgein.Dto.PostResponseDto;
 import com.ceos21.springknowledgein.domain.knowledgein.Dto.PostUpdateDto;
 import com.ceos21.springknowledgein.domain.knowledgein.repository.*;
+import com.ceos21.springknowledgein.domain.user.repository.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,24 +17,30 @@ public class PostService {
     private final PostRepository postRepository;
     private final HashtagRepository hashtagRepository;
 
-    public Post createPost(PostCreateDto dto) {
-        Post post = new Post(dto.getTitle(), dto.getContent(), dto.getMember());
-        /*
+    public Post createPost(PostCreateDto dto, Member member) {
+        Post post = new Post(dto.getTitle(), dto.getContent(), member);
+
+        if (dto.getImages() != null) {
+            for (Image image : dto.getImages()) {
+                post.addImage(new Image(image.getImageUrl()));//id는 안 넣음
+            }
+            /*
         for (타입 변수명 : 순회할 대상) {
         반복할 코드}
          */
-        for (Image image : dto.getImages()) {
-            post.addImage(new Image(image.getImageUrl()));//id는 안 넣음
-        }
-
-        for (Hashtag tag : dto.getHashtags()){
-            Hashtag hashtag = hashtagRepository.findByTagName(tag.getTagName()).
-                    orElseGet(() -> hashtagRepository.save(new Hashtag(tag.getTagName())));
-
-            PostHashtag postHashtag = new PostHashtag(post, hashtag);
-            post.addPostHashtag(postHashtag);
 
         }
+
+        if (dto.getHashtags() != null) {
+            for (Hashtag tag : dto.getHashtags()) {
+                Hashtag hashtag = hashtagRepository.findByTagName(tag.getTagName())
+                        .orElseGet(() -> hashtagRepository.save(new Hashtag(tag.getTagName())));
+
+                PostHashtag postHashtag = new PostHashtag(post, hashtag);
+                post.addPostHashtag(postHashtag);
+            }
+        }
+
         return postRepository.save(post);
     }
 
@@ -65,6 +73,16 @@ public class PostService {
 
         return postRepository.save(post);
 
+    }
+
+    public Post responsePost(PostResponseDto dto) {
+        /*
+        1. 조회
+        2. 리턴
+         */
+        Post post = postRepository.findById(dto.getId())
+                .orElseThrow(()-> new RuntimeException("Post not found"));
+        return post;
     }
 
     public List<Post> getAllPosts() {
