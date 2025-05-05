@@ -36,10 +36,10 @@ public class PostServiceImpl implements PostService {
 
     // 질문글에 대한 답변 작성
     @Transactional
-    public PostResponseDTO addPost(PostRequestDTO postRequest) {
+    public PostResponseDTO addPost(PostRequestDTO postRequest,Long writerId) {
 
         // 1. 질문 작성자 가져오기
-        User writer = userRepository.findById(postRequest.getWriterId())
+        User writer = userRepository.findById(writerId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
 
 
@@ -85,7 +85,7 @@ public class PostServiceImpl implements PostService {
 
         // 2. Post 작성자 = 요창자 ?
         if (!post.getPostWriter().getId().equals(userId)) {
-            throw new CustomException(ErrorStatus.CANNOT_DELETE);
+            throw new CustomException(ErrorStatus.CANNOT_DELETE_POST);
         }
 
         // 3. Post에 속한 Answer 찾기
@@ -95,7 +95,13 @@ public class PostServiceImpl implements PostService {
             likeDislikeRepository.deleteByAnswerId(answer.getId());
         }
 
-        // 3. Post 삭제
+        //4. Post 삭제시 hashtag는 그대로
+        List<PostHash> postHashtags = post.getPostHashtags();
+        for (PostHash postHash : postHashtags) {
+            postHash.setPost(null);
+        }
+
+        // 5. Post 삭제
         postRepository.delete(post);
     }
 
@@ -116,5 +122,13 @@ public class PostServiceImpl implements PostService {
     }
 
 
+    //해시태그 기준 글 검색
+    public List<PostResponseDTO> getPostsByHashtag(String hashtag) {
+        List<Post> posts = postRepository.findByHashtag(hashtag);
+
+        return posts.stream()
+                .map(PostConverter::toPostResponseDTO)
+                .collect(Collectors.toList());
+    }
 }
 

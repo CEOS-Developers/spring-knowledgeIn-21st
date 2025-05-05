@@ -304,3 +304,232 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 **5. AWS S3 BUCKET 사용**
 - 이미지 업로드를 위해 사용
 - MultiPartFile 형식으로 이미지를 S3 버킷에 업로드 후, 이미지 URL을 반환하여 DB에 저장
+
+---
+### WEEK 4. 로그인/회원가입 추가 + 이 외 기능 구현
+
+#### 1. 회원가입 + 로그인
+**1) 로그인 정보를 받아오기 위한 CustomUserDetails**
+``` java
+public class CustomUserDetails implements UserDetails {
+
+    private Long userId;
+    private String username;
+    private String password;
+    private Collection<? extends GrantedAuthority> authorities;
+
+    public CustomUserDetails(Long userId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.authorities = authorities;
+    }
+```
+이후 **@AuthenticationPrincipal** 로 로그인 정보를 주입받았다.
+
+**2) Spring Security**
+```java
+    @Bean
+public SecurityFilterChain myFilter(HttpSecurity httpSecurity) throws Exception {
+    return httpSecurity
+            .csrf(AbstractHttpConfigurer::disable) //csrf 비활성화
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(a -> a.requestMatchers("/user/create", "/user/login", "/user/logout", "/connect/**", "/v3/api-docs/**",
+                    "/swagger-ui/**", "/swagger-ui.html","permit/**").permitAll().anyRequest().authenticated())
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+}
+
+@Bean
+public PasswordEncoder makePassword() {
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+}
+}
+```
+- 로그인/회원가입/스웨거 등은 인증 절차 없이 필터를 통과,
+  로그인하지 않은 사용자가 볼 수 있는 화면 (질문+답변 조회) 등은 엔드포인트를 "**permit/**"으로 시작하게 하여 필터 통과
+- 비밀번호 암호화를 위한 인코더 생성
+
+**3) JwtAuthFilter**
+ ```java
+ UserDetails userDetails = new CustomUserDetails(userId, username, null, authorities);
+
+    // Authentication 객체 설정
+ Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+```
+
+- JWT 안의 정보로 CustomUserDetails 객체를 만든다.
+  이 때, 비밀번호는 이미 토큰으로 인증된 상태이므로 null 처리
+
+- 만든 Authentication을 SecurityContextHolder에 심어 추후 @AuthenticationPrincipal을 통해 로그인 정보를 꺼냄.
+
+#### 2. 로그인 + 비로그인 구분
+<img src="https://velog.velcdn.com/images/dohyunii/post/40c0d955-447e-4d68-87d1-83deb398b807/image.png" width="60%" />
+
+- **post를 예로 들면**
+
+  **<내가 쓴 질문 조회/질문 작성/내가 쓴 질문 삭제>** 등의 api는 로그인 정보를 받아와야 하므로 **/post**로 시작함
+  <**해시태그별 글 조회**>는 로그인하지 않은 사용자도 조회 가능하므로 **/permit**으로 시작해 필터 통과함
+
+#### 3. 로그아웃 + 엑세스 토큰 재발급
+(1) **로그아웃**
+
+- 리프레시 토큰을 레디스에 저장하는 방법도 있다는데 일단 DB에 저장함.
+- **RefreshToken** entity 추가
+```java
+public class RefreshToken {
+    @Id
+    private Long userId;
+
+    private String refreshToken;
+```
+- 로그아웃 시, 저장해두었던 사용자의 refreshToken이 삭제되고 재로그인 해야 한다.
+
+(2)**엑세스 토큰 재발급**
+- 엑세스 토큰의 유효기간은 30분, 리프레시 토큰의 유효기간은 30일로 설정
+- 엑세스 토큰 만료 시, 리프레시 토큰을 이용해 엑세스 토큰을 재발급 받는다.
+- 클라이언트가 리프레시 토큰을 요청과 함께 쿠키에서 보내면, 서버에서 이를 검증하여 엑세스 토큰을 갱신한다.
+
+❶ **리프레시 토큰 검증**
+```java
+RefreshToken savedToken = refreshTokenRepository.findByUserId(userId)
+        .orElseThrow(() -> new CustomException(ErrorStatus.INVALID_REFRESH_TOKEN));
+
+if (!savedToken.getRefreshToken().equals(refreshToken)) {
+    throw new CustomException(ErrorStatus.INVALID_REFRESH_TOKEN);
+
+TokenDTO newTokenDTO = jwtTokenProvider.createToken(user);
+}
+```
+: DB에서 사용자의 리프레시 토큰을 조회하고 비교한 뒤, jwtTokenProvider.createToken(user)를 호출해 새 토큰 발급한다.
+
+```java
+  // DB에 리프레시 토큰 업데이트
+/ savedToken.setRefreshToken(newTokenDTO.getRefreshToken());
+
+쿠키에 새로운 리프레시 토큰 저장
+jwtTokenProvider.setRefreshTokenInCookies(response, newTokenDTO.getRefreshToken());
+
+```
+: 발급 받은 새 토큰을 cookie와 db에 업데이트한다.
+
+❷ **JwtTokenProvider**
+```java
+
+if (existingToken != null) {
+        try {
+        // 리프레시 토큰이 유효한지 확인
+        Jwts.parserBuilder()
+                        .setSigningKey(SECRET_KEY)
+                        .build()
+                        .parseClaimsJws(existingToken.getRefreshToken());
+
+        //유효하면 재사용 (리프레시 토큰은 그대로)
+        refreshToken = existingToken.getRefreshToken();
+            } catch (ExpiredJwtException e) {
+        // 만료된 경우 새로 발급
+        refreshToken = createRefreshToken(user);
+                existingToken.setRefreshToken(refreshToken);
+                refreshTokenRepository.save(existingToken);
+            }
+                    } 
+else {
+        refreshToken = createRefreshToken(user);
+            refreshTokenRepository.save(new RefreshToken(user.getId(), refreshToken));
+        }
+
+```
+- 리프레시 토큰의 만료기한이 남았다면 그대로 반환, 만료기한이 지났다면 새로 발급 받아야한다.
+- 리프레시 토큰이 만료된 경우, **재로그인해야 한다는 에러** 터트림.
+
+**실행결과**
+
+<img src="https://velog.velcdn.com/images/dohyunii/post/4d0309e3-5d3c-4b55-93cb-299ce2a8bb1a/image.png" width="60%" />
+
+- 리프레시 토큰 만료 시,
+  ![](https://velog.velcdn.com/images/dohyunii/post/d21155e1-2f01-40c0-9d04-2beefd15892c/image.png)
+
+
+#### 4. 추가 구현 기능
+**(1) 회원가입, 로그인**
+- 회원가입 시 email, nickname, password 입력
+<img src="https://velog.velcdn.com/images/dohyunii/post/39504893-04dd-4dc2-a376-26cd6ba8b9c0/image.png" width="60%" />
+- 이후 로그인 시 토큰 반환
+
+  ![](https://velog.velcdn.com/images/dohyunii/post/7362e2c7-ac0d-46c5-9a8a-229122a3ab61/image.png)
+- 로그인할 때 리프레시 토큰을 쿠키에 저장
+```java
+        // 쿠키에 리프레시 토큰 저장
+        jwtTokenProvider.setRefreshTokenInCookies(response, tokenDTO.getRefreshToken());
+```
+
+**(2) 해시태그별 글 조회**
+
+ <img src="https://velog.velcdn.com/images/dohyunii/post/314325ad-831e-4615-8112-9831b5f53743/image.png" width="40%" /> 
+ 
+ ![](https://velog.velcdn.com/images/dohyunii/post/45c1c7f5-5c5c-446b-9cce-278c02aab72b/image.png)
+
+- **post 삭제 시, post와 hashtag의 관계는 끊고 hashtag는 남겨둠**
+``` java
+       //4. Post 삭제시 hashtag는 그대로 -> 해당 hashtag의 postId를 null로 설정
+        List<PostHash> postHashtags = post.getPostHashtags();
+        for (PostHash postHash : postHashtags) {
+            postHash.setPost(null);
+        }
+```
+![](https://velog.velcdn.com/images/dohyunii/post/9238ccca-1a0b-4081-a5d0-292bc395f77e/image.png)
+: 삭제된 post이기 때문에 post_hash 테이블의 post_id가 null로 바뀌었다.
+
+**(3) 댓글 관련**
+- 댓글은 **POST, ANSWER**에 남길 수 있다. 이를 TargetStatus로 구분하였다.
+<img src="https://velog.velcdn.com/images/dohyunii/post/71277bc1-08ba-4f2a-ac8e-af22e5dcbb49/image.png" width="50%" />
+: TargetStatus에는 POST 또는 ANSWER과 그의 id를 넣으면 된다.
+
+
+❶ **Post**에 댓글 남김
+
+<img src="https://velog.velcdn.com/images/dohyunii/post/17fb05b4-0d1d-48b4-a8de-8192884fd689/image.png" width="50%" />
+
+❷ **Answer**에 댓글 남김
+
+<img src="https://velog.velcdn.com/images/dohyunii/post/4086b03d-2f08-4aef-a0a1-7c77201a9c88/image.png" width="50%" />
+
+![](https://velog.velcdn.com/images/dohyunii/post/17752005-f2e9-47bb-9d7c-eab40883095e/image.png)
+
+- **Post 삭제 시** 댓글과 답변이 모두 삭제되도록, **Answer만 삭제시** 댓글은 그대로 남도록 했다.
+```
+        // answer삭제시 comment는 그대로 둠
+        List<Comment> comments = commentRepository.findAllByAnswer(answer);
+        for (Comment comment : comments) {
+            comment.setAnswer(null);
+        }
+```
+![](https://velog.velcdn.com/images/dohyunii/post/05232126-f1fe-4c91-b15e-4811bb3a636c/image.png)
+: answer 삭제 후 위와 달리 comment_id 5의 answer_id가 null로 바뀌었다.
+
+🤔이렇게 하면 나중에 어디에 달렸던 댓글인지 알 수 없지 않나 ..??
+
+**-> soft delete**로 변경
+
+- Answer 엔티티에 추가
+
+ ``` java
+ @Where(clause = "is_deleted = false")
+ // @Where을 두어 isdeleted=false인 것만 조회하도록 함
+ 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+ ```
+ 
+ - Answer을 실제로 삭제하는 대신 is_deleted를 true로 설정하여 관계는 그대로 둔다.
+   - answer삭제시 answer_id 5의 is_deleted 가 1로 변경
+   ![](https://velog.velcdn.com/images/dohyunii/post/5cfdcc23-dbcb-4902-828a-104cf0157b83/image.png)
+   - comment 테이블을 보면, answer_id 5가 그대로 남아있다.
+   ![](https://velog.velcdn.com/images/dohyunii/post/6095ebc9-993b-424b-ac14-cad21ca939b6/image.png)
+   - 글 조회시, is_deleted=false인 답변만 조회된다.
+![](https://velog.velcdn.com/images/dohyunii/post/5e43c3f1-3e8d-49dc-b28d-49fe9c722ef4/image.png)
+
+

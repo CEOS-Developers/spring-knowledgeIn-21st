@@ -27,3 +27,8 @@ cloud:
       auto: false
     stack:
       auto: false
+
+jwt:
+  secretKey: ${jwt.secretKey}
+  accessTokenExpirationMinutes: 30
+  refreshTokenExpirationDays: 30

@@ -7,6 +7,7 @@ import com.ceos21.spring_boot.domain.entity.*;
 import com.ceos21.spring_boot.dto.Answer.*;
 import com.ceos21.spring_boot.repository.AnswerRepository;
 import com.ceos21.spring_boot.domain.enums.LikeStatus;
+import com.ceos21.spring_boot.repository.CommentRepository;
 import com.ceos21.spring_boot.repository.PostRepository;
 import com.ceos21.spring_boot.repository.UserRepository;
 import com.ceos21.spring_boot.service.AnswerService;
@@ -32,21 +33,23 @@ public class AnswerServiceImpl implements AnswerService {
     private final UserRepository userRepository;
     private final S3UploadService s3UploadService;
     private final ImageService imageService;
+    private final CommentRepository commentRepository;
 
     // 질문글에 대한 답변 작성
     @Transactional
-    public AnswerResponseDTO addAnswer(AnswerRequestDTO answerRequest) {
+    public AnswerResponseDTO addAnswer(Long writerId,AnswerRequestDTO answerRequest) {
         // 1. 질문글 가져오기
         Post post = postRepository.findById(answerRequest.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorStatus.POST_NOT_FOUND));
 
         // 2. 자신이 작성한 질문글엔 답변 불가
-        if (post.getPostWriter().getId().equals(answerRequest.getWriterId())) {
+        if (post.getPostWriter().getId().equals(writerId)) {
             throw new CustomException(ErrorStatus.CANNOT_ANSWER);
         }
 
+
         // 3. 답변 작성자 가져오기
-        User writer = userRepository.findById(answerRequest.getWriterId())
+        User writer = userRepository.findById(writerId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
 
 
@@ -99,5 +102,19 @@ public class AnswerServiceImpl implements AnswerService {
         );
     }
 
+    // 답변 삭제
+    @Transactional
+    public void deleteAnswer(Long answerId,Long userId) {
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new CustomException(ErrorStatus.ANSWER_NOT_FOUND));
+
+        //Answer 작성자 != 삭제 요청자
+        if (!answer.getAnswerWriter().getId().equals(userId)) {
+            throw new CustomException(ErrorStatus.CANNOT_DELETE_ANSWER);
+        }
+
+        // answer삭제시 comment는 그대로 둠 -> soft delete
+        answer.setIsDeleted(true);
+    }
 
 }

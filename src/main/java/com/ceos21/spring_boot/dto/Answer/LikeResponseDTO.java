@@ -18,3 +18,14 @@ public class LikeResponseDTO {
     private Long answerId;
     private LikeStatus likeStatus;
 }
+
+
+
+
+
+
+
+
+
+
+

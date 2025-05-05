@@ -2,6 +2,7 @@ package com.ceos21.spring_boot.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Where(clause = "is_deleted = false")
 public class Answer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,10 +21,13 @@ public class Answer {
 
     private String content;
 
+    @Column(name = "is_deleted",nullable = false)
+    private boolean isDeleted = false;
+
     @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL)
     private List<Image> images;
 
-    @OneToMany(mappedBy = "answer", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "answer")
     private List<Comment> comments;
 
     @ManyToOne(fetch= FetchType.LAZY)
@@ -33,6 +38,8 @@ public class Answer {
     @JoinColumn(name="post_id")
     private Post post;
 
+
+
     // 연관관계 편의 메서드
     public void addImage(Image image) {
         if (this.images == null) {
@@ -40,6 +47,10 @@ public class Answer {
         }
         this.images.add(image);
         image.setAnswer(this);
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
 }

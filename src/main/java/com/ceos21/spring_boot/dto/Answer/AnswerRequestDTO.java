@@ -13,8 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class AnswerRequestDTO {
 
-    private Long writerId;
-
     @NotNull(message = "post ID must not be null")
     private Long postId;
     private String content;
