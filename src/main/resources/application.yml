@@ -5,9 +5,12 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
+  jwt:
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
+
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
@@ -15,3 +18,6 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+    org.springframework.security: DEBUG
+
+

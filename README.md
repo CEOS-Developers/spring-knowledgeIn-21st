@@ -231,3 +231,122 @@ postService 안에
 ![img_1.png](img_1.png)
 전체 게시글 조회
 ![img_2.png](img_2.png)
+
+
+# week 4 - Spring Security와 로그인
+___
+## JWT를 이용한 인증 방식 - Access 토큰 & Refresh 토큰
+
+### 토큰 발급 흐름
+#### 1. 로그인 완료
+- **SuccessHandler** : Access 토큰 & Refresh 토큰 발급
+
+#### 2. 권한 필요한 모든 요청
+- **JWTFilter** : Access 토큰 요청 검증
+
+#### 3. 응답
+- 데이터 응답
+- **Access 토큰 만료 응답** & 프론트와 협의된 상태 코드
+
+#### 4. Access 토큰 만료 응답을 받을 경우
+- **Refresh 토큰**을 서버측으로 전송
+
+#### 5. Access 토큰 재발급
+- 기존 Access 토큰은 제거
+
+## Refresh 토큰 보호방법
+### <토큰의 저장 위치>
+#### Access 토큰
+- **로컬 스토리지**
+  - CSRF 공격(짧은 시간)보단 XSS 공격받는게 나아서
+
+#### Refresh 토큰
+- **쿠키**
+  - XSS 공격을 받을 수 있지만 httpOnly를 설정하면 완벽히 방어 가능해서
+  - CSRF 공격 받아도, Refresh 토큰은 '토큰 재발급'만 하기 때문에 큰 피해 없음
+
+### <Refresh 토큰 Rotate>
+- Access 토큰 재발급할 때 **Refresh 토큰도 같이 재발급**해서 프론트에 응답
+
+### <Refresh 토큰 블랙리스팅>
+- Refresh 토큰을 발급할 때 **서버측 저장소에도 저장**
+- **로그아웃** / **탈취**됐을 때 -> 서버측 저장소에서 해당 **토큰 삭제**
+- 요청 올 때마다 **저장소에 존재하는지 확인**
+  - 저장소에 없는데 요청 왔다면 해커가 토큰 복제해서 요청한 것
+
+## 세션, 쿠키, OAuth 방식
+### 세션 (Session)
+- 정의: **서버**에서 사용자 정보를 유지하는 방식
+- 위치: 서버 측 저장소
+- 용도: 사용자 인증 정보 유지, 로그인 상태 관리 등
+- 특징:
+  - **클라이언트는 세션 ID만** 저장 (보통 쿠키를 통해 전달됨)
+  - **서버는 해당 ID로 사용자 상태를 관리**
+  - 보안이 비교적 높음, 단 서버 자원 사용
+
+### 쿠키 (Cookie)
+- 정의: **클라이언트**(브라우저)에 저장되는 작은 데이터 조각
+- 위치: 클라이언트 측 저장소 (브라우저)
+- 용도: 로그인 상태 유지, 사용자 설정 저장, 광고 추적 등
+- 특징:
+  - **서버가 쿠키를 생성**해서 **클라이언트에 저장**하도록 명령
+  - 클라이언트는 이후 **요청마다 쿠키를 함께 전송**
+  - 보안에 취약 (민감 정보 저장 지양)
+
+### OAuth (Open Authorization)
+- 정의: **타사 애플리케이션**이 **사용자 인증 없이** 제한된 리소스 접근을 허용하는 권한 위임 프로토콜
+- 용도: 구글, 카카오, 페이스북 등 외부 로그인 연동
+- 흐름:
+  사용자 -> 제3자 서비스 로그인 요청
+  제3자 서비스 -> 인증 서버에 인증 요청
+  인증 서버 -> Access Token 발급
+  제3자 서비스 -> Access Token으로 사용자 자원 접근
+- 특징:
+  - 비밀번호를 **외부 서비스에 제공하지 않음**
+  - 보안성과 편의성 우수
+
+## 회원가입 및 로그인 API 테스트
+
+### 회원가입
+![](https://velog.velcdn.com/images/mirupio/post/637b9d4b-f834-4535-9afc-6795e90a61e8/image.png)![](https://velog.velcdn.com/images/mirupio/post/976ad6db-cc03-4e11-a576-affa2b51a2d8/image.png)
+
+### 로그인
+![](https://velog.velcdn.com/images/mirupio/post/fb5c7619-86bd-4a3b-8762-85c2d44893ef/image.png)
+![](https://velog.velcdn.com/images/mirupio/post/6ae2ef9d-3ab7-437d-bd9d-d5ebf58c4c83/image.png)
+
+## 토큰이 필요한 API 테스트
+
+### 게시글 생성
+#### w/o access 토큰
+![](https://velog.velcdn.com/images/mirupio/post/390a1c16-0e44-4e7d-a312-617af3e50dee/image.png)
+#### w/ 만료된 access 토큰
+![](https://velog.velcdn.com/images/mirupio/post/82cf779d-66e6-4a38-8740-05b2e1c8de4c/image.png)
+#### w/ 만료 안된 access 토큰
+![](https://velog.velcdn.com/images/mirupio/post/62a369b2-2419-4d6e-9c91-8bb10efe24d6/image.png)![](https://velog.velcdn.com/images/mirupio/post/b884242a-df66-46df-ac47-f39606655f46/image.png)
+
+### 특정 게시글 조회
+![](https://velog.velcdn.com/images/mirupio/post/2885d65a-ea29-4a3d-a53a-f83a35e50b6a/image.png)
+
+
+### 전체 게시글 조회
+![](https://velog.velcdn.com/images/mirupio/post/7ff8773f-e771-4dca-b777-a30f54d545a2/image.png)jeongha가 yunha가 쓴 글까지 볼 수 있음
+
+
+### 자신이 쓴 전체 게시글 조회
+![](https://velog.velcdn.com/images/mirupio/post/b5ccbfec-5f4f-4d53-9ee2-662881e4ba7c/image.png)
+jeongha는 jeongha가 쓴 글만 볼 수 있음
+
+### 게시글 수정
+#### w/ 다른 사람의 access 토큰
+![](https://velog.velcdn.com/images/mirupio/post/8a242045-0623-4079-8fdd-e664f295eb20/image.png)yunha는 jeongha의 글을 수정 못함
+
+#### w/ 자신의 access 토큰
+![](https://velog.velcdn.com/images/mirupio/post/f0b31be6-e240-4821-b534-80977f30034e/image.png)
+
+
+### 게시글 삭제
+#### w/ 다른 사람의 access 토큰
+![](https://velog.velcdn.com/images/mirupio/post/50bb84eb-9895-420a-9890-577837f1b884/image.png)yunha는 jeongha의 글을 삭제 못함
+
+#### w/ 자신의 access 토큰
+![](https://velog.velcdn.com/images/mirupio/post/1c3e40e4-a487-4419-9cbf-dae5a4ec9e05/image.png)
