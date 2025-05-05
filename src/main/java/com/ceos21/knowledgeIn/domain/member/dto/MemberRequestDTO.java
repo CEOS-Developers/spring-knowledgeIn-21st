@@ -10,11 +10,20 @@ public class MemberRequestDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class MemberJoinDTO{
+    public static class JoinDTO{
         private String name;
         private String email;
         private String password;
         private String nickname;
         private String phone;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SignInDTO{
+        private String email;
+        private String password;
     }
 }

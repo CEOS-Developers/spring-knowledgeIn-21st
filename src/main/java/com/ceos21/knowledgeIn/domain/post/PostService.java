@@ -8,7 +8,6 @@ import com.ceos21.knowledgeIn.domain.image.Image;
 import com.ceos21.knowledgeIn.domain.image.ImageService;
 import com.ceos21.knowledgeIn.domain.member.Member;
 import com.ceos21.knowledgeIn.domain.post.dto.PostRequestDTO;
-import com.ceos21.knowledgeIn.domain.post.dto.PostResponseDTO;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTag;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTagRepository;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTagService;
@@ -17,6 +16,7 @@ import com.ceos21.knowledgeIn.global.exceptionHandler.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,18 +69,18 @@ public class PostService {
     }
 
 
-    public Page<Post> getPostList(Integer page, Integer size, String sort, String search) {
+    public Page<Post> getPostList(Pageable pageable, String search) {
 
-        Sort sorted;
+//        Sort sorted;
+//
+//        switch (sort){
+//            case "ANS_DESC": sorted = Sort.by(Sort.Direction.DESC, "answerCnt"); break;
+//            case "ANS_ASC": sorted = Sort.by(Sort.Direction.ASC, "answerCnt"); break;
+//            case "RECENT":
+//            default: sorted = Sort.by(Sort.Direction.DESC, "createdAt");
+//        }
 
-        switch (sort){
-            case "ANS_DESC": sorted = Sort.by(Sort.Direction.DESC, "answerCnt"); break;
-            case "ANS_ASC": sorted = Sort.by(Sort.Direction.ASC, "answerCnt"); break;
-            case "RECENT":
-            default: sorted = Sort.by(Sort.Direction.DESC, "createdAt");
-        }
-
-        return postRepository.findAll(PageRequest.of(page,size, sorted));
+        return postRepository.findByContentContains(search,pageable);
     }
 
     @Transactional
@@ -118,8 +118,11 @@ public class PostService {
     }
 
     @Transactional
-    public Post updatePost(Long postId, PostRequestDTO.PostUpdateRequestDTO requestDTO, List<MultipartFile> newImageFiles) {
+    public Post updatePost(Member member, Long postId, PostRequestDTO.PostUpdateRequestDTO requestDTO, List<MultipartFile> newImageFiles) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+        if(post.getMember()!=member){
+            throw new GeneralException(Status.NOT_AUTHORIZED);
+        }
 
         //답변이 존재하는 질문은 수정 불가
         if(post.getPostType()==PostType.QUESTION&&post.getAnswerCnt()>0){
@@ -164,8 +167,11 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePost(Long postId) {
+    public void deletePost(Member member, Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+        if(post.getMember()!=member){
+            throw new GeneralException(Status.NOT_AUTHORIZED);
+        }
 
         //답변이 존재하는 질문은 삭제 불가
         if(post.getAnswerCnt()>0){
@@ -178,17 +184,17 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public Post getQuestion(Long postId) {
-        return postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+    public Post getPost(Long postId) {
+        return postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.POST_NOT_FOUND));
     }
 
-    public Page<Post> getQuestionAnswerList(Long postId, Integer page, Integer size, String sort) {
+    public Page<Post> getQuestionAnswerList(Long postId, Pageable pageable) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
         if(post.getPostType()!= PostType.QUESTION){//질문 글이 아닐 시에 오류 응답
             throw new GeneralException(Status.BAD_REQUEST);
         }
 
-        return postRepository.findByParent(post, PageRequest.of(page,size));
+        return postRepository.findByParent(post, pageable);
     }
 }

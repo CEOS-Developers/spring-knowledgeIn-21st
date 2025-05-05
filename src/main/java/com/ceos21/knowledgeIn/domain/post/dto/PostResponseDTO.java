@@ -44,7 +44,7 @@ public class PostResponseDTO {
                     .hashTags(hashTagDTOs)
                     .images(imgUrls)
                     .likeCount(post.getLikeCnt())
-                    .dislikeCount(post.getDisLikeCnt())
+                    .dislikeCount(post.getDislikeCnt())
                     .commentCount(post.getCommentCnt())
                     .build();
         }else{
