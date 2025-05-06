@@ -1,3 +1,11 @@
+// {
+//   "java.configuration.updateBuildConfiguration": "interactive"
+// }
+
 {
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.compiler.args": ["-parameters"],
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.gradle.enabled": true,
+  "java.import.gradle.wrapper.enabled": true,
+  "java.project.referencedLibraries": ["lib/**/*.jar"]
 }

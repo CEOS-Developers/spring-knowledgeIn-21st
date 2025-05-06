@@ -1,42 +1,54 @@
-# spring-knowledgeIn-21st
+# (1) spring-knowledgeIn-21st
 ceos back-end 21st naver knowledge-in clone coding project
 
 
-![image](https://github.com/user-attachments/assets/6a974dae-2060-43e1-8eb2-a9d73e761e74)
+# (2) Spring Security와 로그인 - 4주차
 ---
 
-
-## 1. 과제 설명
-1. 아래의 요구사항에 맞추어 개발 초기 환경 구축하기
-2. 요구사항에 포함된 엔티티 객체들의 repository 파일 만들기
-3. 만든 repository 파일의 단위테스트 실행하기
-
-### - 요구사항
-> 구현 기능
-1. 게시글 조회
-2. 게시글에 사진과 함께 글, 해시태그 작성하기 
-3. 게시글에 댓글 및 대댓글 기능
-4. 게시글 댓글에 좋아요, 싫어요 기능
-5. 게시글, 댓글, 좋아요 삭제 기능
-6. 회원 기능
+### 1) SpringSecurity
+- 정의 : Spring 기반 application의 인증(Authentication)과 인가(Authorization)을 담당하는 보안 프레임워크
+- csrf, cors, https 보안 설정, OAuth2, JWT, session 등 다양한 인증 전략 연동 가능
+- 동작 방식
+1) 클라이언트가 요청을 보낼 때 SecurityFilterChain을 통해 인증 및 권한을 검사
+2) 인증이 완료되면 SecurityContextHolder에 인증 객체(Authentication)를 저장해 이후 요청에서 재사용
+3) 세션 기반 인증 혹은 JWT 기반 인증 방식에 따라 인증 객체를 관리함
+- 연동
+기본은 세션 기반 인증, AuthenticationFilter을 만들어 JWT 필터를 등록하면 JWT 기반 인증 가능
 
 ---
 
-## 2. ERD 참고 자료 - dbdiagram.io 활용
-![image](https://github.com/user-attachments/assets/2f5d2f03-5be9-491b-8bc9-9a8ff4520ee8)
-((수정이 조금 필요합니다))
+### 2) JWT와 로그인
+---
+- JWT와 Session
+공통점 : 사용자 인증 상태를 유지하는 방식
+차이점 : 작동 방식, 저장 위치, 확장성, 보안 처리 방식 등에서 차이가 있음
 
-## 3. 설계 고민 및 결론 지점
-(1) DB ERD를 설계하는 과정 : 처음에는 여러 테이블에 likes(좋아요 기능) 속성을 추가했는데 추가 테이블이 만들어질 것 같아서 그냥 likes 테이블을 하나 만들었습니다.
+- 공통점
+목적 : 인증(Authorization)된 사용자의 상태를 유지하기 위함
+흐름 : 로그인 → 인증 완료 → 토큰 또는 세션 생성 → 이후 요청에 인증 정보 포함
+사용처 : 웹 서비스에서 로그인 상태 유지, 사용자 인증 필요 API 호출 등에서 사용됨
 
-(2) domain 디렉토리 구조 짤 때 Service / Controller / repository 등의 폴더를 만들고 각 기능 파일을 추가했는데, 이번에는 기능 개수가 많을 것 같아서 기능별로 폴더를 만들었습니다. (예시 : comments, tags, posts,likes 등등) 어떤 방법을 택하는게 좋을까요?
+- 차이점
+1) JWT
+- 저장 위치 : 클라이언트(브라우저의 localStorage, sessionStorage, cookie 등)
+- 토큰 형태 : Base64 인코딩된 JSON 문자열
+- 서버 상태 : stateless (서버가 토큰 내용을 저장하지 않음)
+- 확장성 : 서버 간 공유 필요 없음 (토큰 자체에 정보가 포함) → 수평 확장에 유리
+- 보안 : 탈취되면 유저 행세 가능 → 짧은 만료 시간 + HTTPS + Refresh Token 필요
+- 만료 관리 : 토큰에 직접 만료 시간 지정
+- 로그아웃 처리 : 토큰은 클라이언트에서 삭제만 가능
 
-(3) 스프링을 거의 처음 써봐서 그런지 편리하지만 많은 라이브러리를 써서 초기설정이 쉽지 않은 것 같습니다 (그래도 initializer가 있어서 정말 다행입니다..) (ㅜ.ㅜ..) initializer에서는 보통 어떤 기능들을 많이 쓰시나요?
+2) Session
+- 저장 위치 : 서버 메모리, DB, Redis
+- 토큰 형태 : 고유한 세션 ID
+- 서버 상태 : stateful (서버가 세션 상태를 저장)
+- 확장성 : 서버 또는 중앙 세션 저장소 필요 → 확장성에 불리
+- 보안 : 서버 관리 하에 세션 무효화 가능 (조작은 어려움)
+- 만료 관리 : 서버 측에서 세션 유효시간 관리
+- 로그아웃 처리 : 서버에서 무효화하려면 별도 블랙리스트 필요
+
+3) 적합성
+- Session : 보안성과 무효화 기능이 중요한 서비스 구현 시 사용
+- JWT : 서버 부담을 줄이고 클라이언트에 인증 상태를 넘기고 싶은 경우 사용
 
 ---
-## 4. 단위테스트 결과창 (신기해서 첨부)
-![image](https://github.com/user-attachments/assets/8f963ee4-8e14-40c5-a00b-1b3e58539062)
-
----
-
-
