@@ -1,7 +1,7 @@
 package com.ceos21.ceos21BE.jwt;
 
-import com.ceos21.ceos21BE.apiPayload.code.status.ErrorStatus;
-import com.ceos21.ceos21BE.apiPayload.exception.GeneralException;
+import com.ceos21.ceos21BE.global.apiPayload.code.status.ErrorStatus;
+import com.ceos21.ceos21BE.global.apiPayload.exception.GeneralException;
 import com.ceos21.ceos21BE.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.customDetail.CustomDetailsService;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;

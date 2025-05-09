@@ -1,7 +1,7 @@
 package com.ceos21.ceos21BE.jwt;
 
 
-import com.ceos21.ceos21BE.apiPayload.ApiResponse;
+import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
 import com.ceos21.ceos21BE.customDetail.CustomDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;

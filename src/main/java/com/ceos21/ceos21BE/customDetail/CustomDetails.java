@@ -1,6 +1,6 @@
 package com.ceos21.ceos21BE.customDetail;
 
-import com.ceos21.ceos21BE.web.user.entity.UserEntity;
+import com.ceos21.ceos21BE.web.user.entity.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,14 +12,14 @@ import java.util.stream.Collectors;
 @Getter
 public class CustomDetails implements UserDetails {
 
-    private final UserEntity user;
+    private final User user;
 
-    public CustomDetails(UserEntity user) {
+    public CustomDetails(User user) {
         this.user = user;
     }
 
     public CustomDetails(String username, String password, String role) {
-        this.user = UserEntity.builder()
+        this.user = User.builder()
                 .username(username)
                 .password(password)
                 .role(role)

@@ -1,6 +1,6 @@
 package com.ceos21.ceos21BE.jwt;
 
-import com.ceos21.ceos21BE.apiPayload.ApiResponse;
+import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
 import com.ceos21.ceos21BE.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
 import com.ceos21.ceos21BE.web.auth.dto.LoginRequestDto;
@@ -18,9 +18,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 import java.io.IOException;
 

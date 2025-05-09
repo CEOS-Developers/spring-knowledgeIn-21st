@@ -1,6 +1,6 @@
 package com.ceos21.ceos21BE.customDetail;
 
-import com.ceos21.ceos21BE.web.user.entity.UserEntity;
+import com.ceos21.ceos21BE.web.user.entity.User;
 import com.ceos21.ceos21BE.web.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,10 +18,10 @@ public class CustomDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        Optional<UserEntity> user = userRepository.findByEmail(email);
+        Optional<User> user = userRepository.findByEmail(email);
 
         if (user.isPresent()) {
-            UserEntity newUser = user.get();
+            User newUser = user.get();
 
             return new CustomDetails(newUser);
         }

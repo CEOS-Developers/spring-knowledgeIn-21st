@@ -1,49 +1,47 @@
 package com.ceos21.ceos21BE.web.comment.controller;
 
-import com.ceos21.ceos21BE.apiPayload.ApiResponse;
-import com.ceos21.ceos21BE.web.comment.dto.request.CommentRequest;
-import com.ceos21.ceos21BE.web.comment.dto.request.DeleteCommentRequest;
-import com.ceos21.ceos21BE.web.comment.dto.response.CommentResponse;
+import com.ceos21.ceos21BE.customDetail.CustomDetails;
+import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
+import com.ceos21.ceos21BE.global.apiPayload.code.status.SuccessStatus;
+import com.ceos21.ceos21BE.web.comment.dto.response.CommentResponseDTO;
 import com.ceos21.ceos21BE.web.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/comment")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/create/{postId}")
-    public ApiResponse<CommentResponse> createComment(
+    // 댓글 작성
+    @PostMapping("/posts/{postId}/comments")
+    public ApiResponse<CommentResponseDTO> createComment(
             @PathVariable Long postId,
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomDetails user,
             @RequestParam String content) {
-        CommentRequest request = CommentRequest.builder()
-                .userId(userId)
-                .postId(postId)
-                .content(content)
-                .build();
-        return ApiResponse.onSuccess(commentService.createComment(request));
+        CommentResponseDTO response = commentService.createComment(postId, user.getUser().getUserId(), content);
+        return ApiResponse.of(SuccessStatus._CREATED, response);
     }
 
-    @DeleteMapping("/{commentId}")
+    // 댓글 삭제
+    @DeleteMapping("/comments/{commentId}")
     public ApiResponse<Void> deleteComment(
             @PathVariable Long commentId,
-            @RequestParam Long userId) {
-        DeleteCommentRequest request = DeleteCommentRequest.builder()
-                .commentId(commentId)
-                .userId(userId)
-                .build();
-        return ApiResponse.onSuccess(commentService.deleteComment(request));
+            @AuthenticationPrincipal CustomDetails user) {
+        commentService.deleteComment(commentId, user.getUser().getUserId());
+        return ApiResponse.of(SuccessStatus._OK, null);
     }
 
-    @GetMapping("/{userId}")
-    public ApiResponse<List<CommentResponse>> getCommentByUserId(@PathVariable Long userId) {
-        return ApiResponse.onSuccess(commentService.getCommentByUSerId(userId));
+    // 댓글 목록 조회
+    @GetMapping("/posts/{postId}/comments")
+    public ApiResponse<List<CommentResponseDTO>> getComment(@PathVariable Long postId) {
+        List<CommentResponseDTO> response = commentService.getCommentByPostId(postId);
+        return ApiResponse.onSuccess(response);
     }
 
 }

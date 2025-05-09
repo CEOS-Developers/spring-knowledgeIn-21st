@@ -1,7 +1,7 @@
 package com.ceos21.ceos21BE.web.auth.controller;
 
-import com.ceos21.ceos21BE.apiPayload.ApiResponse;
-import com.ceos21.ceos21BE.apiPayload.exception.GeneralException;
+import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
+import com.ceos21.ceos21BE.global.apiPayload.exception.GeneralException;
 import com.ceos21.ceos21BE.jwt.JwtUtil;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
 import com.ceos21.ceos21BE.web.auth.dto.LoginRequestDto;

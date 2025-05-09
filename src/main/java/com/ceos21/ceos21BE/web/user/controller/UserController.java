@@ -1,9 +1,8 @@
 package com.ceos21.ceos21BE.web.user.controller;
 
-import com.ceos21.ceos21BE.apiPayload.ApiResponse;
+import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
 import com.ceos21.ceos21BE.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.web.user.dto.UserInfoDto;
-import com.ceos21.ceos21BE.web.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
