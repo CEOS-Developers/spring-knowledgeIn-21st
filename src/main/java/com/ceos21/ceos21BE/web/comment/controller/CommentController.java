@@ -1,6 +1,6 @@
 package com.ceos21.ceos21BE.web.comment.controller;
 
-import com.ceos21.ceos21BE.customDetail.CustomDetails;
+import com.ceos21.ceos21BE.web.user.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
 import com.ceos21.ceos21BE.global.apiPayload.code.status.SuccessStatus;
 import com.ceos21.ceos21BE.web.comment.dto.response.CommentResponseDTO;

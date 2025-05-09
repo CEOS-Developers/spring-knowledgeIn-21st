@@ -4,6 +4,7 @@ package com.ceos21.ceos21BE.global.config;
 import com.ceos21.ceos21BE.jwt.JwtAuthenticationFilter;
 import com.ceos21.ceos21BE.jwt.JwtAuthorizationFilter;
 import com.ceos21.ceos21BE.jwt.JwtUtil;
+import com.ceos21.ceos21BE.web.user.customDetail.CustomDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
+    private final CustomDetailsService customDetailsService;
     private final String[] allowedUrls = {
             "/h2-console/**",
             "/swagger-ui/index.html",
@@ -83,7 +85,7 @@ public class SecurityConfig {
                 authenticationManager(authenticationConfiguration), jwtUtil);
         loginFilter.setFilterProcessesUrl("/login");
 
-        JwtAuthorizationFilter authorizationFilter = new JwtAuthorizationFilter(jwtUtil);
+        JwtAuthorizationFilter authorizationFilter = new JwtAuthorizationFilter(jwtUtil, customDetailsService);
 
 
         http.

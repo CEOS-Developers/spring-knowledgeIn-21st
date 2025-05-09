@@ -1,7 +1,7 @@
 package com.ceos21.ceos21BE.jwt;
 
 import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
-import com.ceos21.ceos21BE.customDetail.CustomDetails;
+import com.ceos21.ceos21BE.web.user.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
 import com.ceos21.ceos21BE.web.auth.dto.LoginRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,14 +33,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
 
-        System.out.println("JwtAuthenticationFilter: 로그인 시도 중");
+        log.info("JwtAuthenticationFilter: 로그인 시도 중");
         // 1. username, password 받아서
         ObjectMapper om =new ObjectMapper();
         LoginRequestDto loginRequestDTO;
         try {
             loginRequestDTO = om.readValue(request.getInputStream(), LoginRequestDto.class);
         } catch (IOException e) {
-            throw new AuthenticationServiceException("Error of request body.");
+            log.error("LoginRequestDto parsing error", e);
+            throw new AuthenticationServiceException("Invalid login request format.");
         }
 
         // usernamePassword Token generate
@@ -78,6 +79,23 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         ObjectMapper om = new ObjectMapper();
         om.writeValue(response.getWriter(), apiResponse);
 
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                              AuthenticationException failed) throws IOException, ServletException {
+        log.warn("[!] Login failed: " + failed.getMessage());
+
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json;charset=UTF-8");
+
+        ApiResponse<?> errorResponse = ApiResponse.onFailure(
+                String.valueOf(HttpStatus.UNAUTHORIZED),
+                "로그인 실패: " + failed.getMessage(),
+                null
+        );
+
+        new ObjectMapper().writeValue(response.getWriter(), errorResponse);
     }
 
 }

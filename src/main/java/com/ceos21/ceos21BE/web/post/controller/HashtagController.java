@@ -1,7 +1,6 @@
 package com.ceos21.ceos21BE.web.post.controller;
 
 import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
-import com.ceos21.ceos21BE.global.apiPayload.code.status.SuccessStatus;
 import com.ceos21.ceos21BE.web.post.dto.response.HashtagPostResponseDTO;
 import com.ceos21.ceos21BE.web.post.service.HashtagService;
 import lombok.RequiredArgsConstructor;

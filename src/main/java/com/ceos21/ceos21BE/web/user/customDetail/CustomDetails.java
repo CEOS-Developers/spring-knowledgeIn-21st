@@ -1,4 +1,4 @@
-package com.ceos21.ceos21BE.customDetail;
+package com.ceos21.ceos21BE.web.user.customDetail;
 
 import com.ceos21.ceos21BE.web.user.entity.User;
 import lombok.Getter;
@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Getter
@@ -18,19 +19,11 @@ public class CustomDetails implements UserDetails {
         this.user = user;
     }
 
-    public CustomDetails(String username, String password, String role) {
-        this.user = User.builder()
-                .username(username)
-                .password(password)
-                .role(role)
-                .build();
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRoleList().stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        // role 설정을 안 할 예정이므로 권한이 없다면 빈 리스트 반환
+        return Collections.emptyList();
     }
 
     @Override
@@ -40,7 +33,7 @@ public class CustomDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return user.getUsername();
     }
 
     @Override

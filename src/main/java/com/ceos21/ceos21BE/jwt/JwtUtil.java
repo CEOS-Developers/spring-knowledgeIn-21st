@@ -2,8 +2,8 @@ package com.ceos21.ceos21BE.jwt;
 
 import com.ceos21.ceos21BE.global.apiPayload.code.status.ErrorStatus;
 import com.ceos21.ceos21BE.global.apiPayload.exception.GeneralException;
-import com.ceos21.ceos21BE.customDetail.CustomDetails;
-import com.ceos21.ceos21BE.customDetail.CustomDetailsService;
+import com.ceos21.ceos21BE.web.user.customDetail.CustomDetails;
+import com.ceos21.ceos21BE.web.user.customDetail.CustomDetailsService;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -95,7 +95,6 @@ public class JwtUtil {
 
     public String createJwtRefreshToken(CustomDetails principalDetails) {
         Instant expiration = Instant.now().plusMillis(refreshTokenExpiration);
-        String refreshToken = tokenProvider(principalDetails, expiration);
 
         return tokenProvider(principalDetails, expiration);
     }
@@ -133,15 +132,10 @@ public class JwtUtil {
 
             if(isExpired) {
                 log.info("[*] Token is Expired");
+                throw new GeneralException(ErrorStatus._TOKEN_EXPIRED);
             }
-        } catch (SecurityException | MalformedJwtException e) {
-            log.info("Token is Invalid");
-        } catch (ExpiredJwtException e) {
-            log.info("Token is Expired");
-        } catch (UnsupportedJwtException e) {
-            log.info("Token is Unsupported");
-        } catch (IllegalArgumentException e) {
-            log.info("Token is Illegal");
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new GeneralException(ErrorStatus._TOKEN_INVALID);
         }
     }
 

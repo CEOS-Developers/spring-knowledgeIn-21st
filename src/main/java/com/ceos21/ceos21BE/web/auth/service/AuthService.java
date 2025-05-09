@@ -2,7 +2,7 @@ package com.ceos21.ceos21BE.web.auth.service;
 
 import com.ceos21.ceos21BE.global.apiPayload.code.status.ErrorStatus;
 import com.ceos21.ceos21BE.global.apiPayload.exception.GeneralException;
-import com.ceos21.ceos21BE.customDetail.CustomDetails;
+import com.ceos21.ceos21BE.web.user.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.jwt.JwtUtil;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
 import com.ceos21.ceos21BE.web.auth.dto.SignUpRequestDto;

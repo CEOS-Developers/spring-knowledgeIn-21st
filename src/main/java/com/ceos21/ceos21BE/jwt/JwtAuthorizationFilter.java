@@ -1,8 +1,8 @@
 package com.ceos21.ceos21BE.jwt;
 
 
+import com.ceos21.ceos21BE.web.user.customDetail.CustomDetailsService;
 import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
-import com.ceos21.ceos21BE.customDetail.CustomDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.security.SignatureException;
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final CustomDetailsService customDetailsService;
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request,
@@ -46,7 +49,18 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             // 유효성 검사
             jwtUtil.validationToken(accessToken);
 
+            // 비밀번호 없이 UserDetails 생성 -> 토큰 위조 시 실제 DB 사용자 검증 불가
             // accessToken 을 기반으로 principalDetail 저장
+
+            String username = jwtUtil.getUsername(accessToken);
+            UserDetails userDetails = customDetailsService.loadUserByUsername(username);
+
+            // spring security 인증 토큰 생성
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities()
+            );
+
+            /*
             CustomDetails principalDetails = new CustomDetails(
                     jwtUtil.getUsername(accessToken),
                     null,
@@ -60,7 +74,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     principalDetails.getAuthorities()
             );
 
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+             */
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {

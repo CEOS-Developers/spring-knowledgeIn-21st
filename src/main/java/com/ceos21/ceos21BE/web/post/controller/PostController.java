@@ -1,7 +1,7 @@
 package com.ceos21.ceos21BE.web.post.controller;
 
 import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
-import com.ceos21.ceos21BE.customDetail.CustomDetails;
+import com.ceos21.ceos21BE.web.user.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.global.apiPayload.code.status.SuccessStatus;
 import com.ceos21.ceos21BE.web.post.dto.request.CreatePostRequestDto;
 import com.ceos21.ceos21BE.web.post.dto.request.DeletePostRequest;
@@ -18,7 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.print.Pageable;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 
 @RestController

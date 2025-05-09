@@ -1,4 +1,4 @@
-package com.ceos21.ceos21BE.customDetail;
+package com.ceos21.ceos21BE.web.user.customDetail;
 
 import com.ceos21.ceos21BE.web.user.entity.User;
 import com.ceos21.ceos21BE.web.user.repository.UserRepository;
