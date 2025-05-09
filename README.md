@@ -586,10 +586,12 @@ ith name 'jwtAuthFilter' defined in URL
 > Caused by: org.springframework.util.PlaceholderResolutionException: Circular placeholder reference 'jwt.secretKey' in value "`${jwt.secretKey}`" <-- "`${jwt.secretKey}`" <-- "`${jwt.secretKey}`"
 
 원래 구현한 application.yml이다.
-> jwt:
+```java
+jwt:
 secretKey: `${jwt.secretKey}`
 accessTokenExpirationMinutes: 30
 refreshTokenExpirationDays: 30
+```
 
 여기서 jwt.secretKey 순환참조 오류가 떴다.
 
@@ -642,6 +644,7 @@ AWS_ACCESS_KEY_ID=~~
 AWS_BUCKET=~~
 AWS_SECRET_ACCESS_KEY=~~
 JWT_SECRET_KEY=~~
+DB_PASSWORD=~~
 ```
 application.yml은
 ```java
@@ -662,9 +665,9 @@ SPRING_DATASOURCE_PASSWORD=~~
 ```
 추가했더니 드디어 해결됐다.
 
-💥 일단 해결은 됐는데 url과 username은 모두 application.yml에 하드코딩 해두었는데 왜 .env 파일에 추가로 설정해둬야 연결이 되는지 모르겠다..
+💥 일단 해결은 됐는데 url과 username은 모두 application.yml에 하드코딩 해두었는데 왜 .env 파일에 추가로 설정해둬야 연결이 되는지 모르겠다.. 
   
-누가 안다면 알려주세요,,,
+application.yml을 읽어오지 못하는 것 같은데 누가 이유를 안다면 알려주세요,,, ㅠ
 
 ---
 추가로, 에러 해결해보면서 시도해본 
