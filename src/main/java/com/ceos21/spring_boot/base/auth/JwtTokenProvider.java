@@ -6,12 +6,16 @@ import com.ceos21.spring_boot.dto.user.TokenDTO;
 import com.ceos21.spring_boot.repository.RefreshTokenRepository;
 import com.ceos21.spring_boot.repository.UserRepository;
 import io.jsonwebtoken.*;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import com.ceos21.spring_boot.base.status.ErrorStatus;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.token.TokenService;
 import org.springframework.stereotype.Component;
@@ -22,6 +26,7 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
     private final Key SECRET_KEY;
@@ -29,19 +34,20 @@ public class JwtTokenProvider {
     private final long refreshTokenExpirationMillis;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
+    private final JwtProperties jwtProperties;
 
-    public JwtTokenProvider(
-            @Value("${jwt.secretKey}") String secretKey,
-            @Value("${jwt.accessTokenExpirationMinutes}") long accessTokenExpirationMinutes,
-            @Value("${jwt.refreshTokenExpirationDays}") long refreshTokenExpirationDays, RefreshTokenRepository refreshTokenRepository, UserRepository userRepository
-    ) {
-        this.SECRET_KEY = new SecretKeySpec(Base64.getDecoder().decode(secretKey), SignatureAlgorithm.HS512.getJcaName());
-        this.accessTokenExpirationMillis = accessTokenExpirationMinutes * 60 * 1000L; //5분
-        this.refreshTokenExpirationMillis = refreshTokenExpirationDays* 24 * 60 * 60 * 1000L;; //30일
+    @Autowired
+    public JwtTokenProvider(JwtProperties jwtProperties,
+                            RefreshTokenRepository refreshTokenRepository,
+                            UserRepository userRepository) {
+        this.jwtProperties = jwtProperties;
+        this.SECRET_KEY = new SecretKeySpec(Base64.getDecoder().decode(jwtProperties.getSecretKey()),
+                SignatureAlgorithm.HS512.getJcaName());
+        this.accessTokenExpirationMillis = jwtProperties.getAccessTokenExpirationMinutes() * 60 * 1000L;
+        this.refreshTokenExpirationMillis = jwtProperties.getRefreshTokenExpirationDays() * 24 * 60 * 60 * 1000L;
         this.refreshTokenRepository = refreshTokenRepository;
         this.userRepository = userRepository;
     }
-
 
     //엑세스 토큰 생성
     public String createAccessToken(User user) {
