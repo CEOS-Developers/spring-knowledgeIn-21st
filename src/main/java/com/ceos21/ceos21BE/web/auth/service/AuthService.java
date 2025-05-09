@@ -5,7 +5,7 @@ import com.ceos21.ceos21BE.global.apiPayload.exception.GeneralException;
 import com.ceos21.ceos21BE.web.user.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.jwt.JwtUtil;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
-import com.ceos21.ceos21BE.web.auth.dto.SignUpRequestDto;
+import com.ceos21.ceos21BE.web.auth.dto.SignUpRequestDTO;
 import com.ceos21.ceos21BE.web.user.entity.User;
 import com.ceos21.ceos21BE.web.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +19,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+
 
     public JwtDto login(String email, String password) {
         // 1. 이메일로 유저 찾기
@@ -38,7 +39,7 @@ public class AuthService {
         return new JwtDto(accessToken, refreshToken);
     }
 
-    public JwtDto signUp(SignUpRequestDto requestDto) {
+    public JwtDto signUp(SignUpRequestDTO requestDto) {
         // email 중복 체크
         if(userRepository.existsByEmail(requestDto.getEmail())) {
             throw new GeneralException(ErrorStatus._EMAIL_DUPLICATED);
@@ -52,7 +53,6 @@ public class AuthService {
                 .email(requestDto.getEmail())
                 .password(encodedPassword)
                 .username(requestDto.getUsername())
-                .role("ROLE_USER")
                 .build();
 
         // UserEntity 저장

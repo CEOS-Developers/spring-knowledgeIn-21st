@@ -32,4 +32,7 @@ public class User extends BaseEntity {
     //private String role;
 
     // User은 단방향으로 관리하겠다.
+    public void updateUsername(String username) {
+        this.username = username;
+    }
 }

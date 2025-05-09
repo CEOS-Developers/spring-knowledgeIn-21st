@@ -3,7 +3,7 @@ package com.ceos21.ceos21BE.jwt;
 import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
 import com.ceos21.ceos21BE.web.user.customDetail.CustomDetails;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
-import com.ceos21.ceos21BE.web.auth.dto.LoginRequestDto;
+import com.ceos21.ceos21BE.web.auth.dto.LoginRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,9 +36,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.info("JwtAuthenticationFilter: 로그인 시도 중");
         // 1. username, password 받아서
         ObjectMapper om =new ObjectMapper();
-        LoginRequestDto loginRequestDTO;
+        LoginRequestDTO loginRequestDTO;
         try {
-            loginRequestDTO = om.readValue(request.getInputStream(), LoginRequestDto.class);
+            loginRequestDTO = om.readValue(request.getInputStream(), LoginRequestDTO.class);
         } catch (IOException e) {
             log.error("LoginRequestDto parsing error", e);
             throw new AuthenticationServiceException("Invalid login request format.");
