@@ -1,6 +1,6 @@
 package com.ceos21.springknowledgein.security.user;
 
-import com.ceos21.springknowledgein.domain.user.repository.MemberRepository;
+import com.ceos21.springknowledgein.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

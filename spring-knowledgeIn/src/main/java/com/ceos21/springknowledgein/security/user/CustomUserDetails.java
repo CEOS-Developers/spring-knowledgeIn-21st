@@ -1,6 +1,6 @@
 package com.ceos21.springknowledgein.security.user;
 
-import com.ceos21.springknowledgein.domain.user.repository.Member;
+import com.ceos21.springknowledgein.user.repository.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

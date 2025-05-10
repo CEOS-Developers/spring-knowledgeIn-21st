@@ -2,15 +2,14 @@ package com.ceos21.springknowledgein.domain.knowledein.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ceos21.springknowledgein.domain.knowledgein.repository.Post;
-import com.ceos21.springknowledgein.domain.knowledgein.repository.PostRepository;
-import com.ceos21.springknowledgein.domain.user.UserRoleEnum;
-import com.ceos21.springknowledgein.domain.user.repository.Member;
-import com.ceos21.springknowledgein.domain.user.repository.MemberRepository;
+import com.ceos21.springknowledgein.knowledgein.domain.Post;
+import com.ceos21.springknowledgein.knowledgein.repository.PostRepository;
+import com.ceos21.springknowledgein.user.UserRoleEnum;
+import com.ceos21.springknowledgein.user.repository.Member;
+import com.ceos21.springknowledgein.user.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
