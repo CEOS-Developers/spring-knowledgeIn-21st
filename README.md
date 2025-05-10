@@ -532,4 +532,160 @@ else {
    - 글 조회시, is_deleted=false인 답변만 조회된다.
 ![](https://velog.velcdn.com/images/dohyunii/post/5e43c3f1-3e8d-49dc-b28d-49fe9c722ef4/image.png)
 
+---
+### WEEK 4. Docker
+### 1. Docker 컨테이너란?
+- 애플리케이션을 패키징하는 툴
+- 웹 애플리케이션을 실행하는 데 필요한 모든 환경을 패키징해 컨테이너 이미지를 만들고, 
+이 이미지를 이용해 컨테이너를 생성
 
+### 2. Docker의 구성 요소
+ **(1) Docker file**
+- Copy files
+- install dependencies
+- set env
+- run script 등
+
+ **(2) Docker Image**
+- Application을 실행하는 데 필요한 모든 세팅 포함
+- 만들어진 이미지는 **불변**
+
+ **(3) Container**
+ - image를 이용해 container 안에서 애플리케이션이 동작
+ - 격리된 환경에서 실행하며 각 컨테이너는 고유한 파일 시스템을 가짐
+
+### Docker 동작 방식
+![img.png](img.png)
+**docker file 만들기 -> build해서 docker image 만들기 -> container 구동하기**
+
+### 3. 간단 실습
+![](https://velog.velcdn.com/images/dohyunii/post/7329f520-60c9-43a5-a48c-6be5f55e3ddf/image.png)
+- hello-world 도커 이미지를 다운로드 받은 후 run 실행
+
+#### <포트포워딩>
+![](https://velog.velcdn.com/images/dohyunii/post/07d85280-f3a7-49b8-9ab2-6d276f2a2d91/image.png)
+- -p 8080:80 --> 브라우저에서 http://localhost:8080으로 접근하면, 컨테이너의 80번 포트로 연결됨
+![](https://velog.velcdn.com/images/dohyunii/post/f7e13235-e8b6-41d2-a086-6615ab24609a/image.png)
+
+#### 그 외
+![](https://velog.velcdn.com/images/dohyunii/post/2836144b-76cc-41a3-8650-833a6aee658c/image.png)
+- **docker ps** : 현재 실행 중인 컨테이너 목록 조회
+- **docker top <컨테이너 name>** : 특정 컨테이너 안에서 실행 중인 프로세스 목록 조회
+
+### 4. 도커 기반 스프링부트 빌드
+~~**에러지옥에 빠졌다...**~~
+
+> UnsatisfiedDependencyException. 
+ Message: Error creating bean w
+ith name 'jwtAuthFilter' defined in URL 
+- JwtAuthFilter가 JwtTokenProvider를 생성자 인자로 받고 있는데, 이 과정에서 의존성이 해결되지 않는다고 한다..
+- 의존성 문제라면 로컬에서도 에러가 떠야 하는데 잘 돌아갔다.
+
+
+- 이것저것 고치다가 발견한..
+> Caused by: org.springframework.util.PlaceholderResolutionException: Circular placeholder reference 'jwt.secretKey' in value "`${jwt.secretKey}`" <-- "`${jwt.secretKey}`" <-- "`${jwt.secretKey}`"
+
+원래 구현한 application.yml이다.
+```java
+jwt:
+secretKey: `${jwt.secretKey}`
+accessTokenExpirationMinutes: 30
+refreshTokenExpirationDays: 30
+```
+
+여기서 jwt.secretKey 순환참조 오류가 떴다.
+
+>jwt.secretKey: `${jwt.secretKey}`를
+>jwt:secretKey: `${JWT_SECRET_KEY}`로 바꿔서 해결
+
+jwt.secretKey를 설정할 때 다시 jwt.secretKey를 참조해 무한 루프가 발생하는 거였다..
+
+아, 그리고 bootJar 사용 시 **application.yml의 내용을 변경**하면 **jar 파일도 다시 빌드**해야 한다. 
+여기서도 한참을 헤맸다..
+
+두 번째, **JDBC CONNECTION** 에러
+
+docker-compose.yml
+```java
+services:
+  db:
+    image: mysql:8.0
+    ports:
+      - "3308:3306"
+```
+docker 컨테이너를 3308 포트로 연결해 뒀다.
+
+application.yml
+```java
+spring:
+  datasource:
+    url: "jdbc:mysql://db:3306/naver?useSSL=false&allowPublicKeyRetrieval=true"
+```
+- docker 호스트 포트는 3308이지만 내부에서는 MYSQL이 3306 포트에서 실행되기 때문에
+**jdbc:mysql://db:3306/naver**를 이용해야 한다. 
+- 그리고 localhost:3306이 아니라 **docker의 db:3306**으로 url을 바꿔야 한다.
+
+근데도 계속 이 에러가 났다...
+![](https://velog.velcdn.com/images/dohyunii/post/f21775be-55d8-4334-96d0-9fad110b307d/image.png)
+
+내가 설정해둔
+docker-compose.yml
+```java
+  app:
+    image: doapp
+    container_name: spring-app
+    env_file:
+      - .env
+```
+여기서 .env파일을 읽어 환경변수를 읽어오도록 했다.
+.env 파일에는
+```java
+AWS_ACCESS_KEY_ID=~~
+AWS_BUCKET=~~
+AWS_SECRET_ACCESS_KEY=~~
+JWT_SECRET_KEY=~~
+DB_PASSWORD=~~
+```
+application.yml은
+```java
+spring:
+  datasource:
+    url: "jdbc:mysql://db:3306/naver?useSSL=false&allowPublicKeyRetrieval=true"
+    username: root
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+```
+이렇게 되어있어 이들을 읽어올 거라 생각했는데 읽어오지 못한 듯 하다.
+
+.env 파일에
+```java
+SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/naver
+SPRING_DATASOURCE_USERNAME=root
+SPRING_DATASOURCE_PASSWORD=~~
+```
+추가했더니 드디어 해결됐다.
+
+💥 일단 해결은 됐는데 url과 username은 모두 application.yml에 하드코딩 해두었는데 왜 .env 파일에 추가로 설정해둬야 연결이 되는지 모르겠다.. 
+  
+application.yml을 읽어오지 못하는 것 같은데 누가 이유를 안다면 알려주세요,,, ㅠ
+
+---
+추가로, 에러 해결해보면서 시도해본 
+```java
+services:
+ db:
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+
+ app:
+  depends_on:
+   db:
+     condition: service_healthy
+```
+이 방법으로 해결되진 않았지만, **app 서비스가 db가 정상 작동(healthy)일 때만 시작**되도록 제어하기 위한 것이다.
+
+DB가 정상작동되기 전에 App이 실행되면 **connection error**가 뜰 수 있다고 하여 시도해보았다.
+
+---
