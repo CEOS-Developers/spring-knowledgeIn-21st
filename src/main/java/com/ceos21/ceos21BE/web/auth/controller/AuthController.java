@@ -1,6 +1,7 @@
 package com.ceos21.ceos21BE.web.auth.controller;
 
 import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
+import com.ceos21.ceos21BE.global.apiPayload.code.status.SuccessStatus;
 import com.ceos21.ceos21BE.global.apiPayload.exception.GeneralException;
 import com.ceos21.ceos21BE.jwt.JwtUtil;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
@@ -29,9 +30,9 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ApiResponse<JwtDto> signUp(@RequestBody SignUpRequestDTO request) {
-        JwtDto jwtDto = authService.signUp(request);
-        return ApiResponse.onSuccess(jwtDto);
+    public ApiResponse<Void> signUp(@RequestBody SignUpRequestDTO request) {
+        authService.signUp(request);
+        return ApiResponse.of(SuccessStatus._CREATED, null);
     }
 
     @GetMapping("/reissue")
@@ -46,7 +47,4 @@ public class AuthController {
             throw new GeneralException("Refresh token expired");
         }
     }
-
-
-
 }

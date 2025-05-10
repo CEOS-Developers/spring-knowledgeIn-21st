@@ -39,7 +39,7 @@ public class AuthService {
         return new JwtDto(accessToken, refreshToken);
     }
 
-    public JwtDto signUp(SignUpRequestDTO requestDto) {
+    public void signUp(SignUpRequestDTO requestDto) {
         // email 중복 체크
         if(userRepository.existsByEmail(requestDto.getEmail())) {
             throw new GeneralException(ErrorStatus._EMAIL_DUPLICATED);
@@ -58,11 +58,15 @@ public class AuthService {
         // UserEntity 저장
         userRepository.save(user);
 
+        /*
         // Jwt
         CustomDetails customDetails = new CustomDetails(user);
         String accessToken = jwtUtil.createJwtAccessToken(customDetails);
         String refreshToken = jwtUtil.createJwtRefreshToken(customDetails);
 
+
         return new JwtDto(accessToken, refreshToken);
+        // 회원가입 시 토큰 발급은 하지 않음
+         */
     }
 }
