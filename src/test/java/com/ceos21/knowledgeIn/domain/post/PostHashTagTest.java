@@ -1,9 +1,9 @@
 package com.ceos21.knowledgeIn.domain.post;
 
 import com.ceos21.knowledgeIn.domain.user.User;
-import com.ceos21.knowledgeIn.repository.HashTagRepository;
-import com.ceos21.knowledgeIn.repository.PostRepository;
-import com.ceos21.knowledgeIn.repository.UserRepository;
+import com.ceos21.knowledgeIn.repository.post.HashTagRepository;
+import com.ceos21.knowledgeIn.repository.post.PostRepository;
+import com.ceos21.knowledgeIn.repository.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

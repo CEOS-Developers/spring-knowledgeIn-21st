@@ -6,7 +6,9 @@ import com.ceos21.knowledgeIn.controller.dto.post.PostCreateDTO;
 import com.ceos21.knowledgeIn.controller.dto.post.PostHashTagResponseDTO;
 import com.ceos21.knowledgeIn.domain.post.PostType;
 import com.ceos21.knowledgeIn.domain.user.User;
-import com.ceos21.knowledgeIn.repository.UserRepository;
+import com.ceos21.knowledgeIn.repository.user.UserRepository;
+import com.ceos21.knowledgeIn.service.post.HashTagService;
+import com.ceos21.knowledgeIn.service.post.PostService;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,12 +26,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class HashTagServiceTest {
     @Autowired
-    com.ceos21.knowledgeIn.service.PostService
+    PostService
             postService;
     @Autowired
     UserRepository userRepository;
     @Autowired
-    com.ceos21.knowledgeIn.service.HashTagService hashTagService;
+    HashTagService hashTagService;
     @Autowired
     EntityManager em;
 

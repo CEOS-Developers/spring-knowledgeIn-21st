@@ -2,7 +2,7 @@ package com.ceos21.knowledgeIn.controller.post;
 
 import com.ceos21.knowledgeIn.controller.dto.post.CommentCreateDTO;
 import com.ceos21.knowledgeIn.controller.dto.post.CommentResponseDTO;
-import com.ceos21.knowledgeIn.service.CommentService;
+import com.ceos21.knowledgeIn.service.post.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,9 +1,9 @@
 package com.ceos21.knowledgeIn.domain.post;
 
 import com.ceos21.knowledgeIn.domain.user.User;
-import com.ceos21.knowledgeIn.repository.CommentRepository;
-import com.ceos21.knowledgeIn.repository.PostRepository;
-import com.ceos21.knowledgeIn.repository.UserRepository;
+import com.ceos21.knowledgeIn.repository.post.CommentRepository;
+import com.ceos21.knowledgeIn.repository.post.PostRepository;
+import com.ceos21.knowledgeIn.repository.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

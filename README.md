@@ -333,4 +333,60 @@ com.example.project
 5. Redis안에 blacklist 확인
 ![레디스 블랙리스트 확인](./uploads/blacklist_redis.png)
 
+# 5주차
 
+
+지난주 과제였던 토큰 기반 로그인에서 부족하다고 느꼈던 부분을 위주로 리팩토링을 진행했습니다.!
+
+---
+
+## 주요 작업 내역
+
+
+- 인증 객체의 credential에 token을 담지 않음 (보안상 불필요)
+- JWT의 Payload에 권한(Role) 정보 삽입
+- UserDetail 필드 구조 정리
+- 자체 로그인(UsernamePasswordAuthenticationToken) 필터를 Spring Security FilterChain에 등록
+- 인증 성공/실패 시 JWT 발급 및 예외 응답 처리 (AuthenticationSuccessHandler, FailureHandler 활용)
+- 페이지별 권한 제어 설정
+- accessToken은 헤더에, refreshToken은 쿠키에 저장
+
+---
+
+### 설정 & 환경 변수 관리
+
+- accessToken / refreshToken 만료 시간을 환경 변수로 관리
+- application.yml 설정 파일을 프로파일에 따라 분리 (`application-test.yml`, `application-prod.yml`, 등)
+
+---
+과제를 내일까지로 착각해서 docker는 실습만 따라가봤습니다...ㅠ
+
+보다 깊은 공부는 이어서 진행하겠습니다...
+
+## 간단한 Docker 개념 및 장단점
+
+### Docker란?
+
+Docker는 애플리케이션을 실행 환경과 함께 **컨테이너**라는 단위로 패키징하여, **어디서나 동일하게 실행할 수 있도록** 도와주는 도구
+
+---
+
+### 장점
+
+- **환경 일관성**: 로컬, 테스트, 운영 환경을 완전히 동일하게 유지 가능
+- **배포 자동화에 좋음**: CI/CD와 쉽게 통합 가능
+- **경량화된 실행**: VM보다 훨씬 가볍고 빠름
+- **버전 격리**: 각 컨테이너는 독립적인 실행 환경을 가짐
+
+---
+
+### 단점
+
+- 보안/자원 격리 측면에서 VM보다는 부족한 부분이 있음
+
+
+---
+### 1. docker 컨테이너 실행 후 postman으로 요청 
+![도커_연결_postman](./uploads/docker_healthy_postman.png)
+### 2. cmd에서 실행하며 나온 로그들 입니다 
+![도커_연결_cmd](./uploads/docker_healthy_cmd.png)

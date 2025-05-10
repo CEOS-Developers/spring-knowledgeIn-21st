@@ -1,6 +1,6 @@
 package com.ceos21.knowledgeIn.domain.user;
 
-import com.ceos21.knowledgeIn.repository.UserRepository;
+import com.ceos21.knowledgeIn.repository.user.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

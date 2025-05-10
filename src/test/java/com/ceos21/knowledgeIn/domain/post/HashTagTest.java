@@ -1,6 +1,6 @@
 package com.ceos21.knowledgeIn.domain.post;
 
-import com.ceos21.knowledgeIn.repository.HashTagRepository;
+import com.ceos21.knowledgeIn.repository.post.HashTagRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

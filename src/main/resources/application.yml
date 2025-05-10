@@ -17,7 +17,13 @@ spring:
     redis:
       host: localhost
       port: 6379  # Spring이 redis와 TCP연결을 위한 포트
+
 jwt:
   secret: ${JWT_SECRET_KEY} # secret key는 base64로 인코딩해놨음
-  access-token-expiration: 600000   # 10분(ms 단위)
-  refresh-token-expiration: 1209600000  # 14일 (ms 단위)
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}   # 1분(ms 단위)
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}  # 1일 (ms 단위)
+
+logging:
+  level:
+    org.springframework: DEBUG
+    root: info
