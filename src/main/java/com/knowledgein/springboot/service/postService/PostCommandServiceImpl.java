@@ -33,7 +33,7 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     @Override
     @Transactional
-    public Post createPost(PostRequestDTO.CreateDto request, User user) {
+    public Post createPost(PostRequestDTO.CreateDto request, User user, List<String> imageUrls) {
         Post question = null;
 
         // postType == PostType.QUESTION -> questionId is null
@@ -60,8 +60,8 @@ public class PostCommandServiceImpl implements PostCommandService {
             }
         }
 
-        if (request.getImageList() != null) {
-            for (String imageUrl : request.getImageList()) {
+        if (imageUrls != null) {
+            for (String imageUrl : imageUrls) {
                 Image image = ImageConverter.toImage(newPost, imageUrl);
                 newPost.addImage(image);
             }
@@ -99,7 +99,7 @@ public class PostCommandServiceImpl implements PostCommandService {
 
     @Override
     @Transactional
-    public Post updatePost(Long postId, User user, PostRequestDTO.UpdateDto request) {
+    public Post updatePost(Long postId, User user, PostRequestDTO.UpdateDto request, List<String> imageUrls) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
 
@@ -134,9 +134,10 @@ public class PostCommandServiceImpl implements PostCommandService {
                 }
             }
         }
-        if (request.getImageList() != null) {
-            post.clearImageList();
-            for (String imageUrl: request.getImageList()) {
+        if (imageUrls != null) {
+            if (post.getImageList() != null) post.clearImageList();
+
+            for (String imageUrl: imageUrls) {
                 Image image = ImageConverter.toImage(post, imageUrl);
                 post.addImage(image);
             }
@@ -144,5 +145,4 @@ public class PostCommandServiceImpl implements PostCommandService {
 
         return post;
     }
-
 }

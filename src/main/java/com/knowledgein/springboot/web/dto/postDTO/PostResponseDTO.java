@@ -19,6 +19,18 @@ public class PostResponseDTO {
         @Schema(description = "게시물 id", example = "1")
         private Long postId;
 
+        @Schema(description = "게시물 제목", example = "날씨가 궁금해요")
+        private String title;
+
+        @Schema(description = "게시물 내용", example = "오늘 날씨는 뭘지 궁금해요 알려주세요")
+        private String content;
+
+        @Schema(description = "해시태그", example = "['#날씨', '#궁금', '#긴급']")
+        private List<String> hashtagList;
+
+        @Schema(description = "이미지 URL", example = "['https://image1.png', ...]")
+        private List<String> imageList;
+
         @Schema(description = "게시물 생성 시간", example = "2021-08-01T16:26:39.098")
         private LocalDateTime createdAt;
     }

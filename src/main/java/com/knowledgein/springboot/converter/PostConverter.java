@@ -13,6 +13,10 @@ public class PostConverter {
     public static PostResponseDTO.ResultDto toResultDto(Post post) {
         return PostResponseDTO.ResultDto.builder()
                 .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .hashtagList(getHashtagList(post))
+                .imageList(getImageList(post))
                 .createdAt(post.getCreatedAt())
                 .build();
     }
@@ -59,22 +63,25 @@ public class PostConverter {
     }
 
     public static PostResponseDTO.UpdatedDto toUpdatedDto(Post post) {
-        List<String> hashtagList = post.getPostHashtagList().stream()
-                .map(postHashtag -> postHashtag.getHashtag().getTag())
-                .collect(Collectors.toList());
-
-        List<String> imageList = post.getImageList().stream()
-                .map(image -> image.getImageUrl())
-                .collect(Collectors.toList());
-
         return PostResponseDTO.UpdatedDto.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .hashtagList(hashtagList)
-                .imageList(imageList)
+                .hashtagList(getHashtagList(post))
+                .imageList(getImageList(post))
                 .build();
     }
 
+    private static List<String> getHashtagList(Post post) {
+        return post.getPostHashtagList().stream()
+                .map(postHashtag -> postHashtag.getHashtag().getTag())
+                .collect(Collectors.toList());
+    }
+
+    private static List<String> getImageList(Post post) {
+        return post.getImageList().stream()
+                .map(image -> image.getImageUrl())
+                .collect(Collectors.toList());
+    }
 
 }

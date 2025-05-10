@@ -4,9 +4,11 @@ import com.knowledgein.springboot.apiPayload.ApiResponse;
 import com.knowledgein.springboot.apiPayload.code.status.ErrorStatus;
 import com.knowledgein.springboot.apiPayload.exception.GeneralException;
 import com.knowledgein.springboot.converter.PostConverter;
+import com.knowledgein.springboot.domain.Image;
 import com.knowledgein.springboot.domain.Post;
 import com.knowledgein.springboot.domain.User;
 import com.knowledgein.springboot.jwt.CustomUserDetails;
+import com.knowledgein.springboot.service.imageService.ImageCommandService;
 import com.knowledgein.springboot.service.postService.PostCommandService;
 import com.knowledgein.springboot.service.postService.PostQueryService;
 import com.knowledgein.springboot.web.dto.postDTO.PostRequestDTO;
@@ -15,10 +17,14 @@ import com.knowledgein.springboot.validation.annotation.CheckPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name="게시물", description = "게시물 관련 API")
@@ -27,14 +33,18 @@ import java.util.List;
 public class PostRestController {
     private final PostQueryService postQueryService;
     private final PostCommandService postCommandService;
+    private final ImageCommandService imageCommandService;
 
-    @PostMapping("/posts")
+    @PostMapping(value = "/posts", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     @Operation(summary = "게시물 생성 API",
             description = "게시물에 필요한 내용을 작성해서 생성하는 API")
-    public ApiResponse<PostResponseDTO.ResultDto> create(@RequestBody PostRequestDTO.CreateDto request,
+    public ApiResponse<PostResponseDTO.ResultDto> create(@RequestPart("request") PostRequestDTO.CreateDto request,
+                                                         @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         User user = checkUser(userDetails);
-        Post post = postCommandService.createPost(request, user);
+
+        List<String> imageUrls = convertImgUrls(imageFiles);
+        Post post = postCommandService.createPost(request, user, imageUrls);
         return ApiResponse.onSuccess(PostConverter.toResultDto(post));
     }
 
@@ -69,17 +79,32 @@ public class PostRestController {
     @Operation(summary = "특정 게시물 일부 수정 API",
             description = "지정된 게시물의 일부 필드를 수정하는 API")
     public ApiResponse<PostResponseDTO.UpdatedDto> update(@PathVariable(name = "postId") Long postId,
+                                                          @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
                                                           @AuthenticationPrincipal CustomUserDetails userDetails,
                                                           @RequestBody PostRequestDTO.UpdateDto request) {
         User user = checkUser(userDetails);
+        List<String> imageUrls = convertImgUrls(imageFiles);
 
-        Post updatedPost = postCommandService.updatePost(postId, user, request);
+        Post updatedPost = postCommandService.updatePost(postId, user, request, imageUrls);
         return ApiResponse.onSuccess(PostConverter.toUpdatedDto(updatedPost));
     }
 
-    public User checkUser (CustomUserDetails userDetails) {
+    private User checkUser (CustomUserDetails userDetails) {
         User user = (userDetails == null) ? null : userDetails.getUser();
         if (user == null) throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
         return user;
+    }
+
+    private List<String> convertImgUrls(List<MultipartFile> imageFiles) {
+        List<String> imageUrls = new ArrayList<>();
+
+        if (imageFiles != null) {
+            for (MultipartFile image: imageFiles) {
+                String extension = FilenameUtils.getExtension(image.getOriginalFilename());
+                imageUrls.add(imageCommandService.uploadFile(image, extension));
+            }
+        }
+
+        return imageUrls;
     }
 }
