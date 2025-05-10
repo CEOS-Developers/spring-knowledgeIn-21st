@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -57,9 +58,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         SecurityContextHolder.getContext().setAuthentication(authResult);   // 인증 정보 저장
 
         String email = authResult.getName();
-        String roles = authResult.getAuthorities().stream()
+        List<String> roles = authResult.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.toList());
 
         String accessToken = jwtUtil.createAccessToken(email, roles);
         String refreshToken = jwtUtil.createRefreshToken(email);
@@ -71,7 +72,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 "로그인 성공",
                 Map.of(
                         "accessToken", accessToken,
-                        "refreshToekn", refreshToken
+                        "refreshToken", refreshToken
                         )
         );
 

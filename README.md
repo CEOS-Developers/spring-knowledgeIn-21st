@@ -1,82 +1,68 @@
-# 🔐 Spring Security와 로그인
+# 🐋 Docker
+## 🌊 왜 H2가 아닌 MySQL을 쓸까?
 
-## 🔥 JWT 인증 방식 알아보기
+지식인 서비스를 클론 코딩하면서 H2 데이터베이스를 사용해 왔다. 
+H2를 선택했던 건 Spring Boot 프로젝트를 처음 만들 때 쉽게 포함할 수 있고 설정도 간편해서 개발 초반에 사용하기 좋기 때문이다.
 
-### 📌 로그인 인증 흐름
+하지만 이번 Docker로 과제를 수행하면서 문제가 생겼다!
 
-1. 클라이언트가 로그인 요청을 보낸다.
-2. `UsernamePasswordAuthenticationFilter`가 요청을 가로채고, 사용자 입력값으로 `UsernamePasswordAuthenticationToken` 객체를 생성한다.  
-   이때 생성된 토큰은 아직 인증되지 않은 상태이다.
-3. `AuthenticationManager`가 해당 토큰을 전달받아 처리하며, 내부적으로는 `DaoAuthenticationProvider`가 이를 담당한다.
-4. `DaoAuthenticationProvider`는 `UserDetailsService`를 호출하여 DB에서 사용자 정보를 조회하고, 이를 기반으로 `UserDetails` 객체를 생성한다.
-5. 사용자가 입력한 비밀번호와 DB에 저장된 비밀번호를 비교하고 일치할 경우, 인증이 완료된 `UsernamePasswordAuthenticationToken` 객체를 생성한다.  
-   이 객체는 `isAuthenticated = true` 상태지만, 클라이언트에게 직접 전달되지는 않는다.
-6. 인증이 완료된 토큰은 다시 `AuthenticationManager`를 통해 `UsernamePasswordAuthenticationFilter`로 반환된다.
-7. `successfulAuthentication()` 메서드가 실행되며, 다음과 같은 작업이 수행된다:
-    - `SecurityContextHolder.setContext(...)`: 인증된 사용자 정보를 `SecurityContext`에 저장하여 이후 요청에서도 인증 상태를 유지한다.
-    - `JwtUtil.createToken(...)`: 사용자 정보를 기반으로 JWT 토큰을 생성한다.
-    - 생성된 JWT 토큰을 응답의 헤더 또는 바디에 담아 클라이언트에게 전달한다.  
-      클라이언트는 이 토큰을 저장하고, 이후 요청 시 `Authorization: Bearer <token>` 형식으로 헤더에 포함시켜 서버에 전송한다.
+### H2 연결 오류
+기존에 H2를 localhost로 연결해서 쓰고 있었다. 그런데 Docker로 Spring Boot 애플리케이션을 실행하자마자 터졌다. 
+DB 연결 오류가 발생하면서 애플리케이션이 실행되지 않았다. <br>
+Docker 컨테이너는 격리된 실행 환경이다. 우리가 흔히 쓰는 localhost는 개발자 로컬 컴퓨터를 의미하는데, 
+**Docker 컨테이너 내부에서 localhost는 컨테이너 자기 자신**을 가리킨다. 
+그런데 우리가 쓰던 H2는 개발자 컴퓨터, 즉 컨테이너 외부에 있었고 컨테이너 내부에서는 당연히 그것을 찾을 수 없었던 것이다.
 
-### 📌 로그인 이후 요청 흐름
+컨테이너 입장에서 보면 `내부에 존재하지 않는 DB를 찾으려고 한 것`이고, 이것 때문에 오류가 발생한 것이다. 
 
-로그인 이후 클라이언트는 JWT 토큰을 포함해 서버에 요청을 보내고, 서버는 이를 통해 사용자의 인증 여부를 판단한다.
+이 문제를 해결하는 방법은 크게 두 가지가 있다.
+1. H2를 **embedded 모드 (파일 기반)** 으로 전환하는 것이었다. 
+즉, 애플리케이션 내부에서 H2 파일을 생성하도록 JDBC URL을 수정하고, 컨테이너 외부와 volume으로 연결하는 방식이다.
+`oscarfonts/h2`와 같은 비공식 Docker 이미지를 통해 실행할 수는 있다. <br>
+실제로 DockerHub에도 존재한다. [참고](https://hub.docker.com/r/oscarfonts/h2)
 
-1. 요청이 들어오면 Spring Security의 필터 체인이 실행된다.
-2. 로그인 시 사용되었던 `UsernamePasswordAuthenticationFilter`는 건너뛰고, `JwtAuthenticationFilter`가 실행된다.
-3. `JwtAuthenticationFilter`는 다음과 같은 과정을 거친다:
-    - **JWT 토큰 추출:**  
-      `JwtUtil.resolveToken()`을 통해 HTTP 요청 헤더의 `Authorization: Bearer <token>`에서 토큰을 꺼낸다.
-    - **토큰 유효성 검증:**  
-      `JwtUtil.validateToken()`을 통해 서명 위조 여부, 만료 여부 등을 확인한다.
-    - **사용자 정보 추출:**  
-      `JwtUtil.getUserInfoFromToken()`을 통해 토큰의 클레임에서 `username`을 추출한다.
-    - **사용자 조회:**  
-      `UserDetailsService.loadUserByUsername(username)`을 호출하여 DB에서 사용자 정보를 조회하고, `UserDetails` 객체를 생성한다.
-    - **인증 객체 생성:**  
-      수동으로 `UsernamePasswordAuthenticationToken`을 생성하고 `isAuthenticated = true` 상태로 설정한다.
-    - **SecurityContext 등록:**  
-      인증 객체를 `SecurityContextHolder`에 설정하여 인증 상태를 유지한다.  
-      JWT는 **stateless(무상태)** 구조이므로, `SecurityContextRepository.saveContext()`를 호출하지 않는다.  
-      서버는 인증 상태를 기억하지 않기 때문에, 클라이언트는 **매 요청마다 JWT 토큰으로 인증**해야 한다.
+하지만 이건 H2 공식에서 제공하는 방식이 아니다. 
 
+### 공식적으로 제공되는 DB
 
+DockerHub를 보면 공식적으로 제공되는 데이터베이스는 다음과 같다.
+- MySQL 
+- PostgreSQL 
+- MongoDB
 
-## 🔁 Refresh Token 발급 로직
+### MySQL의 클라이언트-서버 구조
+MySQL은 전통적인 RDBMS로 기본적으로 `서버-클라이언트` 구조를 따른다. 서버는 항상 열려 있고, 클라이언트는 여기에 접속해 쿼리를 날리는 구조다. 
+다양한 애플리케이션, 백엔드, API, 관리 도구들이 MySQL과 연동될 수 있도록 설계되어 있으며, 여러 연결을 동시에 처리할 수 있는 멀티스레드 구조도 지원한다.
 
-로그인 시 서버는 클라이언트에게 **Access Token**과 **Refresh Token**을 함께 발급한다.
-- Access Token은 짧은 유효기간(15~30분)을 가지며,
-- Refresh Token은 상대적으로 긴 유효기간(7일~30일)을 가진다.
+반면 H2는 애초에 테스트/개발을 목적으로 만들어진 `인메모리 DB`다. 물론 서버 모드로 전환해 사용하거나 TCP로도 연결할 수는 있지만, 이는 예외적인 사용법이고, 일반적으로는 JVM 내부에서 같이 실행되는 구조를 갖는다. 
+즉, Docker의 분리된 컨테이너 환경과는 자연스럽지 못하다!
 
-서버는 **Refresh Token만 DB에 저장**하며, 클라이언트는 두 토큰을 로컬/세션 저장소 또는 쿠키에 저장한다.  
-이후 요청 시 Access Token과 함께 Refresh Token도 전송하게 된다.
+### 도커에서 MySQL을 쓰면 좋은 이유들
+1. **격리와 일관성 (Isolation and consistency)**
 
-Access Token이 만료되었을 경우, 서버는 함께 전달된 Refresh Token을 사용해 다음 과정을 수행한다:
-1. DB에 저장된 Refresh Token과 일치하는지 검증한다.
-2. 일치한다면 새로운 Access Token을 재발급하여 응답한다.
+도커의 철학과 잘 맞는다. 컨테이너 단위로 격리된 환경에서 독립적으로 실행되고, 환경 간 일관성을 보장한다.
 
+2. **버전 관리 (Version control)**
 
+mysql:8.0처럼 명확히 버전을 고정할 수 있어, 개발/운영/테스트 환경이 항상 동일하다.
 
-## 🐾 로그아웃 처리 방식
+3. **확장성과 리소스 제어 (Scalability and resource control)**
 
-로그아웃은 보통 **DB에서 Refresh Token을 삭제**함으로써 처리할 수 있다.  
-그러나 다음과 같은 문제가 발생할 수 있다:
+컨테이너에 메모리, CPU 제한을 걸 수 있고, 필요 시 복제나 클러스터도 쉽게 구성할 수 있다.
 
-- Refresh Token은 삭제되었지만, **Access Token은 여전히 유효**할 수 있다.  
-  → 이 경우, 사용자가 계속해서 보호된 리소스에 접근할 수 있게 된다.
+4. **의존성 관리 (Dependency management)**
 
-이러한 보안상의 문제를 `블랙리스트(Blacklist)`를 활용하여 해결할 수 있다.
+로컬 컴퓨터에 MySQL을 직접 설치하지 않아도 된다. 컨테이너 안에서만 동작하니 내 개발 환경은 깨끗하게 유지된다.
 
-- 만료되지 않은 Access Token을 **블랙리스트에 등록**하여 무효화시킨다.
-- 블랙리스트는 보통 Redis 등을 활용하여 저장되며, **토큰의 남은 유효시간만큼 저장**하고 이후 삭제한다.
-- 서버는 매 요청마다 **토큰이 블랙리스트에 포함되어 있는지 확인**하고, 포함되어 있다면 인증을 거부한다.
+5. **데이터 영속성 (Persistence)**
 
-이 방법은 보안을 강화할 수 있다는 장점이 있지만,
-결국 서버가 상태를 저장하게 되므로 JWT의 stateless 구조와는 반대되는 개념이다. <br>
-또한 블랙리스트는 토큰의 유효기간 동안만 임시로 저장하며, 이후 자동으로 제거되도록 설정할 수 있다.
-그러나 대규모 사용자 요청이 몰릴 경우, 블랙리스트 조회 자체가 병목이 될 수 있다는 단점도 있다.
+`/var/lib/mysql` 폴더에 Docker volume을 마운트하면 컨테이너가 꺼져도 데이터는 그대로 남는다.
 
-따라서 다음과 같은 전략을 택한다.
-- Access Token의 만료 시간을 **짧게 설정(15~30분)** 하여 보안 위험을 줄인다.
-- Refresh Token은 **긴 유효기간(7일 이상)** 으로 설정해 사용자 편의성을 보장한다.
-- 블랙리스트는 **필요할 경우에만 선택적으로 도입**하는 것이 일반적이다.
+### Reference
+- 🌐https://docs.docker.com/guides/databases/
+- 🌐https://www.geeksforgeeks.org/mysql-vs-h2/
+- 🌐[https://www.oracle.com/kr/mysql/what-is-mysql/#:~:text=MySQL Database는 다양한 백엔드%2C 클라이언트 프로그램 및,지원하는 멀티스레드 SQL 서버로 구성된 클라이언트/서버 시스템입니다](https://www.oracle.com/kr/mysql/what-is-mysql/#:~:text=MySQL%20Database%EB%8A%94%20%EB%8B%A4%EC%96%91%ED%95%9C%20%EB%B0%B1%EC%97%94%EB%93%9C%2C%20%ED%81%B4%EB%9D%BC%EC%9D%B4%EC%96%B8%ED%8A%B8%20%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8%20%EB%B0%8F,%EC%A7%80%EC%9B%90%ED%95%98%EB%8A%94%20%EB%A9%80%ED%8B%B0%EC%8A%A4%EB%A0%88%EB%93%9C%20SQL%20%EC%84%9C%EB%B2%84%EB%A1%9C%20%EA%B5%AC%EC%84%B1%EB%90%9C%20%ED%81%B4%EB%9D%BC%EC%9D%B4%EC%96%B8%ED%8A%B8/%EC%84%9C%EB%B2%84%20%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%9E%85%EB%8B%88%EB%8B%A4). 
+- 🌐https://www.datacamp.com/tutorial/set-up-and-configure-mysql-in-docker
+- 🌐https://medium.com/@nuwanwe/mysql-on-docker-a-comprehensive-guide-e807fdcbcd48
+- 🌐https://github.com/metabase/metabase/issues/8467
+- 🌐https://www.metabase.com/docs/latest/installation-and-operation/running-metabase-on-docker

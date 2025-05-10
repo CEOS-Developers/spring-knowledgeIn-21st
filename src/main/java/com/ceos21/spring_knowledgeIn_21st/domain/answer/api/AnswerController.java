@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +47,7 @@ public class AnswerController {
 
     @PostMapping("/posts/{postId}/answers")
     @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasRole('USER')")
     @Operation(
             summary = "답변 추가",
             description = "새로운 답변을 등록합니다"
@@ -76,6 +78,7 @@ public class AnswerController {
 
     @PatchMapping("/answers/{answerId}")
     @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasRole('USER')")
     @Operation(
             summary = "답변 수정",
             description = "답변을 수정합니다"
@@ -93,6 +96,7 @@ public class AnswerController {
 
     @DeleteMapping("/answers/{answerId}")
     @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasRole('USER')")
     @Operation(
             summary = "답변 삭제",
             description = "답변을 삭제합니다"
@@ -108,6 +112,7 @@ public class AnswerController {
 
     @PostMapping("/answers/{answerId}/reactions")
     @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasRole('USER')")
     @Operation(
             summary = "답변 좋아요",
             description = "답변에 좋아요를 추가합니다. 이때 자신의 답변에는 반응 불가 및 이미 좋아요 또는 싫어요를 누른 경우 반응 불가"
