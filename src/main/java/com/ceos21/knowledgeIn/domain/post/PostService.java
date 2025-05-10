@@ -80,7 +80,7 @@ public class PostService {
 //            default: sorted = Sort.by(Sort.Direction.DESC, "createdAt");
 //        }
 
-        return postRepository.findByContentContains(search,pageable);
+        return postRepository.findByContentContainsAndPostType(search,pageable,PostType.QUESTION);
     }
 
     @Transactional

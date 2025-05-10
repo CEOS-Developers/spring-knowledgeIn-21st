@@ -1,6 +1,5 @@
-package com.ceos21.knowledgeIn.domain.reaction;
+package com.ceos21.knowledgeIn.domain.reaction.domain;
 
-import com.ceos21.knowledgeIn.domain.common.ReactionType;
 import com.ceos21.knowledgeIn.domain.member.Member;
 import com.ceos21.knowledgeIn.domain.post.Post;
 import com.ceos21.knowledgeIn.global.domain.BaseEntity;
@@ -25,4 +24,9 @@ public class Reaction extends BaseEntity {
     private Post post;
 
     private ReactionType reactionType;
+
+    public ReactionType setReactionType(ReactionType reactionType) {
+        this.reactionType = reactionType;
+        return this.reactionType;
+    }
 }

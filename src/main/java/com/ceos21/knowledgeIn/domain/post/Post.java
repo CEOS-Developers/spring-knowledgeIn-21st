@@ -5,6 +5,7 @@ import com.ceos21.knowledgeIn.domain.image.Image;
 import com.ceos21.knowledgeIn.domain.member.Member;
 import com.ceos21.knowledgeIn.domain.post.dto.PostRequestDTO;
 import com.ceos21.knowledgeIn.domain.postHashTag.PostHashTag;
+import com.ceos21.knowledgeIn.domain.reaction.domain.ReactionType;
 import com.ceos21.knowledgeIn.global.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -95,5 +96,17 @@ public class Post extends BaseEntity {
         if(isAdd){commentCnt++;}
         else {commentCnt--;}
         return commentCnt;
+    }
+
+    public Integer setReactionCnt(Integer add, ReactionType type){
+        if(type.equals(ReactionType.LIKE)){
+            this.likeCnt=this.likeCnt+add;
+            return this.likeCnt;
+        }else if(type.equals(ReactionType.DISLIKE)){
+            this.dislikeCnt=this.dislikeCnt+add;
+            return this.dislikeCnt;
+        }else{
+            return 0;
+        }
     }
 }
