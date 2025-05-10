@@ -15,7 +15,7 @@ spring:
         format_sql: true
 
   jwt:
-    secret: bXlzZWNyZXRrZXk=
+    secret: "akCdfyzab9Z5EVetHD6OqzV8d75hqDsH6Z5ZkvEDDCzkWzvO5XgPqKk2Boq8JpgAqH9vG8VaVwhmYMM7Abu7vw=="
     access-token-expiration: 3600000 # 1시간
 
 server:
