@@ -1,11 +1,12 @@
 package com.ceos21.ceos21BE.web.auth.controller;
 
-import com.ceos21.ceos21BE.apiPayload.ApiResponse;
-import com.ceos21.ceos21BE.apiPayload.exception.GeneralException;
+import com.ceos21.ceos21BE.global.apiPayload.ApiResponse;
+import com.ceos21.ceos21BE.global.apiPayload.code.status.SuccessStatus;
+import com.ceos21.ceos21BE.global.apiPayload.exception.GeneralException;
 import com.ceos21.ceos21BE.jwt.JwtUtil;
 import com.ceos21.ceos21BE.jwt.dto.JwtDto;
-import com.ceos21.ceos21BE.web.auth.dto.LoginRequestDto;
-import com.ceos21.ceos21BE.web.auth.dto.SignUpRequestDto;
+import com.ceos21.ceos21BE.web.auth.dto.LoginRequestDTO;
+import com.ceos21.ceos21BE.web.auth.dto.SignUpRequestDTO;
 import com.ceos21.ceos21BE.web.auth.service.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
@@ -23,15 +24,15 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ApiResponse<JwtDto> login(@RequestBody LoginRequestDto request) {
+    public ApiResponse<JwtDto> login(@RequestBody LoginRequestDTO request) {
         JwtDto jwtDto = authService.login(request.getEmail(), request.getPassword());
         return ApiResponse.onSuccess(jwtDto);
     }
 
     @PostMapping("/signup")
-    public ApiResponse<JwtDto> signUp(@RequestBody SignUpRequestDto request) {
-        JwtDto jwtDto = authService.signUp(request);
-        return ApiResponse.onSuccess(jwtDto);
+    public ApiResponse<Void> signUp(@RequestBody SignUpRequestDTO request) {
+        authService.signUp(request);
+        return ApiResponse.of(SuccessStatus._CREATED, null);
     }
 
     @GetMapping("/reissue")
@@ -46,7 +47,4 @@ public class AuthController {
             throw new GeneralException("Refresh token expired");
         }
     }
-
-
-
 }

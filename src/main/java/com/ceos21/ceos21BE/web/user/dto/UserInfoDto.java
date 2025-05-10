@@ -8,13 +8,11 @@ import lombok.Getter;
 public class UserInfoDto {
     private String username;
     private String email;
-    private String role;
 
     public static UserInfoDto from(UserInfoDto userInfoDto) {
         return UserInfoDto.builder()
                 .username(userInfoDto.getUsername())
                 .email(userInfoDto.getEmail())
-                .role(userInfoDto.getRole())
                 .build();
     }
 }

@@ -40,3 +40,4 @@ out/
 
 ### Ignore application-dev.yml file
 application-dev.yml
+application-text.yml

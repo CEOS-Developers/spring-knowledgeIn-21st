@@ -1,14 +1,14 @@
 package com.ceos21.ceos21BE.web.auth.converter;
 
-import com.ceos21.ceos21BE.web.user.entity.UserEntity;
+import com.ceos21.ceos21BE.web.user.entity.User;
 
 public class AuthConverter {
-    public static UserEntity toUser(String email, String name, String password) {
+    public static User toUser(String email, String name, String password) {
 
         // 나중에 social login 시에 사용
         String passwordToUse = password != null ? password : "defaultPassword";
 
-        return UserEntity.builder()
+        return User.builder()
                 .email(email)
                 .username(name)
                 .password(passwordToUse)
