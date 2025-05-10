@@ -3,10 +3,10 @@ spring:
     name: knowledgeIn
 
   datasource:
-    url: jdbc:h2:tcp://localhost/~/knowledgeIn
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://spring-knowledgein-21st-db-1:3306/knowledgeIn
+    username: root
+    password: mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
