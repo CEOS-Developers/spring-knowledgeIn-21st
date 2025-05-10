@@ -350,3 +350,30 @@ jeongha는 jeongha가 쓴 글만 볼 수 있음
 
 #### w/ 자신의 access 토큰
 ![](https://velog.velcdn.com/images/mirupio/post/1c3e40e4-a487-4419-9cbf-dae5a4ec9e05/image.png)
+
+
+# week 5 - Docker
+### **dockerfile** -> **image** -> **container**
+
+#### 1. dockerfile 작성
+- OS
+  ex) Ubuntu
+- 프로그램, 라이브러리
+  ex) Python, Node.js
+- SDK
+  ex) JDK21
+- 코드
+  ex) print("hello") / app.jar
+
+#### 2. image 빌드 : docker build(dockerfile 기반으로 image 생성)
+```
+./gradlew build 
+docker build -t knowledgein . 
+```
+
+#### 3. container 실행 : docker run
+```
+docker run -p 8080:8080 knowledgein
+```
+http://localhost:8080 에 접속해 서버가 잘 띄워져 있는 것 확인!
+![img_3.png](img_3.png)

@@ -23,10 +23,10 @@ public class JoinService {
         LocalDate birthdate = joinDTO.getBirthdate();
         String phoneNumber = joinDTO.getPhoneNumber();
 
-        Boolean isExist = userRepository.existsByUsername(username);
+        Boolean isExist = userRepository.existsByEmail(email);
 
-        if(isExist) {
-            return;
+        if (isExist) {
+            throw new IllegalStateException("이미 존재하는 이메일입니다.");
         }
 
         User data = User.builder()

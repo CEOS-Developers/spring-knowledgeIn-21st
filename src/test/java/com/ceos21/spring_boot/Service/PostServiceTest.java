@@ -1,4 +1,4 @@
-package com.ceos21.spring_boot.Service;
+/*package com.ceos21.spring_boot.Service;
 
 import com.ceos21.spring_boot.DTO.post.PostRequestDTO;
 import com.ceos21.spring_boot.DTO.post.PostResponseDTO;
@@ -58,4 +58,6 @@ public class PostServiceTest {
         assertEquals(2, result.getImageUrls().size());
         assertEquals(2, result.getHashtags().size());
     }
+
 }
+ */

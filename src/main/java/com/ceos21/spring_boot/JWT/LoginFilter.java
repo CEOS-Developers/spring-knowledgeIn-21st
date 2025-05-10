@@ -49,8 +49,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         CustomUserDetailsDTO customUserDetailsDTO = (CustomUserDetailsDTO) authentication.getPrincipal();
 
         // 유저 정보 꺼내 오기
-        // username
-        String username = customUserDetailsDTO.getUsername();
+        // email
+        String email = customUserDetailsDTO.getUsername();
 
         // role
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -59,15 +59,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         // 토큰 생성
-        String access = jwtUtil.createJwt("access",username, role, 600000L);
-        String refresh = jwtUtil.createJwt("refresh",username, role, 86400000L);
+        String access = jwtUtil.createJwt("access", email, role);
+        String refresh = jwtUtil.createJwt("refresh", email, role);
 
         //Refresh 토큰 저장
-        addRefresh(username, refresh, 86400000L);
+        addRefresh(email, refresh, 86400000L);
 
         // 응답 생성
-        response.addHeader("access", access);
-        response.addCookie(createCookie("refresh",refresh));
+        response.addHeader("Authorization", "Bearer " + access); // Access 토큰 -> Authorization 헤더로 전송 (표준 방식)
+        response.addCookie(createCookie("refresh",refresh)); // Refresh 토큰 -> HttpOnly 쿠키로 전송
         response.setStatus(HttpStatus.OK.value());
     }
 
@@ -90,14 +90,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     // Refresh 토큰 DB 저장
-    private void addRefresh(String username, String refreshToken, Long expiredMs) {
+    private void addRefresh(String email, String refreshToken, Long expiredMs) {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
-
         String expiration = date.toString();
 
         Refresh refresh = Refresh.builder()
-                .username(username)
+                .email(email)
                 .refresh(refreshToken)
                 .expiration(expiration)
                 .build();
