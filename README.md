@@ -1112,13 +1112,16 @@ dependencies {
     - Docker에서 접속하려면 DockerFile에 `CMD ["--spring.profiles.active=docker"]` 추가
 
 - Jar vs BootJar
-
-| **구분**       | **jar**                                | **bootJar**                                     |
-|----------------|-----------------------------------------|-------------------------------------------------|
-| **목적**       | 일반 Java 애플리케이션용 JAR           | Spring Boot 실행용 JAR                          |
-| **실행 여부**  | `java -jar`로 실행 불가 (의존성 미포함) | `java -jar`로 실행 가능                         |
-| **포함 내용**  | 클래스 + 메타 정보만 포함              | 클래스 + 라이브러리 + 실행 메인 클래스 포함     |
-| **도커 사용 가능** | 별도 스크립트 필요                    | 도커에서 바로 실행 가능                         |
+    
+    | **구분**       | **jar**                                | **bootJar**                                     |
+    |----------------|-----------------------------------------|-------------------------------------------------|
+    | **목적**       | 일반 Java 애플리케이션용 JAR           | Spring Boot 실행용 JAR                          |
+    | **실행 여부**  | `java -jar`로 실행 불가 (의존성 미포함) | `java -jar`로 실행 가능                         |
+    | **포함 내용**  | 클래스 + 메타 정보만 포함              | 클래스 + 라이브러리 + 실행 메인 클래스 포함     |
+    | **도커 사용 가능** | 별도 스크립트 필요                    | 도커에서 바로 실행 가능                         |
+    - 도커 컨테이너는 `ENTRYPOINT ["java", "-jar", "app.jar"]` **JAR 하나**만 실행 → 모든 의존성을 포함한 bootJar가 필요!!
+    - Reference: [jar vs BootJar](https://velog.io/@hoyo1744/bootJar-vs-jarplainJar)
+    - Clean할때 `./gradlew clean bootJar`
 
 - 도커 이미지 빌드 호환성 문제
     - `WARNING: The requested image's platform (linux/arm64/v8) does not match the detected host platform (linux/amd64/v3) and no specific platform was requested`
