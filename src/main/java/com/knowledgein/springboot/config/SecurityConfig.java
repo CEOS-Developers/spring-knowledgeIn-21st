@@ -32,12 +32,13 @@ public class SecurityConfig {
                 .formLogin((auth) -> auth.disable())
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/","/login"
+                        .requestMatchers("/","/sign-in", "/sign-up"
                                 ,"/user/**"
                                 ,"/swagger-ui/**"
                                 ,"/swagger-resources/**"
                                 ,"/v3/api-docs/**"
                                 , "/resources/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -8,7 +8,7 @@ import com.knowledgein.springboot.web.dto.postDTO.PostResponseDTO;
 import java.util.List;
 
 public interface PostCommandService {
-    Post createPost(PostRequestDTO.CreateDto request, User user);
+    Post createPost(PostRequestDTO.CreateDto request, User user, List<String> imageUrls);
     List<PostResponseDTO.ResultDto> deletePost(Long postId, User user);
-    Post updatePost(Long postId, User user, PostRequestDTO.UpdateDto request);
+    Post updatePost(Long postId, User user, PostRequestDTO.UpdateDto request, List<String> imageUrls);
 }
