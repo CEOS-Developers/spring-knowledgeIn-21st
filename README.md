@@ -2,41 +2,52 @@
 ceos back-end 21st naver knowledge-in clone coding project
 
 ---
-## Spring Security 동작 원리
-- 동작원리
-    1. 요청 수신
-    2. AuthenticationFilter: UsernamePasswordAuthenticationToken(=인증용 객체) 생성
-    3. AuthenticationManager 호출, 이 클래스가 여러 Provider의 목록을 가지고 있다.
-       그 중 해당 Token을 처리할 수 있는 적절한 Provider 선택
-    4. 선택한 Provider에게 인증객체를 넘겨주고 해당 Provider는 UserDetailsService를 통해
-       로그인한 사용자의 정보를 비교하여 인증한다.
-    5. 인증이 완료되면 SecurityContextHolder에 인증 객체를 담는다.
+## Doker 개념
+https://www.youtube.com/watch?v=e0koWWAmXSk
 
-위의 과정은 기본적인 formLogin 방식에서의 로그인 인증 절차이다.
-JWT를 이용하려면 요청이 Controller로 들어왔을 때 로그인 로직을 작성한 Service단에서
-직접 인증 객체를 만들고 authenticate()를 통해 인증 과정을 거친다.
-이때 말하는 인증 과정이란 단순히 '사용자가 맞는지'를 검증하는 것으로, 처음 인증객체를 생성했을 때는 authenticated가 false값이지만
-매니저의 authenticate()를 실행하고 나서 사용자의 유저네임과 비밀번호가 일치하면 authenticated가 true인 상태로 반환된다.
+예전에 수업에서 도커 관련해서 진도를 조금 나갔을 때 하나도 이해가 안됐어서 다시 찾아봤는데, 
+위의 영상이 도커 개념에 대해 쉽게 설명해둔 것 같다..
 
-이 후에 해당 인증객체를 가지고 jwt토큰을 생성할 수 있다.
+내 프로젝트에 필요한 라이브러리,OS 등등 모든것을 밀키트처럼 모아서 '이미지'라는 개념으로 만들고
+해당 이미지를 실행시키기만 하면 어디서든 내 컴퓨터에서 실행시키는 환경과 똑같은 환경에서 실행되는 느낌?인것같다
 
-### UserDetails
-해당 클래스는 Spring Security에서 유저의 정보를 담기 위해 사용하는 클래스이다.
-스프링 시큐리티에 Entity 객체를 바로 넘겨주면 안되고, UserDetails형으로 변환해서 전달해야한다.
-때문에 UserDetails를 상속하는 커스텀 UserDetails 클래스를 만들고, 해당 객체에 Entity를 담을 수 있도록
-할 수 있다.
-#### 유저 엔티티가 UserDetails클래스를 상속하게 하면 안될까?
-UserDetails클래스와 일반 엔티티 클래스는 분리하는 것이 좋다고 한다. 유저 엔티티는 DB에 영향을 주는 클래스, UserDetails는 시큐리티단에 영향을 주는
-클래스이기 때문에 분리를 해두는 것이 적절하다.
-## Security Config 작성
-- **csrf, formLogin, BasicHttp 보안 disable**
-  - REST API로 JWT방식을 사용하기 때문에 위와같은 공격에 대한 보안은 필요없다고 함
 
-## Controller단
-- **@AuthenticationPrincipal**
-  - 로그인한(인증된) 사용자의 정보를 가져올 수 있는 어노테이션.
-  - 로그인이 필요하지 않은 요청에서 이 어노테이션을 쓴다면 null이 주입되면서 NullpointException이 일어날 수 있으므로 주의가 필요하다.
-- **@ParameterObject로 Pageable 객체 받기**
-  - 여러개의 쿼리 파라미터를 하나의 객체로 묶어서 받을 수 있게 해주는 어노테이션
-  - Pageable 객체는 page 번호, 한 페이지 당 size(row 수), sort 방법을 캡슐화한 객체
+## 트러블 슈팅
+### 1. 컨테이너 내에서의 localhost ≠ 내 컴퓨터
+맨 처음에 db까지 도커로 띄우지는 않고, 스프링만 띄워보기로 했다.
+jar 파일로 빌드하고 이미지를 실행시키려 하니 DB 연결 관련 에러가 떴다.
+스프링부트 어플리케이션을 실행하면 잘 되는데 왜 그럴까 했더니 데이터베이스 url이 localhost로
+되어있어서 그랬다.
 
+도커 컨테이너가 내 컴퓨터(호스트)안에 새로운 미니 컴퓨터를 만든 것이라고 생각해보면 컨테이너 내에서는
+localhost가 내 컴퓨터를 가리키지 않을 것이다.
+그래서 내가 원하는 localhost를 사용하려면, 도커 컨테이너가 만들어진 진짜 호스트 컴퓨터를 가리키도록 해야한다.
+
+이 문제는 `localhost` 부분을 `host.docker.internal`로 바꾸면 해결이 가능했다. 윈도우에서는 가능하다고 하는데 맥은 잘 모르겠다.
+
+
+### 2. 컨테이너 이름
+두번째로 이제 db도 도커 컨테이너로 만들어서 연결해보았다.
+그러면 db url이 `jdbc:mysql://{도커 db 컨테이너 이름}:3306/knowledgeIn` 와 같은 형태를 띌 것이다.
+
+이때 또 멍청비용을 치렀는데.. db의 컨테이너 이름을 안정해준걸 모르고 그냥 db:3306이라고 했다가 계속 연결 에러가 났다.
+컨테이너 이름이 db라고 확신하고 있었어서 계속 다른 곳에서 삽질하다가 나중에 알았다..
+
+컨테이너 이름을 안정해주면 기본 이름은 <프로젝트명>_<서비스명>_<순번> 형식으로 지정된다.
+docker-compose.yml이 abc라는 디렉터리 아래 있고, 서비스명을 db로 설정했다면 abc-db-1 이런식.
+
+참고로 `docker ps` 라는 명령어를 사용하면 현재 실행중인 도커 컨테이너들의 이름을 포함한 다양한 정보를 알 수 있다.
+
+---
+## 추가 구현
+
+### reaction 관련 기능 구현
+- 좋아요, 싫어요 입력 받을 수 있음
+
+#### 로직
+- 반응 한 적 없을 경우: 요청 들어온 리액션으로 리액션 객체 생성 and 저장
+- 현재 저장된 값과 다른 반응 요청: 요청 들어온 리액션 타입으로 변경
+- 현재 저장된 값과 동일한 반응 다시 요청: softDelete
+
+### 리팩토링
+postService에서 질문 목록 조회 시 답변까지 조회되는 문제 해결
