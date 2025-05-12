@@ -1,31 +1,37 @@
 package com.ceos21.ceos21BE.web.post.service.questionservice;
 
-import com.ceos21.ceos21BE.web.post.dto.request.CreatePostRequest;
+import com.ceos21.ceos21BE.web.post.dto.request.CreatePostRequestDto;
 import com.ceos21.ceos21BE.web.post.dto.request.DeletePostRequest;
-import com.ceos21.ceos21BE.web.post.dto.request.PostRequest;
-import com.ceos21.ceos21BE.web.post.dto.request.UpdatePostRequest;
-import com.ceos21.ceos21BE.web.post.dto.response.PostResponse;
+import com.ceos21.ceos21BE.web.post.dto.request.UpdatePostRequestDto;
+import com.ceos21.ceos21BE.web.post.dto.response.AnswerSummaryResponseDto;
+import com.ceos21.ceos21BE.web.post.dto.response.PostResponseDto;
+import com.ceos21.ceos21BE.web.post.entity.Post;
 import com.ceos21.ceos21BE.web.post.entity.PostType;
+import org.springframework.data.domain.Page;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 
 public interface PostService {
     // 게시글 생성 (질문 or 답변)
-    PostResponse createPost(CreatePostRequest request, Long userId);
+    PostResponseDto createPost(CreatePostRequestDto request, Long userId);
 
     // 게시글 수정
-    PostResponse updatePost(UpdatePostRequest request, Long requestUserId, Long postId);
+    PostResponseDto updatePost(UpdatePostRequestDto request, Long userId, Long postId);
 
     // 게시글 삭제
-    void deletePost(DeletePostRequest request, String email);
+    void deletePost(DeletePostRequest request, Long userId);
 
-    // 해시태그로 게시글 목록 조회
-    List<PostResponse> getPostsByHashtag(String HashtagName);
-
+    // 페이징 처리된 게시글 조회
+    Page<PostResponseDto> getPostList(PostType type, Pageable pageable);
     // 사용자별 게시글 조회
-    List<PostResponse> getPostsByUser(Long userId);
+    List<PostResponseDto> getPostsByUser(Long userId);
 
-    // 전체 게시글 조회
-    List<PostResponse> getAllPosts();
+    // 전체 게시글 조회 -> 를 할 일이 있음?
+    //List<PostResponseDto> getAllPosts();
+    PostResponseDto getPost(Long postId);
+
+    List<AnswerSummaryResponseDto> getAnswersByQuestionId(Long questionId);
+    public Post validatePost(Long postId);
 }
