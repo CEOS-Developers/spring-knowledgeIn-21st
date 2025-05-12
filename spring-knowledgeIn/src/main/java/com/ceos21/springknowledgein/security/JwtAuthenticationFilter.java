@@ -1,6 +1,6 @@
 package com.ceos21.springknowledgein.security;
 
-import com.ceos21.springknowledgein.domain.user.dto.LoginRequestDto;
+import com.ceos21.springknowledgein.user.dto.LoginRequestDto;
 import com.ceos21.springknowledgein.security.user.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;

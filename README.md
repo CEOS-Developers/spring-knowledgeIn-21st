@@ -146,3 +146,82 @@ Access Token + Refresh Token 전달 및 보관 방식
 프론트는 AccessToken을 메모리 or localStorage에 저장
 
 
+----------------------------------------------------------------------
+
+<h1>🐳 Docker 학습 정리</h1>
+
+<h2>1. Docker 관련 용어</h2>
+
+<h3>- 컨테이너</h3>
+<ul>
+  <li>실행 중인 애플리케이션과 그 환경을 하나로 묶은 <strong>격리된 실행 단위</strong></li>
+  <li>가볍고, 빠르게 배포 및 테스트 가능</li>
+</ul>
+
+<h3>- 컨테이너 이미지</h3>
+<ul>
+  <li>컨테이너 실행을 위한 <strong>설정 파일, 애플리케이션, 의존성</strong>이 포함된 정적 패키지</li>
+  <li><code>Dockerfile</code>을 기반으로 생성됨</li>
+</ul>
+
+<hr/>
+
+<h2>2. Docker 실행 순서</h2>
+<ol>
+  <li>Dockerfile 작성</li>
+  <li><code>docker build</code> → 이미지 생성</li>
+  <li><code>docker run</code> → 컨테이너 실행</li>
+</ol>
+
+<hr/>
+
+<h2>3. 도커에서 로컬 MySQL 사용법</h2>
+<p>컨테이너 내부에서 로컬 MySQL을 사용하려면 <code>host.docker.internal</code> 주소를 사용해야 함<br/>
+</p>
+
+<pre>
+<code>
+spring:
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3306/your_db
+</code>
+</pre>
+
+<hr/>
+
+<h2>4. OpenJDK vs Eclipse Temurin</h2>
+
+<p>
+Docker Hub는 수년간 <code>openjdk</code> 이미지를 유지해왔지만, 2022년 7월부로 해당 이미지의 <strong>deprecated(더 이상 업데이트되지 않음)</strong>을 공식 발표했습니다.
+</p>
+<p>
+기존 <code>openjdk</code> 이미지는 Eclipse Adoptium이나 기타 공급처의 OpenJDK Java SE 바이너리를 기반으로 구성되어 있었으나, 더 이상 <strong>기능/보안 업데이트가 제공되지 않기 때문에</strong> 사용에 주의가 필요합니다.
+</p>
+
+<h3>권장 사항</h3>
+<ul>
+  <li>Docker Hub는 <strong>Adoptium 프로젝트</strong> 또는 <strong>공식 Java 공급업체</strong>에서 제공하는 이미지를 사용할 것을 권장하고 있습니다.</li>
+  <li>특히, <strong>Eclipse Temurin</strong> 이미지가 적절한 대체 이미지로 소개되었습니다.</li>
+  <li>많은 기업(예: Red Hat 애플리케이션 등)이 <code>eclipse-temurin</code> 이미지로의 전환을 마친 상태입니다.</li>
+</ul>
+
+<h3>전환 예시</h3>
+<p>기존에 사용하던 Dockerfile의 base image를 다음과 같이 변경하면 됩니다:</p>
+
+<pre><code># 기존
+FROM openjdk:17
+
+# 변경
+FROM eclipse-temurin:17
+</code></pre>
+
+<h3>에러 경험</h3>
+<p>
+처음엔 <code>openjdk</code> 이미지를 사용했는데, Docker 환경에서 Spring Boot 프로젝트를 실행할 때 <strong>exec /opt/java/openjdk/bin/java: exec format error</strong>가 지속적으로 발생했습니다.
+</p>
+<p>
+<code>eclipse-temurin</code>로 전환한 이후에는 모든 문제가 해결되어 <strong>정상적으로 빌드 및 실행</strong>이 가능했습니다.
+</p>
+
+
+

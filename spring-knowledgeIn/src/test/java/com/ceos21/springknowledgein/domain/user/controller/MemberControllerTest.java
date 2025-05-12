@@ -1,7 +1,7 @@
 package com.ceos21.springknowledgein.domain.user.controller;
 
 
-import com.ceos21.springknowledgein.domain.user.dto.SignupRequestDto;
+import com.ceos21.springknowledgein.user.dto.SignupRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
