@@ -29,7 +29,7 @@ public class User extends BaseEntity {
     @Column(name = "password", length = 255, nullable = false)
     private String password;
 
-    @Column(name = "email", length = 100)
+    @Column(name = "email", length = 100, nullable = false, unique = true) // 로그인, 인증, 회원 중복 체크에 활용
     private String email;
 
     @Column(name = "name", length = 50, nullable = false)
@@ -72,6 +72,5 @@ public class User extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.role = role;
     }
-
 }
 

@@ -21,22 +21,18 @@ public class CustomLogoutFilter extends GenericFilterBean {
     private final RefreshRepository refreshRepository;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        doFilter((HttpServletRequest) request,(HttpServletResponse) response, filterChain);
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
+        doFilter((HttpServletRequest) request, (HttpServletResponse) response, filterChain);
     }
 
-    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
 
-        // 1. 요청 URI와 HTTP 메서드가 로그아웃 조건과 일치하지 않으면 다음 필터로 넘김
+        // 로그아웃 경로가 아니거나 POST가 아닌 요청은 다음 필터로 넘김
         String requestUri = request.getRequestURI();
-        if (!requestUri.matches("^\\/logout$")) {
-
-            filterChain.doFilter(request, response);
-            return;
-        }
         String requestMethod = request.getMethod();
-        if (!requestMethod.equals("POST")) {
-
+        if (!requestUri.equals("/logout") || !requestMethod.equals("POST")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -44,55 +40,53 @@ public class CustomLogoutFilter extends GenericFilterBean {
         // 쿠키에서 Refresh 토큰 추출
         String refresh = null;
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-
-            if (cookie.getName().equals("refresh")) {
-
-                refresh = cookie.getValue();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh".equals(cookie.getName())) {
+                    refresh = cookie.getValue();
+                    break;
+                }
             }
         }
 
-        // Refresh 토큰이 없는 경우 -> 400 오류 응답
+        // Refresh 토큰이 없는 경우 → 400 응답
         if (refresh == null) {
-
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Refresh token is missing.");
             return;
         }
 
-        // Refresh 토큰 만료 여부 확인
+        // Refresh 토큰 검증
         try {
-            jwtUtil.isExpired(refresh);
+            jwtUtil.verifyToken(refresh); // 서명 + 만료 검증
         } catch (ExpiredJwtException e) {
-
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Refresh token expired.");
+            return;
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid refresh token.");
             return;
         }
 
-        // 해당 토큰이 Refresh인지 확인
+        // 카테고리가 refresh인지 확인
         String category = jwtUtil.getCategory(refresh);
-        if (!category.equals("refresh")) {
-
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        if (!"refresh".equals(category)) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Not a refresh token.");
             return;
         }
 
-        // Refresh 토큰이 DB에 저장되어 있는지 확인
-        Boolean isExist = refreshRepository.existsByRefresh(refresh);
-        if (!isExist) {
-
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        // Refresh 토큰이 DB에 존재하는지 확인
+        if (!refreshRepository.existsByRefresh(refresh)) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Refresh token not found in DB.");
             return;
         }
 
-        // 로그아웃 처리
-        // DB에서 Refresh 토큰 제거
+        // DB에서 Refresh 토큰 삭제
         refreshRepository.deleteByRefresh(refresh);
 
         // 클라이언트의 쿠키 삭제
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+        Cookie expiredCookie = new Cookie("refresh", null);
+        expiredCookie.setMaxAge(0);
+        expiredCookie.setPath("/");
+        response.addCookie(expiredCookie);
 
         // 성공 응답
         response.setStatus(HttpServletResponse.SC_OK);
