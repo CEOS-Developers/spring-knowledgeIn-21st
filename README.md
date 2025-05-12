@@ -649,3 +649,181 @@ pm.environment.set("access", token);
 아주 편하다
 
 
+### docker 적용
+
+특별한 건 없었다!<br>
+docker compose를 사용했는데 컨테이너끼리 포트 지정해주는 부분이 헷갈렸어서 정리해봤다.<br>
+![](https://velog.velcdn.com/images/grammi_boii/post/d95ae0c5-8c3b-490f-a4a7-70e9762e9e80/image.png)
+
+로컬에서 db가 5432 포트를 사용하고 있으니<br>
+같은 db 컨테이너를 띄우기 위해서는 5431 포트를 사용했고<br>
+Redis도 마찬가지로 6379를 사용하고 있으니 6378로 포트 포워딩을 해주었다.<br>
+
+그렇다면 8080:8080으로 포워딩한 백엔드 컨테이너는 도커 db, 도커 redis를 사용하기 위해서 어떤 포트를 사용해야 할까?<br>
+그림처럼 5432, 6379이다.<br>
+사실 생각해보면 간단한데 도커 네트워크 안에서 통신하는 거니까..<br>
+
+
+### docker-compose.prod
+
+application-prod 처럼 profile을 분리하는 것이라고 한다.<br>
+이와 관련해서<br>
+\1. DB 컨테이너 삭제 2. nginx 구현 3. Docker hub <br>
+3가지가 젹혀있는데 이게 무슨 말인지 설펴보면서 내 생각을 정리해보겠다
+
+
+
+### Docker 실제 활용
+
+1. DB 컨테이너 삭제<br>
+AWS로 생각해보면 하나의 ec2 인스턴스 안에서 컨테이너 3개(spring, db, redis) 모두가 돌아가고 있는 상황.<br>
+CPU, Memory 사용량이 남아나지 않을 것이다.<br>
+첫 프로젝트를 이렇게 했다가 서버가 계속 죽었던 기억이 난다.<br>
+2. Nginx 구현<br>
+로드밸런싱을 위해 사용.<br>
+ELB로 대체할 수 있다고 생각했는데, 작동하는 계층이 다르기 때문에 둘다 사용하는게 좋고 일반적이라는 글을 봐서 뒤에서 생각과 검증을 해보겠다.
+3. Docker hub
+도커 허브에 이미지를 올려 배포하는 방법이다.<br>
+이러면 prod 환경에서는 docker hub pull, docker compose up -d, docker image prune -f만 해주면 된다.<br>
+이것도 마찬가지로 첫 프로젝트때 백엔드 prod 인스턴스 안에서 git clone, git pull, build image까지 했던 기억이 난다..<br>
+지금 생각해보면 git action을 사용하면 git action상에서 빌드하고 docker hub push 하거나 jenkins를 사용한다면 CI 서버에서 빌드, push 하는게 맞다.
+
+정리하면, prod 환경에서는 RDS 같은 제품을 사용해 DB를 따로 관리하고<br>
+로드밸런싱 신경써주고<br>
+CI 서버는 따로 두자.
+
+### Web Server, Web Application Server
+
+완전 도커에 관련된 내용은 아니지만 엔진엑스를 보다가 문득 생각이 나서 정리해봤습니다
+
+![](https://velog.velcdn.com/images/grammi_boii/post/463b587b-9d8f-42a7-8006-ac227682cd45/image.png)
+
+구글에 검색하면 이런 그림이 나오는데,<br>
+Web Server는 정적 자원을 제공하고, WAS는 동적 자원을 제공한다고 나와 있다.<br>
+정적 자원은 HTML, CSS, JS, 이미지 등등<br>
+그래서 Webserver의 예시로 Nginx, Apache가 나와있고<br>
+WAS의 예시로 Tomcat, Jetty 등이 있다고 한다.
+
+약간 와닿지 않는데, 계산이 들어가는 등 비즈니스 로직을 처리하는 놈은 WAS이고<br>
+WAS는 WebServer가 하는 일을 수행할 수 있지만<br>
+고급 기능을 수행할 수 있는 WAS 자원이 아까우니 서빙만 하면 되는 일은 WebServer에게 시키자는 것으로 생각하면 될 것 같다.<br>
+
+#### Tomcat, Spring, SpringBoot
+
+처음 이를 보고 든 의문은 우리가 개발하는건 Spring인데 왜 WAS가 tomcat이지? 였다<br>
+~~사실 너무 당연하다고 생각하는 분들이 있을 수 있지만 ㅎㅎ<br>~~
+
+![](https://velog.velcdn.com/images/grammi_boii/post/81d75442-f732-4b1b-b0ec-ef97ba579d02/image.png)
+
+이부분은 김영한님의 스프링 부트 강의를 듣고 조금 이해가 되었다. - 이 강의 추천 (후반부에는 스프링 액추에이터, 그라파나, 프로메테우스 등 모니터링 내용도 나옴!)<br>
+여기서 직접 war로 빌드해 톰캣 서버에 스프링 파일을 올리는 방식으로 배포하는 경험을 해봤다.<br>
+그러고 나니 톰캣이 내장되어 있다, 즉 내장 서버가 있다라는 말때문에 **스프링 안에 톰캣이 있다고 착각**했다는 사실을 알게 되었다.<br>
+
+![](https://velog.velcdn.com/images/grammi_boii/post/9d686adf-9b08-43fd-964b-0fe59eb6edaa/image.png)
+
+그냥 Tomcat 소프트웨어 의존성을 포함하고 있는거라고 생각하면 될 듯 하다.<br>
+
+강의에서는 외장 톰캣 설치<br>
+서블릿 컨테이너 초기화를 사용해 필요한 서블릿을 등록<br>
+스프링 컨테이너를 생성해서 등록<br>
+스프링 MVC가 동작하도록 DispatcherServlet을 등록<br>
+흐름으로 진행된다.<br>
+
+내장 톰캣은<br>
+위 과정들은 똑같지만 톰캣을 의존성으로 관리<br>
+이를 jar 파일로 관리하는데, jar(spring) 내에 jar(tomcat)을 포함할 수 없기때문에 Fatjar 사용<br>
+내장 톰캣 실행, 스프링 컨테이너 생성, 디스패처 서블릿 등록등 모든 과정을 처리해 주는 부트 클래스를 만듬<br>
+이것이 바로 Spring Boot
+
+빠르게 강의를 보며 여기까지 이해했었는데, 이번 기회로 이론적인 내용을 조금 더 파보겠다<br>
+특히 서블릿을 등록한다는게 뭔지, DispatcherServlet이 뭔지<br>
+
+HTTP 요청을 처리하기 위해 Servlet 인터페이스를 구현후 서블릿 컨테이너에 등록해야 정상적으로 작동한다.<br>
+옛날에는 이를 web.xml 파일에 직접 등록했다.<br>
+즉 HTTP 요청을 처리하기 위한 하나의 방식인 것이다.<br>
+하지만!! Spring MVC가 등장하면서 요청을 Controller 단에서 처리하기 시작했고 DispatcherServlet이 등장했다.<br>
+DispatcherServlet은 Front Controller 패턴을 사용해 HTTP 요청을 처리하는 서블릿이다.<br>
+
+쉽게 말해 디스패처 서블릿은 핸들러 매핑 정보를 스캔해 요청에 적절한 **서블릿 OR 컨트롤러를 호출**해 주는 것.<br>
+즉 우리는 서블릿을 등록할 필요 없이 @Controller로 스프링 빈을 등록해 놓으면<br>
+디스패처 서블릿이 해당 컨트롤러를 호출해주는 것이다.<br>
+
+![](https://velog.velcdn.com/images/grammi_boii/post/eb9847af-686d-43ac-8de9-e44f06f4a3fb/image.png)
+
+이 그림이 가장 이해가 잘 가는 것 같다.<br>
+
+### DispatcherServlet
+
+요청을 처리할 컨트롤러를 찾아서 위임(호출) 한다는 것이 뭘까?<br>
+과정은 이렇다고 한다.
+1. 클라이언트 요청을 디스패처 서블릿이 받음
+2. 위임할 컨트롤러를 찾음
+3. 요청을 컨트롤러로 위임할 핸들러 어댑터를 찾아 전달
+4. 핸들러 어댑터가 컨트롤러로 요청을 위임
+5. 비즈니스 로직 처리
+6. 컨트롤러가 반환값을 반환
+7. 핸들러 어댑터가 반환값 처리
+8. 서버 응답을 클라이언트에게 반환
+
+같은 순서로 좀더 자세하게 보자 (보실 분들을 위해 : tomcat-embed-core 패키지에 있습니다)
+
+1. 클라이언트 요청을 디스패처 서블릿이 받음<br>
+    1-1. request, response를 캐스팅
+      ![](https://velog.velcdn.com/images/grammi_boii/post/5799b799-56d8-4bfe-9417-b5273abf88d5/image.png)
+    1-2. method에 따라 진행
+       ![](https://velog.velcdn.com/images/grammi_boii/post/6e7ebf4e-8b5b-4d60-a7bf-3fee52fcc572/image.png)<br>
+        재밌는 점은 2022년에 작성된 망나니 개발자 블로그에는 PATCH 메서드가 늦게 나와서 발생한 예외처리에 대한 내용이 나와있는데, 지금은 업그레이드 된 것 같다. HTTP_SERVLET_METHODS 안에 PATCH 메서드도 들어가 있다.<br> 
+    **1-3. 내부에 있는 processRequest 메서드**<br>
+        드디어 DispatcherServlet이 등장했다. processRequest 메서드에서 do service 메서드를 호출하고 있는데, 이는 추상 메서드로 DispatcherServlet에 구현되어 있다.
+        ![](https://velog.velcdn.com/images/grammi_boii/post/27f0dd6f-c6eb-4aa1-9cf8-64682517d8b6/image.png)
+        ![](https://velog.velcdn.com/images/grammi_boii/post/1bfbbdce-8ef7-4aa5-9898-289518825eda/image.png)
+        doService 메서드 내부에서는 성공 로직인 doDispatch가 핵심이므로 바로 넘어가자
+
+2. 위임할 컨트롤러를 찾음
+3. 요청을 컨트롤러로 위임할 핸들러 어댑터를 찾아 전달<br>
+    2, 3 -1. doDispatch 메서드 내부에서 핸들러 어댑터를 찾음 <br> ![](https://velog.velcdn.com/images/grammi_boii/post/9160e267-36b9-4abb-ad7d-857e43b35cfd/image.png)
+   (이 부분 내부는 생략 하겠다..)
+
+4. 핸들러 어댑터가 컨트롤러로 요청을 위임<br>
+   4-1. 핸들러 어댑터를 통해 컨트롤러 메서드를 호출
+   ![](https://velog.velcdn.com/images/grammi_boii/post/3d422e84-913a-41d3-a5d9-25dafacb7789/image.png)
+   4-2. 구현체인 AbstractHandlerMethodAdapter의 handle 메서드 내부를 보면<br>
+   ![](https://velog.velcdn.com/images/grammi_boii/post/7149f108-bcdc-4877-9b28-f3cbc217178c/image.png)
+   반환 타입이 ModelAndView인데 MVC의 냄새가 나는게 느껴지는가?<br>
+
+5. 비즈니스 로직 처리
+6. 컨트롤러가 반환값을 반환
+7. 핸들러 어댑터가 반환값 처리
+8. 서버 응답을 클라이언트에게 반환
+
+4번 이후 과정들은 따라가보지 못했는데, 아마 역순이라 비슷하지 않을까 싶다.<br>
+어렵네요 하하 잘못된 내용 있으면 지적해주세요!!
+
+이렇게 흐름을 따라가 보니 디스패처 서블릿이 뭔지 헷갈리지는 않을 것 같다.<br>
+GPT에게 스프링 컨테이너에서 관리하는거냐.. 빈이냐 물어봤던 지난날은 안녕~<br>
+
+
+
+
+너무 너무 좋았던 참고자료 (망나니 개발자 최고! 완전 추천)<br>
+<https://velog.io/@ddangle/Spring-Servlet-%EA%B3%BC-Servlet-Container><br>
+<https://mangkyu.tistory.com/216>
+
+추가로 저번 코드리뷰때 exception filter를 추가적으로 구현해야 하는 이유를 생각해보라는 댓글을 보고 답변이 바로 생각이 안나서.. 반성의 의미로 다시 찾아봤다. 벨로그 땡글이님이 정리를 참 잘해놓으셨다.<br>
+<https://velog.io/@ddangle/Spring-Filter-vs-Interceptor>
+
+
+
+
+
+### Nginx
+
+### Load Balancing
+
+### AWS ELB - ALB, NLB, CLB, GWLB
+
+
+엔진엑스랑 로드밸런싱, 프록시와 리버스 프록시, 그와 관련된 AWS 제품을 다루고 싶었는데 실패<br>
+다음 세션이 배포니까 다음주에 이부분 꼭 파봐야겠다<br>
+특히 ALB, nginx 같이 사용하는게 좋다는 글을 보고 의문을 가졌는데 그부분까지 찾아볼것
+
