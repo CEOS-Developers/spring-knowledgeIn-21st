@@ -985,3 +985,212 @@ dependencies {
 - 토큰을 제공해주면 제대로 게시물 작성 가능
 
   ![pic18](readme-src/week4-18.png)
+
+---
+# CEOS Week5 Submission
+
+## 도커 기반 스프링부트 빌드
+
+### DockerFile 생성
+
+- Build stage: 이미지 생성
+    - Gradle 빌드로 .jar 파일을 생성하는 단계 → app.jar만 다음 단계로 넘김
+
+    ```docker
+    # build stage
+    
+    # 어떤 이미지 형식으로 빌드할건지 지정
+    FROM amazoncorretto:21 AS Builder 
+    
+    # 작업 디렉토리 지정
+    WORKDIR /app
+    
+    # 빌드를 위해 필요한 설정 파일들 복사
+    COPY gradlew build.gradle settings.gradle /app/
+    COPY gradle /app/gradle
+    
+    # 도커 내부에서 gradlew 실행 위한 권한 부여
+    RUN chmod +x gradlew
+    
+    # 의존성 미리 다운받음 
+    # 여기까지는 변경이 크게 없으므로 Docker 캐시로 재사용 가능 
+    # (변경이 많은 코드 COPY . . 을 최대한 늦추는게 좋음)
+    RUN ./gradlew dependencies --no-daemon
+    
+    # 프로젝트 전체를 /app으로 복사
+    COPY . .
+    
+    # 전체 프로젝트 clean build 
+    # 테스트 코드 실행 생략
+    # Gradle daemon 비활성화 (도커 환경에서는 필요 x)
+    RUN ./gradlew clean build -x test --no-daemon
+    ```
+
+- Run stage: 도커 컨테이너 환경 생성
+    - Build stage에서 만든 app.jar 파일을 복사해서 실행
+
+    ```docker
+    # run stage
+    FROM amazoncorretto:21
+    
+    WORKDIR /app
+    
+    # 컨테이너 포트가 8081임을 명시
+    EXPOSE 8081
+    
+    # 빌스 스테이지에서 만든 jar 파일을 /app으로 복사
+    COPY --from=builder /app/build/libs/*.jar app.jar
+    
+    # 컨테이너 시작시 실행할 명령어 java -jar app.jar로 스프링 앱 실행
+    ENTRYPOINT ["java", "-jar", "app.jar"]
+    # ENTRYPOINT에 추가되는 부분
+    CMD ["--spring.profiles.active=docker"]
+    ```
+
+
+- Build 명령어
+    - DockerFile의 전체 내용을 읽어서 이미지 생성(jar 파일) 및 jar 실행 환경 구성
+
+    ```bash
+    docker build -t knowledgein .
+    ```
+
+
+- Run 명령어
+    - jar 파일(이미지)을 가지고 컨테이너 실행
+
+    ```bash
+    docker run -p 8080:8081 knowledgein
+    ```
+
+
+- 전체 과정
+
+    ```bash
+    ./gradlew clean bootJar
+    docker build -t knowledgein .
+    docker run -p 8080:8081 knowledgein
+    ```
+
+    1. `./gradlew clean bootJar` 실행
+
+       ![pic1](./readme-src/week5-1.png)
+  
+    2. `docker build -t knowledgein .` 실행 & `docker images`로 생성된 이미지 확인
+
+       ![pic2](./readme-src/week5-2.png)
+       ![pic3](./readme-src/week5-3.png)
+  
+    3. `docker run -p 8080:8081 knowledgein`
+        - 환경변수 `-e DB_password=??` 로 함께 잘 넘겨줘야함
+
+       ![pic4](./readme-src/week5-4.png)
+       ![pic5](./readme-src/week5-5.png)
+
+### Trouble Shooting
+
+- 로컬과 컨테이너의 포트 분리 `-p [host]:[container]`
+    - 포트가 충돌하면 관리가 어려워지므로 로컬 포트와 컨테이너 포트는 분리하는게 굿
+    - 분리하기 위해서는 yml 파일을 따로 두면 됨
+
+    ```yaml
+    // application.yml
+    spring:
+      profiles:
+        active: local
+    
+    // application-local.yml
+    server:
+      port: 8080
+    
+    // application-docker.yml
+    server:
+      port: 8081
+    ```
+
+    - 기본 `application.yml`은 `active=local`로 해둠 → `application-local.yml` 돌아감
+    - Docker에서 접속하려면 DockerFile에 `CMD ["--spring.profiles.active=docker"]` 추가
+
+- Jar vs BootJar
+    
+    | **구분**       | **jar**                                | **bootJar**                                     |
+    |----------------|-----------------------------------------|-------------------------------------------------|
+    | **목적**       | 일반 Java 애플리케이션용 JAR           | Spring Boot 실행용 JAR                          |
+    | **실행 여부**  | `java -jar`로 실행 불가 (의존성 미포함) | `java -jar`로 실행 가능                         |
+    | **포함 내용**  | 클래스 + 메타 정보만 포함              | 클래스 + 라이브러리 + 실행 메인 클래스 포함     |
+    | **도커 사용 가능** | 별도 스크립트 필요                    | 도커에서 바로 실행 가능                         |
+    - 도커 컨테이너는 `ENTRYPOINT ["java", "-jar", "app.jar"]` **JAR 하나**만 실행 → 모든 의존성을 포함한 bootJar가 필요!!
+    - Reference: [jar vs BootJar](https://velog.io/@hoyo1744/bootJar-vs-jarplainJar)
+    - Clean할때 `./gradlew clean bootJar`
+
+- 도커 이미지 빌드 호환성 문제
+    - `WARNING: The requested image's platform (linux/arm64/v8) does not match the detected host platform (linux/amd64/v3) and no specific platform was requested`
+    - → EC2에 도커 이미지를 올릴때 이런 에러가 날 수 있음
+    - 빌드할때 `docker build --platform linux/amd64 -t knowledgein .`처럼 빌드 플랫폼을 지정
+    - Reference: [빌드 호환성 문제](https://velog.io/@msung99/Docker-%EC%9D%B4%EB%AF%B8%EC%A7%80-%EB%B9%8C%EB%93%9C-%ED%94%8C%EB%9E%AB%ED%8F%BC-%ED%98%B8%ED%99%98%EC%84%B1-%EA%B4%80%EB%A0%A8-%EC%97%90%EB%9F%AC-linuxamd64)
+
+---
+
+## API 추가 구현 및 리팩토링
+
+### 이미지 관련 처리: S3 버킷 사용
+
+- S3 관련 dependency 및 yml 설정
+    - Reference: [S3 sdk v2](https://akku-dev.tistory.com/92)
+
+    ```java
+    // s3
+    implementation 'software.amazon.awssdk:s3:2.31.40'
+    ```
+
+    ```yaml
+    aws:
+      s3:
+        bucket: ceos-knowledgein
+        region: ap-northeast-2
+        credentials:
+          access-key: ${s3_access}
+          secret-key: ${s3_secret}
+    ```
+
+- S3 버킷 생성 및 정책 설정
+    - Reference: [S3 버킷 생성](https://gaeggu.tistory.com/33)
+    - Reference: [S3 버킷 정책 설정](https://velog.io/@jinseoit/AWS-S3-bucket)
+
+    ```java
+    // ImageCommandService > uploadFile()의 일부
+    PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+            .bucket(bucket)
+            .key(key)
+            .contentType(image.getContentType())
+            .build();
+    
+    s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(image.getInputStream(), image.getSize()));
+    
+    // 업로드한 파일의 URL 반환
+    return s3Client.utilities().getUrl(GetUrlRequest.builder()
+            .bucket(bucket)
+            .key(key)
+            .build()).toString();
+    ```
+
+    - s3 클라이언트의 `putObject`가 가능하게 하기 위해서는 버킷 정책을 꼭 설정해줘야함
+
+- 게시물 Post & Update에 관련 사항 반영
+    - `@RequestPart`로 `MultipartFile` 형식의 이미지 파일을 받아야함
+    - `@RequestPart`는 `@RequestBody`와 함께 사용 못하니 둘다 `@RequestPart`로 통일
+
+    ```java
+    @PostMapping(value = "/posts", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @Operation(summary = "게시물 생성 API",
+            description = "게시물에 필요한 내용을 작성해서 생성하는 API")
+    public ApiResponse<PostResponseDTO.ResultDto> create(@RequestPart("request") PostRequestDTO.CreateDto request,
+                                                         @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+    ```
+
+- 포스트맨 테스트
+    - Reference: [포스트맨 form-data 형식](https://jeinie-developer.tistory.com/28)
+    ![pic6](./readme-src/week5-6.png)
+    ![pic7](./readme-src/week5-7.png)
+    ![pic8](./readme-src/week5-8.png)

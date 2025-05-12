@@ -38,8 +38,8 @@ public class PostRequestDTO {
         @Schema(description = "해시태그", example = "['#날씨', '#궁금', '#긴급']")
         private List<String> hashtagList;
 
-        @Schema(description = "이미지 URL", example = "['https://image1.png', ...]")
-        private List<String> imageList;
+//        @Schema(description = "이미지 URL", example = "['https://image1.png', ...]")
+//        private List<String> imageList;
     }
 
     @Getter
@@ -56,7 +56,7 @@ public class PostRequestDTO {
         @Schema(description = "해시태그", example = "['#날씨', '#궁금', '#긴급']")
         private List<String> hashtagList;
 
-        @Schema(description = "이미지 URL", example = "['https://image1.png', ...]")
-        private List<String> imageList;
+//        @Schema(description = "이미지 URL", example = "['https://image1.png', ...]")
+//        private List<String> imageList;
     }
 }

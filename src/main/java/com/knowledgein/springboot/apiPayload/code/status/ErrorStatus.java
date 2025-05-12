@@ -36,7 +36,10 @@ public enum ErrorStatus implements BaseCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "INVALID TOKEN", "토큰이 유효하지 않습니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "EXPIRED TOKEN", "만료된 토큰입니다."),
     UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, "UNSUPPORTED TOKEN", "지원하지 않는 토큰입니다."),
-    INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "INVALID SIGNATURE", "잘못된 JWT 서명입니다");
+    INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "INVALID SIGNATURE", "잘못된 JWT 서명입니다"),
+
+    // s3 관련 에러 응답
+    CANNOT_UPLOAD_S3(HttpStatus.BAD_REQUEST, "CANNOT UPLOAD S3", "S3 업로드에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

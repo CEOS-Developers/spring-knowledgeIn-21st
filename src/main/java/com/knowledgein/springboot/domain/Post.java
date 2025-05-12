@@ -42,22 +42,18 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "question_id")
     private Post questionPost; // Default로 nullable
 
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Image> imageList = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Comment> commentList = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<PostHashtag> postHashtagList = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "questionPost", cascade = CascadeType.ALL)
     @OneToMany(mappedBy = "questionPost", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Post> answerPostList = new ArrayList<>();
