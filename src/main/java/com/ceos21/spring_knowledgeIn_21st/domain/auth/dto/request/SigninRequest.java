@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Schema(description = "로그인 요청")
 public class SigninRequest {
-    @Schema(description = "이메일", example = "cherry@cherry.com")
+    @Schema(description = "이메일", example = "cherry@fruits.com")
     private String email;
 
     @Schema(description = "비밀번호", example = "1234")

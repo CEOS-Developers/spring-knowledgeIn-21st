@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.ceos21.spring_knowledgeIn_21st.global.exception.ErrorCode.DUPLICATE_EMAIL;
 import static com.ceos21.spring_knowledgeIn_21st.global.exception.ErrorCode.INVALID_REFRESH_TOKEN;
 
@@ -48,7 +50,7 @@ public class UserService {
             throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        return jwtUtil.createAccessToken(email, UserRole.USER.name());
+        return jwtUtil.createAccessToken(email, List.of(UserRole.USER.getAuthority()));
     }
 
     @Transactional

@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -35,10 +36,10 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String createAccessToken(String email, String role) {
+    public String createAccessToken(String email, List<String> roles) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim(AUTHORIZATION_KEY, role)
+                .claim(AUTHORIZATION_KEY, roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS512)
