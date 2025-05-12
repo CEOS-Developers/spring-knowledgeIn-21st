@@ -4,13 +4,16 @@ import com.ceos21.knowledgeIn.controller.dto.post.PostCreateDTO;
 import com.ceos21.knowledgeIn.controller.dto.post.PostResponseDTO;
 import com.ceos21.knowledgeIn.domain.post.PostType;
 import com.ceos21.knowledgeIn.domain.user.User;
-import com.ceos21.knowledgeIn.repository.PostRepository;
-import com.ceos21.knowledgeIn.repository.UserRepository;
-import org.assertj.core.api.Assertions;
+import com.ceos21.knowledgeIn.repository.post.PostRepository;
+import com.ceos21.knowledgeIn.repository.user.UserRepository;
+import com.ceos21.knowledgeIn.service.post.PostService;
+import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ActiveProfiles("test")
 @Transactional
 @SpringBootTest
 class PostServiceTest {
@@ -27,6 +31,8 @@ class PostServiceTest {
     PostRepository postRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    EntityManager em;
     User user = null;
     @BeforeEach
     void init() {
@@ -123,6 +129,9 @@ class PostServiceTest {
                 .build());
         //when
         postService.deletePost(questionId);
+        //em.flush, clear가 필요함(delete쿼리는 나갔어도 rollback이 안됐으므로 영속성컨텍스트에서 관리됨)
+        em.flush();
+        em.clear();
         List<PostResponseDTO> dtos = postService.findAllPosts();
 
         //then
