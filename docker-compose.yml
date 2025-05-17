@@ -1,0 +1,16 @@
+services:
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  spring:
+    image: trissss/knowledgein
+    container_name: knowledgein
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+

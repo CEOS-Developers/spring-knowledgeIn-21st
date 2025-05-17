@@ -1,7 +1,6 @@
 # build stage
-
-FROM amazoncorretto:21 AS Builder
-
+FROM eclipse-temurin:21 AS builder
+ENV GRADLE_OPTS="-Xmx2g"
 WORKDIR /app
 
 COPY gradlew build.gradle settings.gradle /app/
@@ -20,7 +19,7 @@ FROM amazoncorretto:21
 
 WORKDIR /app
 
-EXPOSE 8081
+EXPOSE 8080
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 
