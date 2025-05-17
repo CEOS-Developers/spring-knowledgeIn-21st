@@ -377,3 +377,31 @@ docker run -p 8080:8080 knowledgein
 ```
 http://localhost:8080 에 접속해 서버가 잘 띄워져 있는 것 확인!
 ![img_3.png](img_3.png)
+
+# week 6 - Deploy
+### 외부 접속 확인
+- 접속해보기
+  ```
+  http://13.209.67.38:8080/
+  ```
+  ![](https://velog.velcdn.com/images/mirupio/post/c4dd9774-cdf4-4a93-bfd4-b1c801d42035/image.png)
+
+### postman으로 배포환경에 대한 테스트
+- join 테스트
+  ![](https://velog.velcdn.com/images/mirupio/post/83897181-19b8-46de-9ea5-aad8aee99d4f/image.png)
+
+- db에 저장됐는지 확인
+![](https://velog.velcdn.com/images/mirupio/post/4c6d96e9-ead6-4215-801b-d89f8cd87b50/image.png)
+- 깔끔하게 보기 (세로 정렬)
+  ```
+  SELECT * FROM member\G
+  ```
+  ![](https://velog.velcdn.com/images/mirupio/post/7222ac4a-6b93-46ee-978c-8a32beb2e762/image.png)
+
+  
+성공...!!
+
+### 배포환경 다이어그램
+명령어 코드도 함께 정리해봤당
+
+![img_4.png](img_4.png)
