@@ -1,6 +1,13 @@
 # build stage
-FROM eclipse-temurin:21 AS builder
+FROM amazoncorretto:21 AS builder
+
+ENV JWT_SECRET=dummy
+ENV S3_ACCESS=dummy
+ENV S3_SECRET=dummy
+ENV RDS_USERNAME=dummy
+ENV RDS_PASSWORD=dummy
 ENV GRADLE_OPTS="-Xmx2g"
+
 WORKDIR /app
 
 COPY gradlew build.gradle settings.gradle /app/

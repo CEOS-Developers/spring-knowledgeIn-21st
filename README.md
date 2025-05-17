@@ -1370,7 +1370,22 @@ sudo apt install mysql-client # MySQL 설치
 sudo mysql -u {마스터 사용자 이름} -p --port 3306 --host {RDS 인스턴스 엔드포인트} # RDS에 접속
 ```
 
-- 그러나.. rds 호출이 ec2로만 가능하므로 일단 로컬 db 사용..ㅠ
+- ~~그러나.. rds 호출이 ec2로만 가능하므로 일단 로컬 db 사용..ㅠ~~
+- RDS를 로컬에서도 접근가능하게 하기위해 **임시방편으로 엑세스 허용**
+    - `knowledgein-sg-db` 인바운드 규칙에 IPv4, MySQL/Aurora, TCP, 3306 허용
+    - `knowledgein-private-rt` 라우팅에 0.0.0.0/0, `knowledgein-igw` 열어줌
+    - `ceos-knowledgein-db` 퍼블릭 엑세스 가능으로 수정 (하려면 VPC의 DNS 확인 활성화, DNS 호스트 이름 활성화 체크로 수정해줘야함)
+- MySQLWorkbench에서 해당 rds에 접속하고 `create database influy_db;`
+- yml의 datasource 수정
+
+    ```yaml
+    datasource:
+      url: jdbc:mysql://{rds 엔드포인트}:3306/knowledgein_db
+      username: ${RDS_USERNAME:dummy}
+      password: ${RDS_PASSWORD:dummy}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    ```
+
 
 ### Docker-compose 파일 생성
 
@@ -1392,6 +1407,7 @@ vim docker-compose.yml # 내부에 docker-compose 넣어주면 됨
         image: trissss/knowledgein
         container_name: knowledgein
         restart: always
+        env_file: .env # ec2 내에서 .env 만들어서 필요한 환경변수들 넣어주면 됨
         ports:
           - "8080:8080"
         depends_on:
@@ -1402,4 +1418,68 @@ vim docker-compose.yml # 내부에 docker-compose 넣어주면 됨
 
 ## 배포 환경 테스트
 
-후아아암 `Gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed)` 이 에러를 마주하여 7시간의 삽질 끝에 원인을 알아냈는데요.. 조금 더 해보고 업뎃하겠슴다
+~~후아아암 `Gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed)` 이 에러를 마주하여 7시간의 삽질 끝에 원인을 알아냈는데요.. 조금 더 해보고 업뎃하겠슴다~~
+
+- 결론: 환경 변수와의 싸움이었다
+
+### 빌드할때 메모리가 터짐
+
+- 빌드할때 할당된 메모리보다 더 큰 메모리가 필요했음
+
+```docker
+ENV GRADLE_OPTS="-Xmx2g"
+```
+
+- 명시적으로 늘려줌
+
+### `@Value`는 빌드시에도 값을 불러옴
+
+- jwt, s3 관련 설정들을 `@Value`로 설정했는데 이 부분은 빌드시에도 값을 불러와야 하는데 넘겨주지 않았기에 문제가 되었음
+- 하지만 빌드시에는 제대로된 값이 필요없으므로 dummy값을 넘겨줘도 괜찮음
+
+```docker
+ENV JWT_SECRET=dummy
+ENV S3_ACCESS=dummy
+ENV S3_SECRET=dummy
+```
+
+### RDS는 빌드할때 값이 필요한가봄
+
+- 앞처럼 fallback 값 넣어주고 빌드할때 `--build-arg USERNAME = ~~ --build-arg PASSWORD= ~~`로 추가해서 돌리면 되더라… 왜인지는 모르겠
+
+### 도커 이미지 push & pull
+
+- 로컬에서 푸쉬
+
+    ```bash
+    docker tag knowledgein trissss/knowledgein:latest
+    docker push trissss/knowledgein:latest
+    ```
+
+- EC2에서 풀
+
+    ```bash
+    // 도커 설치 
+    sudo apt install docker.io
+    sudo apt install docker-compose
+    
+    // 도커 로그인 
+    docker login
+    
+    // 이미지 풀
+    sudo docker pull trissss/influy:latest
+    ```
+
+- 아까 저장해둔 docker-compose.yml 잘 있나 확인하고 docker-compose 실행
+
+    ```bash
+    sudo docker-compose up -d
+    
+    // 잘 있나 확인 
+    sudo docker ps
+    ```
+
+  ![6-10](./readme-src/week6-10.png)
+- 접속해봄 → 성공
+
+  ![6-11](./readme-src/week6-11.png)
