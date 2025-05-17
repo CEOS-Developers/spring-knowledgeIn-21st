@@ -1,7 +1,6 @@
 # build stage
-
 FROM amazoncorretto:21 AS builder
-
+ENV GRADLE_OPTS="-Xmx2g"
 WORKDIR /app
 
 COPY gradlew build.gradle settings.gradle /app/
