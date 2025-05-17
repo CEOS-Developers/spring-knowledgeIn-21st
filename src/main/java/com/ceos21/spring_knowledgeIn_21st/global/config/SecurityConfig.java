@@ -77,6 +77,7 @@ public class SecurityConfig {
 
 
                         .requestMatchers("/",
+                                "/index.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",

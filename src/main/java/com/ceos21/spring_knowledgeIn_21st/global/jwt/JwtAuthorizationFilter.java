@@ -1,5 +1,6 @@
 package com.ceos21.spring_knowledgeIn_21st.global.jwt;
 
+import com.ceos21.spring_knowledgeIn_21st.global.security.UserDetailsImpl;
 import com.ceos21.spring_knowledgeIn_21st.global.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -36,18 +37,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (token != null && jwtUtil.validateToken(token)) {
             Claims claims = jwtUtil.getUserInfoFromToken(token);
             String email = claims.getSubject();
-
+            UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(email);
             // roles를 JWT에서 직접 꺼냄
             List<String> roles = (List<String>) claims.get("auth");
 
-            // roles -> GrantedAuthority 리스트로 변환
-            List<GrantedAuthority> authorities = roles.stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
-
-            // 인증 객체 생성
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(email, null, authorities);
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();

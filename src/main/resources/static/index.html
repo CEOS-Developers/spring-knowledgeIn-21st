@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NAVER 지식iN 클론</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; background-color: #f5f6f7; }
+
+        .top-header, .nav-bar {
+            background-color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .top-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .naver-logo {
+            width: 55px;
+            height: 20px;
+            background: url('https://ssl.pstatic.net/static/kin/section/sprite/sp_gnb_240604.svg') no-repeat;
+            background-size: 80px auto;
+            background-position: -1px 7.5px;
+        }
+
+        .search-bar {
+            padding: 6px 12px;
+            border: 1px solid #00bd39;
+            width: 300px;
+        }
+
+        .menu-icons img {
+            height: 24px;
+            margin-left: 12px;
+        }
+
+        .nav-links a {
+            margin-right: 20px;
+            color: #111;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .ask-btn {
+            background-color: #00bd39;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .main {
+            padding: 0 24px;
+            margin-top: 24px;
+        }
+
+        /* ✅ 여기에 새로운 wrapper 추가 */
+        .section-container {
+            max-width: 848px; /* 카드 4개 * 200px + 3 * 16px gap */
+            margin: 0 auto;
+            padding: 0px;
+        }
+
+        .card-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow: hidden;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .info-card {
+            width: 200px;
+            min-height: 180px;
+            border-radius: 16px;
+            color: white;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            background: #5B8BF6;
+            box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .card-content {
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .info-card:nth-child(1) { background-color: #4a65f6; }
+        .info-card:nth-child(2) { background-color: #44cf86; }
+        .info-card:nth-child(3) { background-color: #44bccf; }
+        .info-card:nth-child(4) { background-color: #5B8BF6; }
+
+        .qa-section {
+            background: white;
+            padding: 16px;
+            box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .qa-section h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .qa-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .qa-item {
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+        }
+
+        .qa-item:first-child {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .qa-item span {
+            display: inline-block;
+            width: 20px;
+            font-weight: bold;
+            color: #00bd39;
+        }
+
+        .qa-item a {
+            color: #111;
+            text-decoration: none;
+            font-size:14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="top-header">
+    <div class="logo">
+        <div class="naver-logo"></div>
+        <input type="text" class="search-bar" placeholder="검색어를 입력하세요" />
+    </div>
+    <div class="menu-icons">
+        <img src="https://img.icons8.com/material-rounded/24/000000/appointment-reminders.png" alt="알림" />
+        <img src="https://img.icons8.com/material-rounded/24/000000/settings.png" alt="설정" />
+    </div>
+</div>
+
+<div class="nav-bar">
+    <div class="nav-links">
+        <a href="#">홈</a>
+        <a href="#">Q&A</a>
+        <a href="#">답변하기</a>
+        <a href="#">지식기부</a>
+        <a href="#">사람들</a>
+    </div>
+    <button class="ask-btn">질문하기</button>
+</div>
+
+<div class="main">
+    <!-- ✅ 카드 영역을 section-container로 감싸기 -->
+    <div class="section-container">
+        <div class="card-grid">
+            <div class="info-card">
+                <div class="card-title">오늘의 노래는?</div>
+                <div class="card-content">오페라의 유령,<br />Think of me</div>
+            </div>
+            <div class="info-card">
+                <div class="card-title">아하! 그렇구나</div>
+                <div class="card-content">구름은 하얀색<br />먹구름은 왜 회색?</div>
+            </div>
+            <div class="info-card">
+                <div class="card-title">놓치기 아쉬운 콘텐츠</div>
+                <div class="card-content">영화 '파과'의 원작 소설을 읽어보셨나요?</div>
+            </div>
+            <div class="info-card">
+                <div class="card-title">펄쩍! 깔깔깔</div>
+                <div class="card-content">스파게티에 소금을 많이 넣으면 안되는 이유?</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ QA 영역도 section-container로 감싸기 -->
+    <div class="section-container">
+        <div class="qa-section">
+            <h3>많이 본 Q&A</h3>
+            <div class="qa-list">
+                <div class="qa-item"><span>1</span><a href="#">CEOS 백엔드 화이팅!</a></div>
+                <div class="qa-item"><span>2</span><a href="#">CEOS 프로메사 화이팅!</a></div>
+                <div class="qa-item"><span>3</span><a href="#">홍대 축제 어땠나요?</a></div>
+                <div class="qa-item"><span>4</span><a href="#">AWS 과금이 무서워요</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
