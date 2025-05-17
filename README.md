@@ -1194,3 +1194,212 @@ dependencies {
     ![pic6](./readme-src/week5-6.png)
     ![pic7](./readme-src/week5-7.png)
     ![pic8](./readme-src/week5-8.png)
+
+# CEOS Week6 Submission
+## VPC + RDS + EC2 + S3 설정
+
+- Reference: [VPC](https://kimjingo.tistory.com/175)
+- Reference: [VPC](https://inpa.tistory.com/entry/AWS-%F0%9F%93%9A-VPC-%EC%82%AC%EC%9A%A9-%EC%84%9C%EB%B8%8C%EB%84%B7-%EC%9D%B8%ED%84%B0%EB%84%B7-%EA%B2%8C%EC%9D%B4%ED%8A%B8%EC%9B%A8%EC%9D%B4-NAT-%EB%B3%B4%EC%95%88%EA%B7%B8%EB%A3%B9-NACL-Bastion-Host#)
+- Reference: [VPC&RDS](https://velog.io/@server30sopt/VPC-%EC%84%9C%EB%B8%8C%EB%84%B7-%EC%84%A4%EC%A0%95%EC%9C%BC%EB%A1%9C-RDS%EC%97%90-%EC%95%88%EC%A0%84%ED%95%98%EA%B2%8C-%EC%A0%91%EA%B7%BC%ED%95%98%EA%B8%B0)
+
+### VPC 설정
+
+1. `knowledgein-vpc` 생성: `10.0.0.0/16`
+2. 내부 subnet 생성
+
+   ![6-1](./readme-src/week6-1.png)
+
+   | 서브넷 이름 | 가용 영역 | IPv4 CIDR 블록 |
+       | --- | --- | --- |
+   | knowledgein-public-subnet-1 | ap-northeast-2a | 10.0.1.0/24 |
+   | knowledgein-private-subnet-1 | ap-northeast-2a | 10.0.3.0/24 |
+   | knowledgein-public-subnet-2 | ap-northeast-2b | 10.0.2.0/24 |
+   | knowledgein-private-subnet-2 | ap-northeast-2b | 10.0.4.0/24 |
+3. Internet gateway 생성해서 vpc에 연결
+
+   ![6-2](./readme-src/week6-2.png)
+
+    - VPC 내부에 해당하지 않는 IP는 인터넷으로 보내야하므로 Internet Gateway가 필요
+4. 라우팅 테이블 public, private 다르게 설정
+    - Public 라우팅 테이블
+        - `10.0.0.0/16`은 내부 VPC끼리 주고받는 IP니까 → 로컬에서 처리
+        - 그 외의 모든 인터넷 IP → Internet Gateway로 보냄
+
+      | **목적지 (Destination)** | **대상 (Target)** |
+              | --- | --- |
+      | 10.0.0.0/16 | local |
+      | 0.0.0.0/0 | igw-xxxxxxx  |
+    - Private 라우팅 테이블
+        - 내부 VPC에서만 통신 가능 → 로컬에서 처리
+
+      | **목적지 (Destination)** | **대상 (Target)** |
+              | --- | --- |
+      | 10.0.0.0/16 | local |
+5. 결과
+
+   ![6-3](./readme-src/week6-3.png)
+
+### 보안 그룹 생성
+
+- VPC `knowledgein-vpc`로 지정하는거 잊지마셈
+- `knowledgein-sg-ec2`: 외부에서 EC2로 접근할 수 있는 프로토콜
+    - 인바운드 규칙
+
+      ![6-4](./readme-src/week6-4.png)
+  
+    - 아웃바운드 규칙
+        - 이걸 안해줬더니 ec2에서 `sudo apt-get update`하니 에러가 발생하여 추가함
+        - Reference: [troubleshooting](https://velog.io/@tl1l1l1s/server-error-001)
+
+      ![6-5](./readme-src/week6-5.png)
+
+- `knowledgein-sg-db`: VPC 내부망에서 EC2를 통해 RDS로 접근할 수 있는 프로토콜
+    - 인바운드 규칙
+
+      ![6-6](./readme-src/week6-6.png)
+
+
+### RDS 설정
+
+- RDS 인스턴스를 위한 DB 서브넷 그룹 생성 `knowledgein-db-subnet`
+- `ceos-knowledgein-db` 데이터베이스 생성 (생성해준 db 보안 그룹과 db 서브넷 적용)
+
+
+### EC2 설정
+
+- `ceos-knowledgein-ec2` 생성 (이제까지 생성해준 vpc, 보안그룹, rds… 모두 적용)
+- 탄력적 IP 주소 할당 → 해당 ec2에 연결
+- Swap 메모리 설정 (ssh ec2 접속 후)
+    - Reference: [swap memory](https://velog.io/@junho5336/Swap-%EB%A9%94%EB%AA%A8%EB%A6%AC-%ED%95%A0%EB%8B%B9%ED%95%98%EA%B8%B0)
+
+    ```bash
+    sudo fallocate -l 2G /swapfile
+    
+    sudo chmod 600 /swapfile
+    
+    sudo mkswap /swapfile
+    
+    sudo swapon /swapfile
+    
+    sudo vi /etc/fstab # /swapfile swap swap defaults 0 0 마지막 줄에 추가
+    
+    free # 확인 
+    ```
+
+  ![6-7](./readme-src/week6-7.png)
+
+### S3 설정
+
+- S3 Gateway Endpoint 설정
+    - Reference: [gateway endpoint](https://zigispace.net/1191)
+    - 이전에 만든 `ceos-knowledgein` s3에 대한 엔드포인트를 만듦
+    - S3는 public service라서 VPC 내부에 두지 못해서 vpc에서 s3를 호출하려면 internet gateway를 통해서 호출해야함 → IGW를 거치지 않고 VPC에서 S3를 호출하게 하기 위해서 → Gateway Endpoint 설정
+    - VPC > 엔드포인트에서 Gateway Endpoint인 vpce-xxxxx 생성
+
+      ![6-8](./readme-src/week6-8.jpg)
+      ![6-9](./readme-src/week6-9.png)
+  
+- S3 버킷 정책 수정
+    - 설정된 vpce에서만 접근 가능하도록 수정
+
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "AllowAccessOnlyFromVpce",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": "s3:*",
+                "Resource": [
+                    "arn:aws:s3:::ceos-knowledgein",
+                    "arn:aws:s3:::ceos-knowledgein/*"
+                ],
+                "Condition": {
+                    "StringEquals": {
+                        "aws:sourceVpce": "vpce-xxxxx"
+                    }
+                }
+            }
+        ]
+    }
+    ```
+
+- VPC에서 접근
+    - aws cli 설치
+
+        ```bash
+        sudo apt-get update
+        sudo apt-get install unzip -y
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+        aws --version # aws-cli/2.27.17 Python/3.13.3 Linux/6.8.0-1024-aws exe/x86_64.ubuntu.24
+        rm awscliv2.zip
+        ```
+
+    - s3 접근
+
+        ```bash
+        aws s3 ls # 2025-05-10 11:02:47 ceos-knowledgein
+        
+        aws s3 ls s3://ceos-knowledgein # 올라가있는 사진 리스트 조회 가능
+        ```
+
+
+## 도커 이미지 배포
+
+### 로컬에서 도커 이미지 빌드
+
+```yaml
+./gradlew clean bootJar
+docker build --platform linux/amd64 -t knowledgein . # 도커 이미지 빌드 호환성 문제 해결 위함
+docker run -p 8080:8080 knowledgein
+```
+
+### EC2 접속 + RDS 연결
+
+```bash
+chmod 400 keypair이름.pem  # 키를 공개적으로 볼 수 없도록 설정
+ssh -i "keypair이름.pem" ubuntu@{EC2 public DNS} # EC2 인스턴스에 접속
+```
+
+```bash
+sudo apt-get update # APT 업데이트
+sudo apt install mysql-client # MySQL 설치
+sudo mysql -u {마스터 사용자 이름} -p --port 3306 --host {RDS 인스턴스 엔드포인트} # RDS에 접속
+```
+
+- 그러나.. rds 호출이 ec2로만 가능하므로 일단 로컬 db 사용..ㅠ
+
+### Docker-compose 파일 생성
+
+```bash
+vim docker-compose.yml # 내부에 docker-compose 넣어주면 됨
+```
+
+- docker-compose.yml
+
+    ```yaml
+    services:
+      redis:
+        image: redis
+        container_name: redis
+        ports:
+          - "6379:6379"
+    
+      spring:
+        image: trissss/knowledgein
+        container_name: knowledgein
+        restart: always
+        ports:
+          - "8080:8080"
+        depends_on:
+          - redis
+    ```
+
+    - redis, spring 이미지를 각각 생성하도록
+
+## 배포 환경 테스트
+
+후아아암 `Gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed)` 이 에러를 마주하여 7시간의 삽질 끝에 원인을 알아냈는데요.. 조금 더 해보고 업뎃하겠슴다

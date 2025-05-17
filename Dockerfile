@@ -1,5 +1,5 @@
 # build stage
-FROM amazoncorretto:21 AS builder
+FROM eclipse-temurin:21 AS builder
 ENV GRADLE_OPTS="-Xmx2g"
 WORKDIR /app
 
