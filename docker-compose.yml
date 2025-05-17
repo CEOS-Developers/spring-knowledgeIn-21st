@@ -7,6 +7,9 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - spring-knowledgein-21st_my-network
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: naver
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -22,7 +25,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-        - app:/app
+      - app:/app
     ports:
       - "8080:8080"
 
