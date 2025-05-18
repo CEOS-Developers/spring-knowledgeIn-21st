@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/spring_knowledge_in
-    username: root
+    url: ${DB_URL}
+    username: ${DB_USER}
     password:
   jpa:
     hibernate:
@@ -15,8 +15,8 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379  # Spring이 redis와 TCP연결을 위한 포트
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}  # Spring이 redis와 TCP연결을 위한 포트
 
 jwt:
   secret: ${JWT_SECRET_KEY} # secret key는 base64로 인코딩해놨음

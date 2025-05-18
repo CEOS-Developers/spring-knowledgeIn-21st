@@ -45,6 +45,35 @@ dependencies {
 
 }
 
-tasks.named('test') {
+// 1 .env
+- local환경에서 주입하는 건 ok
+- docker, 배포환경에서 주입하는 건 찾아봐야함(지금은 .env가 아니라 파라미터로 주는 중)
+// Groovy DSL 예시
+// profile 관리
+def activeProfile = project.findProperty("springProfile") ?: "local"
+
+// test
+/*
+tasks.withType(Test).configureEach {
 	useJUnitPlatform()
+	systemProperty("spring.profiles.active", "test")
 }
+
+// 실행
+tasks.named("bootRun") {
+	systemProperty("spring.profiles.active", activeProfile)
+}
+*/
+
+/*
+// .env 주입
+def envProps = new Properties()
+file('.env').withReader('UTF-8') { envProps.load(it) }
+
+tasks.withType(JavaExec).configureEach {
+	environment.putAll(envProps)
+}
+test {
+	environment.putAll(envProps)
+}
+*/

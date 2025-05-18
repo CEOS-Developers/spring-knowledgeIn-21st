@@ -111,6 +111,7 @@ public class JwtTokenProvider {
 
     /**
      * RefreshToken 생성
+     * TODO RefreshToken 클래스를 사용하지 않고있음. 개선사항
     * */
     public String generateRefreshToken(Long userId, String username) {
         Date now = new Date();
