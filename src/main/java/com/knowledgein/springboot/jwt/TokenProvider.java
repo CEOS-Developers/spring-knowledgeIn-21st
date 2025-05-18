@@ -25,11 +25,8 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class TokenProvider implements InitializingBean {
-    @Value("${jwt.access-token-validity-seconds}")
-    private long accessTokenValiditySeconds; // 24시간
-
-    @Value("${jwt.refresh-token-validity-seconds}")
-    private long refreshTokenValiditySeconds; // 1주일
+    private final long accessTokenValiditySeconds = 86400;
+    private final long refreshTokenValiditySeconds = 604800;
 
     private Key key;
     private final CustomUserDetailsServiceImpl customUserDetailsService;

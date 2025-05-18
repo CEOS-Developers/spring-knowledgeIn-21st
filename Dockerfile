@@ -1,6 +1,12 @@
 # build stage
+FROM amazoncorretto:21 AS builder
 
-FROM amazoncorretto:21 AS Builder
+ENV JWT_SECRET=dummy
+ENV S3_ACCESS=dummy
+ENV S3_SECRET=dummy
+ENV RDS_USERNAME=dummy
+ENV RDS_PASSWORD=dummy
+ENV GRADLE_OPTS="-Xmx2g"
 
 WORKDIR /app
 
@@ -20,7 +26,7 @@ FROM amazoncorretto:21
 
 WORKDIR /app
 
-EXPOSE 8081
+EXPOSE 8080
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 
