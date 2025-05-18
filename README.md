@@ -1209,12 +1209,12 @@ dependencies {
 
    ![6-1](./readme-src/week6-1.png)
 
-   | 서브넷 이름 | 가용 영역 | IPv4 CIDR 블록 |
-       | --- | --- | --- |
-   | knowledgein-public-subnet-1 | ap-northeast-2a | 10.0.1.0/24 |
-   | knowledgein-private-subnet-1 | ap-northeast-2a | 10.0.3.0/24 |
-   | knowledgein-public-subnet-2 | ap-northeast-2b | 10.0.2.0/24 |
-   | knowledgein-private-subnet-2 | ap-northeast-2b | 10.0.4.0/24 |
+   | 서브넷 이름                   | 가용 영역         | IPv4 CIDR 블록 |
+   |-----------------------------|------------------|----------------|
+   | knowledgein-public-subnet-1  | ap-northeast-2a   | 10.0.1.0/24    |
+   | knowledgein-private-subnet-1 | ap-northeast-2a   | 10.0.3.0/24    |
+   | knowledgein-public-subnet-2  | ap-northeast-2b   | 10.0.2.0/24    |
+   | knowledgein-private-subnet-2 | ap-northeast-2b   | 10.0.4.0/24    |
 3. Internet gateway 생성해서 vpc에 연결
 
    ![6-2](./readme-src/week6-2.png)
@@ -1226,15 +1226,15 @@ dependencies {
         - 그 외의 모든 인터넷 IP → Internet Gateway로 보냄
 
       | **목적지 (Destination)** | **대상 (Target)** |
-              | --- | --- |
-      | 10.0.0.0/16 | local |
-      | 0.0.0.0/0 | igw-xxxxxxx  |
+      |---------------------------|-------------------|
+      | 10.0.0.0/16               | local             |
+      | 0.0.0.0/0                 | igw-xxxxxxx       |
     - Private 라우팅 테이블
         - 내부 VPC에서만 통신 가능 → 로컬에서 처리
 
       | **목적지 (Destination)** | **대상 (Target)** |
-              | --- | --- |
-      | 10.0.0.0/16 | local |
+      |---------------------------|-------------------|
+      | 10.0.0.0/16               | local             |
 5. 결과
 
    ![6-3](./readme-src/week6-3.png)
