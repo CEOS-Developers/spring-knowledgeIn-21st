@@ -890,6 +890,9 @@ ec2 docker be container 내부 로그
 글 찾기
 ![](https://velog.velcdn.com/images/grammi_boii/post/d32921fb-3d35-4147-9c39-c8d8b5379cd6/image.png)
 
+docker hub
+![](https://velog.velcdn.com/images/grammi_boii/post/a2340e0c-8dae-41cb-9c1e-c518fe024c0e/image.png)
+
 
 ### 다이어그램
 
@@ -910,6 +913,9 @@ ec2 docker be container 내부 로그
 1. 장애 발생시 가용영역을 바꿔서 서비스를 계속 제공하기 위해
 2. 로드밸런싱을 위해(부하 분산)
 
+추가 설명으로<br>
+rds, elastic cache 부분에 인스턴스 여러개 떠있는게<br>
+많이 봤을 다중AZ 옵션이다
 
 ### BootJar
 
@@ -977,11 +983,25 @@ BUILD SUCCESSFUL in 490ms
 오후 10:24:48: Execution finished 'build'.
 ```
 
-build 태스크에서 bootjar, jar 태스크 포함하는거 말고 다른점으느<br>
+build 태스크에서 bootjar, jar 태스크 포함하는거 말고 다른점은<br>
 - assemble<br>
-  
-- compileTestJava
-- 
+    jar/bootjar 같은 패키징 태스크를 묶어두는 태스크라고 하는데 뭔말인지 잘 모르겠다  
+- compileTestJava<br>
+    테스트 코드를 컴파일하는 태스크
+- processTestResources<br>
+    테스트 리소스 파일을 복사하는 태스크 (src/test/resources -> build/resources/test)
+- testClasses<br>
+    테스트 실행 준비를 마무리하는 태스크
+- test<br>
+    테스트를 실행
+- check<br>
+    code quality를 검사하는 태스크라고 하는데, jacocoTestReport -> 친숙한 이름이 보였다.<br>
+    전 프로젝트에서 CI과정에 커버리지 테스트와 코드 품질검사를 포함시켜서 sonar cloud를 사용했었는데<br>
+    이때 jacoco가 사용되었다.. 이것도 다음에 좀더 파보자
+- build<br>
+    assemble, check 태스크를 포함한다. 최종적으로 build를 수행(바이트코드 생성).
+
+
 
 실제로 압축을 풀어보면<br>
 ![](https://velog.velcdn.com/images/grammi_boii/post/ece62cdb-5a90-4854-8312-16b967d55df1/image.png)<br>
@@ -1034,16 +1054,18 @@ GOOGLE_CLIENT="클라이언트 id"
 GOOGLE_SECRET="클라이언트 시크릿"
 ```
 
+**추가적으로!!**<br>
+profiles.active를 사용하지 않았는데 이걸 사용해야 빌드시에도 다른 프로필 환경변수는 포함되지 않도록 작동한다고 한다.<br>
+코드가 좀 마음에 안들어서 include로 맨날 했는데 다음번에 적용해봐야겠다
 
 
 ### Nginx
+
+
 
 ### Load Balancing
 
 ### AWS ELB - ALB, NLB, CLB, GWLB
 
-
-엔진엑스랑 로드밸런싱, 프록시와 리버스 프록시, 그와 관련된 AWS 제품을 다루고 싶었는데 실패<br>
-다음 세션이 배포니까 다음주에 이부분 꼭 파봐야겠다<br>
-특히 ALB, nginx 같이 사용하는게 좋다는 글을 보고 의문을 가졌는데 그부분까지 찾아볼것
+### Nginx + ELB ???
 
