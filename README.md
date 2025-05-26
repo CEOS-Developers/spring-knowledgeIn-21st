@@ -533,7 +533,7 @@ else {
 ![](https://velog.velcdn.com/images/dohyunii/post/5e43c3f1-3e8d-49dc-b28d-49fe9c722ef4/image.png)
 
 ---
-### WEEK 4. Docker
+### WEEK 5. Docker
 ### 1. Docker 컨테이너란?
 - 애플리케이션을 패키징하는 툴
 - 웹 애플리케이션을 실행하는 데 필요한 모든 환경을 패키징해 컨테이너 이미지를 만들고, 
@@ -689,3 +689,47 @@ services:
 DB가 정상작동되기 전에 App이 실행되면 **connection error**가 뜰 수 있다고 하여 시도해보았다.
 
 ---
+### WEEK 6. Deploy
+### 1. Mission 1 < 도커 배포>
+#### (1) EC2
+- EC2란 AWS에서 제공하는 **클라우드 컴퓨팅 서비스**로 사용자에게 독립된 컴퓨털르 임대해주는 서비스
+  ![](https://velog.velcdn.com/images/dohyunii/post/ef3cf89e-53c4-4cdc-98fa-d1358cbe9f12/image.png)
+- ceosBE라는 인스턴스를 만든 후, 탄력적 IP 주소로 **13.209.190.91**를 할당 받았다.
+  ![](https://velog.velcdn.com/images/dohyunii/post/a47cc0e1-2884-49ae-9d5f-7009b336f9c0/image.png)
+- 보안 규칙으로 HTTPS(443), 웹서버(8080), SSH(22)으로 접속을 허용하며 모든 IP에서 접근 가능하다.
+
+#### (2) 수동 배포
+- 도커 이미지 생성 -> 도커 허브에 이미지 올리기
+  ![](https://velog.velcdn.com/images/dohyunii/post/9f6cf366-7d3d-48a9-9592-82f68fec8577/image.png)
+- 도커 허브에서 이미지 pull 
+
+**sudo docker pull limdodod/dapp** 을 실행한 뒤, spring application에서 만든 docker-compose.yml과 .env를 가져오면 된다.
+ 
+이때, docker-compose.yml에 어떤 이미지를 실행할지 적어줘야 한다.
+
+- 실행 **docker compose up -d**
+
+![](https://velog.velcdn.com/images/dohyunii/post/7c1a177f-9c1f-4f50-adf6-a8fe9ba8fdb2/image.png)
+ 컨테이너 생성 완료
+
+- 이후 할당 받은 IP주소에서 swagger이 접속됨을 볼 수 있다.
+
+![](https://velog.velcdn.com/images/dohyunii/post/f741327f-6816-4137-bac2-5c389cc7f2bb/image.png)
+
+![](https://velog.velcdn.com/images/dohyunii/post/34ad0768-0d32-420f-9864-e197f2d7c6b6/image.png)
+swagger에서 회원가입을 하고 mysql에 접속해 user table에 user가 생긴 것을 볼 수 있다.
+
+#### (3) 탄력적 IP
+① 탄력적 IP란?
+
+**동적**인  클라우드 컴퓨팅 시스템에서 **고정된 정적인 IPv4 주소**를 가지는 주소
+
+
+② 왜 쓰는가?
+
+인스턴스의 Public IP는 고정된 ip주소가 아니라 유동적인 ip 주소이기 때문에 EC2 인스턴스를 재실행하게 되면  기존 IP주소가 변경된다.
+
+Elastic IP는 이를 방지하기 위해 사용한다. 
+
+### 2. Mission 2 <배포환경 Diagram>
+<img src="https://velog.velcdn.com/images/dohyunii/post/dd88ff05-abea-4868-a4e9-ff43f5646b4a/image.png" style="width: 60%;">
