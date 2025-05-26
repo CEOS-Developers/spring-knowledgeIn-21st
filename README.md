@@ -353,6 +353,7 @@ jeongha는 jeongha가 쓴 글만 볼 수 있음
 
 
 # week 5 - Docker
+___
 ### **dockerfile** -> **image** -> **container**
 
 #### 1. dockerfile 작성
@@ -377,3 +378,74 @@ docker run -p 8080:8080 knowledgein
 ```
 http://localhost:8080 에 접속해 서버가 잘 띄워져 있는 것 확인!
 ![img_3.png](img_3.png)
+
+# week 6 - Deploy
+___
+### 외부 접속 확인
+- 접속해보기
+  ```
+  http://13.209.67.38:8080/
+  ```
+  ![](https://velog.velcdn.com/images/mirupio/post/c4dd9774-cdf4-4a93-bfd4-b1c801d42035/image.png)
+
+### postman으로 배포환경에 대한 테스트
+- join 테스트
+  ![](https://velog.velcdn.com/images/mirupio/post/83897181-19b8-46de-9ea5-aad8aee99d4f/image.png)
+
+- db에 저장됐는지 확인
+![](https://velog.velcdn.com/images/mirupio/post/4c6d96e9-ead6-4215-801b-d89f8cd87b50/image.png)
+- 깔끔하게 보기 (세로 정렬)
+  ```
+  SELECT * FROM member\G
+  ```
+  ![](https://velog.velcdn.com/images/mirupio/post/7222ac4a-6b93-46ee-978c-8a32beb2e762/image.png)
+
+  
+성공...!!
+
+### 배포환경 다이어그램
+대략적인 내용을 우선 손그림으로 정리했다
+![img_5.png](img_5.png)
+
+그리고 draw.io로 명령어 코드와 함께 정리해봤당
+![img_4.png](img_4.png)
+
+## 새롭게 알게 된 것
+#### 1. 실제 서비스에서 어떤 DB를 써야 할지 고민하면서 저장소별 특징을 정리해봤다.
+#### DB
+- **S3** : 파일 저장 ex) 이미지, 영상, 문서
+  - MySQL -> S3 URL(파일에 대한 정보) 저장
+
+- **Redis** : 캐시/임시 저장 ex) 로그인 세션, 인증 토큰, 조회수 캐싱
+
+- **MongoDB** : 비정형 데이터 저장 ex) 채팅 기록, 로그 데이터, 유저 행동 이력
+
+- RDBMS
+  - **MySQL**
+  - **PostgreSQL**
+
+- **H2** : 자바 기반 경량 DB - 개발/테스트 용도, 실 서비스에서는 안 씀(데이터 휘발성 있음)
+
+
+#### RDS
+- **RDS** : AWS가 DB를 대신 설치/운영/백업해주는 서비스
+  - RDS가 없다면 -> EC2 자체에 DB 설치
+
+#### 2. EC2와 RDS를 안전하게 연결하고, 외부에서 접속할 수 있게 하려면 인바운드 규칙을 정확히 이해하는 것이 중요하다. 근데 좀 헷갈려서 정리해봤다.
+
+#### EC2 인스턴스 보안 그룹 인바운드 규칙
+- 포트 **22** : **SSH **접속
+  - **내 IP만 허용**
+    -> 내 IP만 EC2 터미널 접속할 수 있음
+
+- 포트 **8080** : **웹 서비스** 접속
+  - **0.0.0.0/0(모든 곳)**
+    -> 웹 브라우저에서 EC2로 접속 가능
+
+#### RDS 인스턴스 보안 그룹 인바운드 규칙
+- 포트 **3306** : **MySQL** 접속
+  - **sg-ec2**
+    -> EC2 보안 그룹만 RDS에 접속
+  - **내 IP**
+    -> 로컬에서 DB 툴 접속
+ 

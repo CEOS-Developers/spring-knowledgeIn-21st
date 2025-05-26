@@ -1,6 +1,14 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:ceos21;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://database-1.crcgscywu5pq.ap-northeast-2.rds.amazonaws.com:3306/knowledgein?useSSL=false&serverTimezone=UTC
+    username: admin
+    password: miru0204!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
