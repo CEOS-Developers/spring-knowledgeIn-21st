@@ -5,6 +5,7 @@ import com.ceos21.springknowledgein.user.repository.Member;
 import jakarta.persistence.*;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Getter //Getter를 쓰면 getImages() 등의 메소드를 따로 작성 안해도 됨.
+@NoArgsConstructor
 public class Post {
 
     @Id
@@ -43,8 +45,6 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostHashtag> postHashtags = new ArrayList<>();
-
-    public Post() {}
 
     public Post(String title, String content, Member member) {
         this.title = title;

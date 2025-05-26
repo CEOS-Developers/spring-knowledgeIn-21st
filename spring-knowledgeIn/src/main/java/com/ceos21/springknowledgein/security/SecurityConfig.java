@@ -40,7 +40,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 안 씀
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/signup", "/api/user/login").permitAll() // 인증 없이 접근 가능
+                        .requestMatchers("/api/user/signup", "/api/user/login","/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html").permitAll() // 인증 없이 접근 가능
                         .anyRequest().authenticated() // 그 외는 인증 필요
                 );
 

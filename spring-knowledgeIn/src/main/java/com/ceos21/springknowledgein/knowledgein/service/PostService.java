@@ -3,7 +3,6 @@ package com.ceos21.springknowledgein.knowledgein.service;
 import com.ceos21.springknowledgein.knowledgein.dto.PostCreateDto;
 import com.ceos21.springknowledgein.knowledgein.dto.PostResponseDto;
 import com.ceos21.springknowledgein.knowledgein.dto.PostUpdateDto;
-import com.ceos21.springknowledgein.domain.knowledgein.repository.*;
 import com.ceos21.springknowledgein.knowledgein.domain.Hashtag;
 import com.ceos21.springknowledgein.knowledgein.repository.HashtagRepository;
 import com.ceos21.springknowledgein.knowledgein.domain.Image;

@@ -4,9 +4,9 @@ spring:
       on-profile: docker
 
   datasource:
-    url: jdbc:mysql://host.docker.internal:3306/knowledgein_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://mysql:3306/spring_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
-    password: hma112611@
+    password: password123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 
