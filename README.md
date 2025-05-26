@@ -816,14 +816,256 @@ GPT에게 스프링 컨테이너에서 관리하는거냐.. 빈이냐 물어봤�
 
 
 
+### 배포, 에러났던 부분
+
+```yaml
+services:
+
+  cache:
+    container_name: redis
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - knowledge_network
+
+  application:
+    container_name: knowledge_be
+    image: knowledge_be
+    ports:
+      - 8080:8080
+    depends_on:
+      - cache
+    env_file:
+      - .env
+    networks:
+      - knowledge_network
+
+volumes:
+    redis_data:
+
+networks:
+  knowledge_network:
+    driver: bridge
+```
+
+
+```shell
+'ACCESS_TOKEN_EXPIRE_TIME': Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; For input string: "1_800_000"
+```
+yml과 다르게 .env에서는 100_000 이렇게 구분이 안된다고한다<br>
+ACCESS_TOKEN_EXPIRE_TINE=100000 <br>
+이렇게 수정
+
+이외에 별다른 에러는 없었다
+
+### 결과
+
+Redis도 elastic cache를 사용하면 좋지만 이번 과제는 docker container로 대체했다
+
+
+ec2
+![](https://velog.velcdn.com/images/grammi_boii/post/e99cc4ec-689f-47e0-a464-493f1c932346/image.png)
+
+rds
+![](https://velog.velcdn.com/images/grammi_boii/post/be27a634-fe46-48e4-96b1-2a5876af4b92/image.png)
+
+ec2 docker ps
+![](https://velog.velcdn.com/images/grammi_boii/post/f4b154df-3721-47d8-a8d8-4fb04c4bde71/image.png)
+
+ec2 docker be container 내부 로그
+![](https://velog.velcdn.com/images/grammi_boii/post/41c9482e-5a44-4e20-b3db-a12e09e575a3/image.png)
+
+회원가입
+![](https://velog.velcdn.com/images/grammi_boii/post/148031cf-a5d0-4a64-ae52-eabbf30786cc/image.png)
+
+로그인
+![](https://velog.velcdn.com/images/grammi_boii/post/0c918015-0ee6-4713-9c1f-5f29c68c33aa/image.png)
+
+글 작성
+![](https://velog.velcdn.com/images/grammi_boii/post/36b59591-c892-4ca6-8aa6-df3679d1c42d/image.png)
+
+글 찾기
+![](https://velog.velcdn.com/images/grammi_boii/post/d32921fb-3d35-4147-9c39-c8d8b5379cd6/image.png)
+
+docker hub
+![](https://velog.velcdn.com/images/grammi_boii/post/a2340e0c-8dae-41cb-9c1e-c518fe024c0e/image.png)
+
+
+### 다이어그램
+
+![](https://velog.velcdn.com/images/grammi_boii/post/2177442b-781d-4484-9d6a-de7949dc0858/image.png)
+
+간단한 프로젝트여서 이렇게 했지만 좋은 구조는 아니다<br>
+
+다른 프로젝트 아키텍쳐는 이렇게 설계했다
+![](https://velog.velcdn.com/images/grammi_boii/post/52e3b254-17da-4fe3-af0f-80ec622da731/image.png)
+
+개선점은 ec2도 프라이빗 서브넷에 있는게 좋고 그러려면 nat gateway가 필요하다.<br>
+![](https://velog.velcdn.com/images/grammi_boii/post/8942aa69-26c6-4d5d-8df0-875eb0c960cc/image.png)
+<br>
+이런느낌
+
+이번에 새로 해봐서 완전히 이해하지 못했지만<br>
+가용영역 두개에 걸쳐 있는 이유는 크게 두가지 이유인데
+1. 장애 발생시 가용영역을 바꿔서 서비스를 계속 제공하기 위해
+2. 로드밸런싱을 위해(부하 분산)
+
+추가 설명으로<br>
+rds, elastic cache 부분에 인스턴스 여러개 떠있는게<br>
+많이 봤을 다중AZ 옵션이다
+
+### BootJar
+
+bootjar했을때
+![](https://velog.velcdn.com/images/grammi_boii/post/d427dccd-1777-4d34-826c-7e9d4d98d93f/image.png)
+
+bootjar 태스크는 실행가능한 jar 파일을 만든다.<br>
+
+jar했을때
+![](https://velog.velcdn.com/images/grammi_boii/post/aea0d584-16c4-4564-a82e-495d53dcb8ea/image.png)<br>
+jar 태스크는 클래스 파일을 만든다.
+
+build했을때
+![](https://velog.velcdn.com/images/grammi_boii/post/131e428b-5bb5-410b-bb27-3261a8887d03/image.png)<br>
+Build할때 plain jar, jar파일 2개가 생성되는데<br>
+각각 위에서 본 jar, bootjar 태스크를 실행했을때의 파일이다.<br>
+
+배포시에는 보통 실행 가능한 파일이 필요하기 때문에 bootjar 했을때 (plain 아닌 jar) 파일을 많이 사용한다.
+
+뭔지 대충 알았으니까 build랑 bootjar가 뭐가 다른지 보자
+
+```shell
+오후 10:25:44: Executing 'bootJar'...
+
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :resolveMainClassName UP-TO-DATE
+> Task :bootJar UP-TO-DATE
+
+BUILD SUCCESSFUL in 518ms
+4 actionable tasks: 4 up-to-date
+오후 10:25:44: Execution finished 'bootJar'.
+
+```
+
+![](https://velog.velcdn.com/images/grammi_boii/post/c8c83181-c514-4e80-9edd-4c471712882a/image.png)
+각 단계는 다음과 같은 태스크라고 한다.<br>
+컴파일은 말그대로 바이트코드로 컴파일한거고<br>
+processResources는 리소스 파일을 복사하는 작업이다.<br>
+application.yml같은 파일 말하는 것 같다. -> 이부분 저번 세션 시간에 질문했던 부분!!! 발견했다 뒤에서 정리해보겠다<br>
+classes는 앞선 두 단계 결과를 모아두는 단계<br>
+
+
+
+```shell
+오후 10:24:48: Executing 'build'...
+
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :resolveMainClassName UP-TO-DATE
+> Task :bootJar UP-TO-DATE
+> Task :jar UP-TO-DATE
+> Task :assemble UP-TO-DATE
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources
+> Task :testClasses
+> Task :test NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build UP-TO-DATE
+
+BUILD SUCCESSFUL in 490ms
+6 actionable tasks: 1 executed, 5 up-to-date
+오후 10:24:48: Execution finished 'build'.
+```
+
+build 태스크에서 bootjar, jar 태스크 포함하는거 말고 다른점은<br>
+- assemble<br>
+    jar/bootjar 같은 패키징 태스크를 묶어두는 태스크라고 하는데 뭔말인지 잘 모르겠다  
+- compileTestJava<br>
+    테스트 코드를 컴파일하는 태스크
+- processTestResources<br>
+    테스트 리소스 파일을 복사하는 태스크 (src/test/resources -> build/resources/test)
+- testClasses<br>
+    테스트 실행 준비를 마무리하는 태스크
+- test<br>
+    테스트를 실행
+- check<br>
+    code quality를 검사하는 태스크라고 하는데, jacocoTestReport -> 친숙한 이름이 보였다.<br>
+    전 프로젝트에서 CI과정에 커버리지 테스트와 코드 품질검사를 포함시켜서 sonar cloud를 사용했었는데<br>
+    이때 jacoco가 사용되었다.. 이것도 다음에 좀더 파보자
+- build<br>
+    assemble, check 태스크를 포함한다. 최종적으로 build를 수행(바이트코드 생성).
+
+
+
+실제로 압축을 풀어보면<br>
+![](https://velog.velcdn.com/images/grammi_boii/post/ece62cdb-5a90-4854-8312-16b967d55df1/image.png)<br>
+![](https://velog.velcdn.com/images/grammi_boii/post/84fad648-290e-4ec3-9ae5-e5114cf7949c/image.png)
+
+
+참고자료<br>
+<https://www.devkuma.com/docs/gradle/bootjar-jar/>
+
+
+### bootjar시 환경변수 주입
+
+![](https://velog.velcdn.com/images/grammi_boii/post/3ddf43ea-992a-49bb-b31a-76cf764ae564/image.png)
+
+![](https://velog.velcdn.com/images/grammi_boii/post/85225f27-c2fb-4ddf-ab17-11510dc18af4/image.png)
+
+include 부분을 주석처리하고 jar파일을 만들어도<br>
+우려한대로 비밀값들이 다 들어가있다.<br>
+
+단, 저 환경변수들을 ${} 부분에 주입(bake) 하지는 않는다고 한다.<br>
+그렇기 때문에 docker compose에서 .env 파일을 사용해 주입하는게 우선순위를 가지는 것 같다.<br>
+
+결론은 docker image를 퍼블릭으로 올릴거면 application-prod 같은 파일에 환경변수를 넣지 말고<br>
+.env 파일을 사용하는게 좋은 것 같다.<br>
+
+이번 지식인에서 사용한 env 파일 예시
+
+```shell
+POSTGRESQL_USERNAME=postgres
+POSTGRESQL_PASSWORD=XXXXXXXXXX
+POSTGRESQL_HOST=ceos-knowledge-db.XXXXXXXXX.ap-northeast-2.rds.amazonaws.com
+POSTGRESQL_PORT=5432
+POSTGRESQL_DATABASE=knowledge
+
+BASE_URL=ec2-X-X-X-X-X.ap-northeast-2.compute.amazonaws.com
+FRONT_URL=http://localhost:3000
+
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+DIR=/Users/leo/knowledgein_images/
+
+# access - 30분
+ACCESS_EXPIRATION=1800000
+# refresh - 30일
+REFRESH_EXPIRATION=2592000000
+JWT_SECRET="eawfiwsfefafsdljlewfw4ennnsd412asdffalskfwnld123aiiiewnsfdwenwekewnlewnklenwlkewlewnlwewenl3101ln4223jndsfnfl1sdfwfeljk134"
+
+GOOGLE_CLIENT="클라이언트 id"
+GOOGLE_SECRET="클라이언트 시크릿"
+```
+
+**추가적으로!!**<br>
+profiles.active를 사용하지 않았는데 이걸 사용해야 빌드시에도 다른 프로필 환경변수는 포함되지 않도록 작동한다고 한다.<br>
+코드가 좀 마음에 안들어서 include로 맨날 했는데 다음번에 적용해봐야겠다
+
+
 ### Nginx
+
+
 
 ### Load Balancing
 
 ### AWS ELB - ALB, NLB, CLB, GWLB
 
-
-엔진엑스랑 로드밸런싱, 프록시와 리버스 프록시, 그와 관련된 AWS 제품을 다루고 싶었는데 실패<br>
-다음 세션이 배포니까 다음주에 이부분 꼭 파봐야겠다<br>
-특히 ALB, nginx 같이 사용하는게 좋다는 글을 보고 의문을 가졌는데 그부분까지 찾아볼것
+### Nginx + ELB ???
 

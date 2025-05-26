@@ -1,24 +1,10 @@
 services:
-  database:
-    container_name: postgres
-    image: postgres:latest
-    restart: always
-    ports:
-      - 5433:5432
-    environment:
-      POSTGRES_DB: knowledge_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - knowledge_network
 
   cache:
     container_name: redis
     image: redis:alpine
     ports:
-      - 6378:6379
+      - 6379:6379
     volumes:
       - redis_data:/data
     networks:
@@ -26,26 +12,17 @@ services:
 
   application:
     container_name: knowledge_be
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: knowledge_be
     ports:
       - 8080:8080
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/knowledge_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 1234
-      SPRING_REDIS_HOST: cache
-      SPRING_REDIS_PORT: 6379
-      SPRING_PROFILES_ACTIVE: local, jwt, oauth
     depends_on:
-      - database
       - cache
+    env_file:
+      - .env
     networks:
       - knowledge_network
 
 volumes:
-    postgres_data:
     redis_data:
 
 networks:
